@@ -1,7 +1,9 @@
 FROM node:10
-EXPOSE 80
+RUN mkdir /app
+ADD . /app
 WORKDIR /app
-COPY . /app
+
 RUN npm install
-RUN tsc app.ts
-CMD [ "node", "app.js" ]
+
+EXPOSE 80
+CMD [ "npm", "start" ]

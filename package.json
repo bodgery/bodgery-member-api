@@ -1,11 +1,19 @@
 {
-    "name": "bodgery-member-api",
-    "version": "0.0.0",
-    "dependencies": {
-        "typescript": "^3.3.3333",
-    },
-    "devDependencies": {
-        "mocha": "^5.2.0",
-        "supertest": "^3.3.0"
+    "name": "bodgery-member-api"
+    ,"version": "0.0.0"
+    ,"description": "Consolidating the Bodgery's member management"
+    ,"repository": ""
+    ,"license": "BSD-2-Clause"
+    ,"scripts": {
+        "start": "node app.js"
+    }
+    ,"dependencies": {
+        "typescript": "^3.3.3333"
+        ,"express": "^4.16.4"
+        ,"pg": "^7.8.2"
+    }
+    ,"devDependencies": {
+        "mocha": "^5.2.0"
+        ,"supertest": "^3.3.0"
     }
 }
