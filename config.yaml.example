@@ -2,4 +2,4 @@
 # DO NOT COMMIT THIS INTO SOURCE CONTORL
 #
 
-port: 3001
+port: 80
