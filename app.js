@@ -16,3 +16,5 @@ const server = express();
 
 server.listen(PORT, () => console.log("Server running"));
 server.get('/', (req, res) => res.status(200).send('hello'));
+
+module.exports.app = server;
