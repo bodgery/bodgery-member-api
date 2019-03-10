@@ -11,4 +11,8 @@ Then you can run:
 
     $ node app.js
 
-To start the server.
+To start the server. You can run the tests with:
+
+    $ node_modules/mocha/bin/mocha
+
+Or just `mocha` if you have it installed locally.
