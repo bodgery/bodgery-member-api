@@ -1,0 +1,377 @@
+openapi: 3.0.1
+servers:
+  - url: '{protocol}://www.thebodgery.com/api'
+    variables:
+      protocol:
+        description: 'The Bodgery API is accessible via https and http'
+        enum:
+          - https
+          - http
+        default: https
+info:
+  description: >-
+    The Bodgery api allows users to query access many programatic functions 
+    related to The Bodgery makerspace in Madison, WI. These functions include
+    querying Wild Apricot for current member status and tool checkoff status.
+    It also includes task management functions. More functionality to be added 
+    as needed.
+  version: 1.0.0
+  title: Bodgery API
+  contact:
+    name: Bodgery IT Team
+    email: it@thebodgery.org
+tags:
+  - name: Tasks
+    description: Manage shop related tasks
+  - name: Members
+    description: Get member status
+  - name: Tools
+    description: Get Tool info
+  - name: Telemetry
+    description: 'Get telemetry information such as temp, air quality, or 
+    shop open status'
+paths:
+  /:
+    get:
+      operationId: listApiVersions
+      summary: List Api Versions
+      tags:
+        - Utility
+      responses:
+        '200':
+          description: Request OK
+  /v1:
+    get:
+      operationId: getApiVersionDetailsv1
+      summary: Show details for Api version 1
+      tags:
+        - Utility
+      responses:
+        '200':
+          description: Request OK
+  /v1/members:
+    get:
+      operationId: getAllMembersv1
+      summary: Get a list of all members
+      tags:
+        - Members
+      parameters:
+        - name: id
+          in: query
+          description: memberId to pull a single member
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: limit
+          in: query
+          description: maximum number of members to return
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: skip
+          in: query
+          description: number of members to skip
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: sort
+          in: query
+          description: property to sort returned members by
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Request OK - Member response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Members'
+        '404':
+          description: Member not found
+    post:
+      operationId: addMemberv1
+      summary: Add a member
+      tags:
+        - Members
+      requestBody:
+        description: The member to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Member'
+      responses:
+        '204':
+          description: Member successfully created
+        '400':
+          description: Could not create member
+  /v1/tools:
+    get:
+      operationId: getToolsv1
+      summary: Get all tools
+      tags:
+        - Tools
+      parameters:
+        - name: id
+          in: query
+          description: toolId to pull a single tool
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: limit
+          in: query
+          description: maximum number of members to return
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: skip
+          in: query
+          description: number of members to skip
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: sort
+          in: query
+          description: property to sort returned members by
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Request OK - Member response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Members'
+        '404':
+          description: Member not found
+  /tasks:
+    get:
+      tags:
+        - Tasks
+      operationId: listTasks
+      summary: List available tasks
+      responses:
+        '200':
+          description: Returns a list of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskList'
+              example:
+                {
+                  tasks:[
+                    {
+                      "id": "0",
+                      "name": "Empty trash into bins",
+                      "description": "All inside trash and recycling bins should be emptied into the large rolling bins outside the building"
+                    },
+                    {
+                      "id": "1",
+                      "name": "Take bins to curb",
+                      "description": "Outside rolling trash bins should be taken to the curb every week on Tuesday. Recycling should be taken to the curb every other Tuesday."
+                    }
+                  ]
+                }
+    post:
+      tags:
+        - Tasks
+      operationId: addTask
+      summary: Add a task to the collection
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/task'
+components:
+  schemas:
+    Member:
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          description: RFID Number
+        name:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        photo:
+          type: string
+          description: Url for photo
+        approvedTools:
+          $ref: '#/components/schemas/Tools'
+        phone:
+          type: string
+        profile:
+          $ref: '#/components/schemas/Questions'
+    Questions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Question'
+    Question:
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+    Members:
+      type: array
+      items:
+        $ref: '#/components/schemas/Member'
+    Address:
+      properties:
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        county:
+          type: string
+        country:
+          type: string
+    Tool:
+      properties:
+        id:
+          type: integer
+        toolName:
+          type: string
+        description:
+          type: string
+          maxLength: 255
+        color:
+          type: string
+          enum:
+            - green
+            - yellow
+            - red
+        brand:
+          type: string
+        model:
+          type: string
+        serial:
+          type: string
+        manualUrl:
+          type: string
+        owner:
+          $ref: '#/components/schemas/Member'
+    Tools:
+      type: array
+      items:
+        $ref: '#/components/schemas/Tool'
+    Area:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        captains:
+          $ref: '#/components/schemas/Members'
+    Areas:
+      type: array
+      items:
+        $ref: '#/components/schemas/Area'
+    Telemetry:
+      type: object
+      properties:
+        id:
+          type: integer
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+    Projects:
+      type: array
+      items:
+        $ref: '#/components/schemas/Project'
+    Space:
+      type: object
+      properties:
+        api:
+          type: string
+        space:
+          type: string
+        logo:
+          type: string
+        url:
+          type: string
+        location:
+          type: object
+          properties:
+            address:
+              type: string
+            lon:
+              type: string
+            lat:
+              type: string
+        contact:
+          type: object
+          properties:
+            email:
+              type: string
+            irc:
+              type: string
+            ml:
+              type: string
+            twitter:
+              type: string
+        state:
+          type: object
+          properties:
+            icon:
+              type: object
+              properties:
+                open:
+                  type: string
+                closed:
+                  type: string
+            open:
+              type: boolean
+        projects:
+          type: array
+          items:
+            type: string
+    taskList:
+      type: array
+      items:
+        $ref: '#/components/schemas/task'
+    task:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 8000
+          
