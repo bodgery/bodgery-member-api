@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require( 'fs' );
 const pg = require('pg');
 const yaml = require( 'js-yaml' );
-const request_funcs = require( './lib/request_funcs.js' );
+const request_funcs = require( './lib/request_funcs.ts' );
 
 var conf = yaml.safeLoad(
     fs.readFileSync( 'config.yaml', 'utf8' ),

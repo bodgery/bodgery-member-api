@@ -9,10 +9,8 @@ editor and change the port number as necessary.
 
 Then you can run:
 
-    $ node app.js
+    $ npm start
 
 To start the server. You can run the tests with:
 
-    $ node_modules/mocha/bin/mocha
-
-Or just `mocha` if you have it installed locally.
+    $ npm test

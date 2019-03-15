@@ -1,11 +1,13 @@
 {
     "name": "bodgery-member-api"
-    ,"version": "0.0.0"
+    ,"version": "1.0.0"
     ,"description": "Consolidating the Bodgery's member management"
     ,"repository": "https://github.com/bodgery/bodgery-member-api"
     ,"license": "BSD-2-Clause"
     ,"scripts": {
-        "start": "node app.js"
+        "start": "tsc app.ts && node app.js"
+        ,"build": "tsc app.ts"
+        ,"test": "tsc app.ts && mocha"
     }
     ,"dependencies": {
         "typescript": "^3.3.3333"
