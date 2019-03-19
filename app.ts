@@ -16,6 +16,10 @@ const server = express();
 
 
 server.listen(PORT, () => console.log( "Server running on port " + PORT ));
-server.get('/', request_funcs.versions );
+server.get('/', request_funcs.get_versions );
+server.post('/v1/members', request_funcs.post_members );
 
-module.exports.app = server;
+module.exports = {
+    app: server
+    ,set_db: ( new_db ) => { request_funcs.set_db( new_db ) }
+};
