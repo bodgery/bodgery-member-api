@@ -1,12 +1,12 @@
 var request = require( 'supertest' );
 var server = require( '../app.ts' );
 
-const app = server.app;
+const APP = server.app;
 
 
 describe( 'Returns version list', function () {
     it( 'Gets versions', function (done) {
-        request( app )
+        request( APP )
             .get( '/' )
             .expect( 200 )
             .expect( 'Content-Type', /json/ )

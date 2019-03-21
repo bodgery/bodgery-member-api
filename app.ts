@@ -12,14 +12,14 @@ var conf = yaml.safeLoad(
 );
 var PORT = conf.port;
 
-const server = express();
+const SERVER = express();
 
 
-server.listen(PORT, () => console.log( "Server running on port " + PORT ));
-server.get('/', request_funcs.get_versions );
-server.post('/v1/members', request_funcs.post_members );
+SERVER.listen(PORT, () => console.log( "Server running on port " + PORT ));
+SERVER.get('/', request_funcs.get_versions );
+SERVER.post('/v1/members', request_funcs.post_members );
 
 module.exports = {
-    app: server
+    app: SERVER
     ,set_db: ( new_db ) => { request_funcs.set_db( new_db ) }
 };
