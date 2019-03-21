@@ -8,13 +8,5 @@
         "outDir": "./built",
         "allowJs": true,
         "target": "es5"
-    },
-    "include": [
-        "./src/*"
-		,"app.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "**/*.spec.ts"
-    ]
+    }
 }

@@ -1,22 +1,24 @@
 {
-    "name": "bodgery-member-api"
-    ,"version": "1.0.0"
-    ,"description": "Consolidating the Bodgery's member management"
-    ,"repository": "https://github.com/bodgery/bodgery-member-api"
-    ,"license": "BSD-2-Clause"
-    ,"scripts": {
-        "start": "tsc app.ts && node app.js"
-        ,"build": "tsc app.ts"
-        ,"test": "tsc app.ts && mocha"
-    }
-    ,"dependencies": {
-        "typescript": "^3.3.3333"
-        ,"express": "^4.16.4"
-        ,"pg": "^7.8.2"
-        ,"js-yaml": "^3.12.2"
-    }
-    ,"devDependencies": {
-        "mocha": "^5.2.0"
-        ,"supertest": "^3.3.0"
-    }
+  "name": "bodgery-member-api",
+  "version": "1.0.0",
+  "description": "Consolidating the Bodgery's member management",
+  "repository": "https://github.com/bodgery/bodgery-member-api",
+  "license": "BSD-2-Clause",
+  "scripts": {
+    "start": "ts-node app.ts",
+    "build": "tsc app.ts",
+    "test": "mocha -r ts-node test/*.ts"
+  },
+  "dependencies": {
+    "typescript": "^3.3.3333",
+    "express": "^4.16.4",
+    "pg": "^7.8.2",
+    "js-yaml": "^3.12.2"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "supertest": "^3.3.0",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.3.4000"
+  }
 }
