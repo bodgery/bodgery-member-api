@@ -20,4 +20,15 @@ module.exports = {
             .status( 204 )
             .end();
     }
+
+    ,get_members: function( req, res ) {
+        // TODO validate params
+        let body = res.body;
+
+        let members = db.get_members();
+
+        res
+            .status( 200 )
+            .send( members );
+    }
 };

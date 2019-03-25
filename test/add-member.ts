@@ -1,8 +1,6 @@
 var request = require( 'supertest' );
 var server = require( '../app.ts' );
 
-const app = server.app;
-
 
 describe( 'POST /v1/members', function () {
     before( () => {
@@ -16,7 +14,7 @@ describe( 'POST /v1/members', function () {
     });
 
     it( 'Adds a member', function (done) {
-        request( app )
+        request( server.app )
             .post( '/v1/members' )
             .send({
                 id: "0123456789"
@@ -43,7 +41,7 @@ describe( 'POST /v1/members', function () {
             })
             .expect( 204 )
             .end( function( err, res ) {
-                if( err ) return done(err);
+                if( err ) done(err);
                 done();
                 process.exit();
             });

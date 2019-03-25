@@ -18,6 +18,7 @@ const SERVER = express();
 SERVER.listen(PORT, () => console.log( "Server running on port " + PORT ));
 SERVER.get('/', request_funcs.get_versions );
 SERVER.post('/v1/members', request_funcs.post_members );
+SERVER.get('/v1/members', request_funcs.get_members );
 
 module.exports = {
     app: SERVER
