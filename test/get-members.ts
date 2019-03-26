@@ -150,7 +150,22 @@ describe( 'GET /v1/members', function () {
     });
 
     it( 'Fetch members with sorting', function ( done ) {
-        // TODO
-        done();
+        request( server.app )
+            .get( '/v1/members' )
+            .send({
+                sort: "name"
+            })
+            .expect( 200 )
+            .expect( function(res) {
+                var data = res.body;
+                if(! Array.isArray( data ) )
+                    throw new Error( "Didn't return array" );
+                if( data[0]['name'] != "Baz Qux" ) 
+                    throw new Error( "Did not sort" );
+            })
+            .end( function( err, res ) {
+                if( err ) return done(err);
+                done();
+            });
     });
 });

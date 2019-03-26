@@ -27,11 +27,18 @@ module.exports = {
         let id = body['id'];
         let limit = body['limit'];
         let skip = body['skip'];
+        let sort = body['sort'];
 
         let members = db.get_members();
+        // TODO most of this should be in db.get_members()
         if( id ) {
             members = members.filter( function (member) {
                 return member.id == id;
+            });
+        }
+        if( sort ) {
+            members = members.sort( function ( a, b ) {
+                return a[sort].localeCompare( b[sort] );
             });
         }
         if( skip ) {
