@@ -110,9 +110,43 @@ describe( 'GET /v1/members', function () {
             });
     });
 
-    it( 'Fetch members with pagination', function ( done ) {
-        // TODO
-        done();
+    it( 'Fetch members with limit', function ( done ) {
+        request( server.app )
+            .get( '/v1/members' )
+            .send({ limit: 3 })
+            .expect( 200 )
+            .expect( function(res) {
+                var data = res.body;
+                if(! Array.isArray( data ) )
+                    throw new Error( "Didn't return array" );
+                if( data.length != 3 )
+                    throw new Error( "Should have returned three users" );
+            })
+            .end( function( err, res ) {
+                if( err ) return done(err);
+                done();
+            });
+    });
+
+    it( 'Fetch members with limit and skip', function ( done ) {
+        request( server.app )
+            .get( '/v1/members' )
+            .send({
+                limit: 3
+                ,skip: 3
+            })
+            .expect( 200 )
+            .expect( function(res) {
+                var data = res.body;
+                if(! Array.isArray( data ) )
+                    throw new Error( "Didn't return array" );
+                if( data.length != 1 )
+                    throw new Error( "Should have returned one user" );
+            })
+            .end( function( err, res ) {
+                if( err ) return done(err);
+                done();
+            });
     });
 
     it( 'Fetch members with sorting', function ( done ) {
