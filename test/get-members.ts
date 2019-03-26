@@ -168,4 +168,8 @@ describe( 'GET /v1/members', function () {
                 done();
             });
     });
+
+    after( () => {
+        server.stop();
+    });
 });

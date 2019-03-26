@@ -19,4 +19,8 @@ describe( 'Returns version list', function () {
                 done();
             });
     });
+
+    after( () => {
+        server.stop();
+    });
 });

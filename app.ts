@@ -14,18 +14,23 @@ var conf = yaml.safeLoad(
 var PORT = conf.port;
 
 const SERVER = express();
+let httpServer = require( 'http' ).createServer( SERVER );
 
 
 SERVER.use( bodyParser.json() );
 SERVER.use( bodyParser.urlencoded({ extended: true }) );
 
-
-SERVER.listen(PORT, () => console.log( "Server running on port " + PORT ));
 SERVER.get('/', request_funcs.get_versions );
 SERVER.post('/v1/members', request_funcs.post_members );
 SERVER.get('/v1/members', request_funcs.get_members );
 
+
+httpServer.listen( PORT );
+console.log( "Server running on port " + PORT );
+
+
 module.exports = {
     app: SERVER
     ,set_db: ( new_db ) => { request_funcs.set_db( new_db ) }
+    ,stop: () => { httpServer.close() }
 };
