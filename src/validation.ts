@@ -21,15 +21,17 @@ let validate = function (params, validation_list) {
     return true;
 };
 
-let isInteger = function (field) {
+
+let matchSingleField = function (field, regex, typeName) {
     return (params) => {
         let value = params[field];
-        let match = /^-?[0-9]*$/;
 
-        if(! match.exec( value )) {
+        if(! regex.exec( value )) {
             throw new Error( "Field '"
                 + field
-                + "' was supposed to be an integer, value is '"
+                + "' was supposed to be "
+                + typeName
+                + ", value is '"
                 + value
                 + "'"
             );
@@ -39,8 +41,14 @@ let isInteger = function (field) {
     };
 };
 
+let isInteger =
+    (field) => matchSingleField( field, /^-?[0-9]*$/, "integer" );
+let isName =
+    (field) => matchSingleField( field, /^[A-Za-z]+$/, "name" );
+
 
 module.exports = {
     validate: validate
     ,isInteger: isInteger
+    ,isName: isName
 };
