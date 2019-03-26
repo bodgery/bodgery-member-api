@@ -43,7 +43,6 @@ describe( 'POST /v1/members', function () {
             .end( function( err, res ) {
                 if( err ) done(err);
                 done();
-                process.exit();
             });
     });
 });

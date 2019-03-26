@@ -23,9 +23,15 @@ module.exports = {
 
     ,get_members: function( req, res ) {
         // TODO validate params
-        let body = res.body;
+        let body = req.body || {};
+        let id = body['id'];
 
         let members = db.get_members();
+        if( id ) {
+            members = members.filter( function (member) {
+                return member.id == id;
+            });
+        }
 
         res
             .status( 200 )

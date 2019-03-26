@@ -1,3 +1,4 @@
+const bodyParser = require( 'body-parser' );
 const express = require('express');
 const fs = require( 'fs' );
 const pg = require('pg');
@@ -13,6 +14,10 @@ var conf = yaml.safeLoad(
 var PORT = conf.port;
 
 const SERVER = express();
+
+
+SERVER.use( bodyParser.json() );
+SERVER.use( bodyParser.urlencoded({ extended: true }) );
 
 
 SERVER.listen(PORT, () => console.log( "Server running on port " + PORT ));

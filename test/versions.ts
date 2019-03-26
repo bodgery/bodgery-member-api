@@ -17,7 +17,6 @@ describe( 'Returns version list', function () {
             .end( function( err, res ) {
                 if( err ) return done(err);
                 done();
-                process.exit();
             });
     });
 });

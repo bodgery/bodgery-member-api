@@ -86,19 +86,37 @@ describe( 'GET /v1/members', function () {
             .end( function( err, res ) {
                 if( err ) return done(err);
                 done();
-                process.exit();
             });
     });
 
-    it( 'Fetch a specific member by ID', function () {
-        // TODO
+    it( 'Fetch a specific member by ID', function ( done ) {
+        request( server.app )
+            .get( '/v1/members' )
+            .send({ id: "1235" })
+            .expect( 200 )
+            .expect( function(res) {
+                var data = res.body;
+                if(! Array.isArray( data ) )
+                    throw new Error( "Didn't return array" );
+                if( data.length != 1 )
+                    throw new Error( "Should only have returned one user" );
+                if( data[0]['name'] != "Baz Qux" )
+                    throw new Error( "Name is wrong (expected 'Baz Qux', got:"
+                        + data[0]['name'] + ")");
+            })
+            .end( function( err, res ) {
+                if( err ) return done(err);
+                done();
+            });
     });
 
-    it( 'Fetch members with pagination', function () {
+    it( 'Fetch members with pagination', function ( done ) {
         // TODO
+        done();
     });
 
-    it( 'Fetch members with sorting', function () {
+    it( 'Fetch members with sorting', function ( done ) {
         // TODO
+        done();
     });
 });
