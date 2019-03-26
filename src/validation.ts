@@ -45,10 +45,13 @@ let isInteger =
     (field) => matchSingleField( field, /^-?[0-9]*$/, "integer" );
 let isName =
     (field) => matchSingleField( field, /^[A-Za-z]+$/, "name" );
+let isWords =
+    (field) => matchSingleField( field, /^[A-Za-z0-9\s]+$/, "words" );
 
 
 module.exports = {
     validate: validate
     ,isInteger: isInteger
     ,isName: isName
+    ,isWords: isWords
 };
