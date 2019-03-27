@@ -4,6 +4,7 @@ const fs = require( 'fs' );
 const pg = require('pg');
 const yaml = require( 'js-yaml' );
 const request_funcs = require( './src/request_funcs.ts' );
+const uuid = require( 'short-uuid' );
 
 var conf = yaml.safeLoad(
     fs.readFileSync( 'config.yaml', 'utf8' ),
@@ -24,16 +25,27 @@ SERVER.use( bodyParser.urlencoded({ extended: true }) );
 // Init logger
 let logger = require( 'logger' ).createLogger( conf.log_file );
 logger.setLevel( conf.log_level );
-logger.format = (level, date, message) => {
-    return [
-        "[" + date.toISOString() + "]"
-        ,message
-    ].join( " " );
-};
+logger.format = ( level, date, message ) => message;
 let logger_wrap = (callback) => function (req, res) {
-    logger.info( "Begin request to", req.method, req.path );
-    let ret = callback( req, res, logger );
-    logger.info( "Finished request to", req.method, req.path );
+    let request_id = uuid( uuid.constants.flickrBase58 ).new();
+    let log_func = function (level, args) {
+        let date = new Date();
+        args.unshift( "(" + request_id + ")" );
+        args.unshift( "[" + date.toISOString() + "]" );
+        return logger[level]( ...args );
+    };
+
+    let request_logger = {
+        fatal: function(...args) { log_func( "fatal", args ) }
+        ,error: function(...args) { log_func( "error", args ) }
+        ,warn: function(...args) { log_func( "warn", args ) }
+        ,info: function(...args) { log_func( "info", args ) }
+        ,debug: function(...args) { log_func( "debug", args ) }
+    };
+
+    request_logger.info( "Begin request to", req.method, req.path );
+    let ret = callback( req, res, request_logger );
+    request_logger.info( "Finished request to", req.method, req.path );
     return ret;
 };
 
