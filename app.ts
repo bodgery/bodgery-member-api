@@ -13,20 +13,40 @@ var conf = yaml.safeLoad(
 );
 var PORT = conf.port;
 
+// Init server
 const SERVER = express();
 let httpServer = require( 'http' ).createServer( SERVER );
-
 
 SERVER.use( bodyParser.json() );
 SERVER.use( bodyParser.urlencoded({ extended: true }) );
 
-SERVER.get('/', request_funcs.get_versions );
-SERVER.post('/v1/members', request_funcs.post_members );
-SERVER.get('/v1/members', request_funcs.get_members );
+
+// Init logger
+let logger = require( 'logger' ).createLogger( conf.log_file );
+logger.setLevel( conf.log_level );
+logger.format = (level, date, message) => {
+    return [
+        "[" + date.toISOString() + "]"
+        ,message
+    ].join( " " );
+};
+let logger_wrap = (callback) => function (req, res) {
+    logger.info( "Begin request to", req.method, req.path );
+    let ret = callback( req, res, logger );
+    logger.info( "Finished request to", req.method, req.path );
+    return ret;
+};
 
 
+// Add server routing callbacks
+SERVER.get('/', logger_wrap( request_funcs.get_versions ) );
+SERVER.post('/v1/members', logger_wrap( request_funcs.post_members ) );
+SERVER.get('/v1/members', logger_wrap( request_funcs.get_members ) );
+
+
+// Start server running
 httpServer.listen( PORT );
-console.log( "Server running on port " + PORT );
+logger.info( "Server running on port", PORT );
 
 
 module.exports = {

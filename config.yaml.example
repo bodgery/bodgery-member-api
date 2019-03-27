@@ -3,3 +3,5 @@
 #
 
 port: 80
+log_file: dev.log
+log_level: info

@@ -4,13 +4,13 @@ let db;
 module.exports = {
     set_db: (new_db) => { db = new_db }
 
-    ,get_versions: function( req, res ) {
+    ,get_versions: function( req, res, logger ) {
         res
             .status(200)
             .json([ '/v1' ]);
     }
 
-    ,post_members: function( req, res ) {
+    ,post_members: function( req, res, logger ) {
         var body = req.body;
         try {
             valid.validate( body, [
@@ -42,7 +42,7 @@ module.exports = {
             .end();
     }
 
-    ,get_members: function( req, res ) {
+    ,get_members: function( req, res, logger ) {
         // TODO validate params
         let body = req.body || {};
         let id = body['id'];
