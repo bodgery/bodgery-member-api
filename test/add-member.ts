@@ -42,7 +42,7 @@ describe( 'POST /v1/members', function () {
             .expect( 204 )
             .end( function( err, res ) {
                 if( err ) done(err);
-                done();
+                else done();
             });
     });
 

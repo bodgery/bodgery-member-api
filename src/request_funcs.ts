@@ -1,3 +1,4 @@
+let valid = require( './validation.ts' );
 let db;
 
 module.exports = {
@@ -10,8 +11,28 @@ module.exports = {
     }
 
     ,post_members: function( req, res ) {
-        // TODO validate params
-        var body = res.body;
+        var body = req.body;
+        try {
+            valid.validate( body, [
+                valid.isInteger( 'id' )
+                ,valid.isWords( 'name' )
+                ,valid.isName( 'firstName' )
+                ,valid.isName( 'lastName' )
+                // TODO address
+                ,valid.isUrl( 'photo' )
+                // TODO approvedTools
+                ,valid.isUSPhone( 'phone' )
+                // TODO questions
+            ]);
+        }
+        catch (err) {
+            console.log( "Errors: " + err.toString() );
+            res
+                .status( 400 )
+                .json({
+                    error: err.toString()
+                });
+        }
 
         // TODO add with an async callback
         db.add_member( body );
