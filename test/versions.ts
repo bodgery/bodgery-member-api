@@ -1,10 +1,10 @@
-var request = require( 'supertest' );
-var server = require( '../app.ts' );
+import * as request from "supertest";
+import * as server from "../app";
 
 
 describe( 'Returns version list', function () {
     it( 'Gets versions', function (done) {
-        request( server.app )
+        request( server.SERVER )
             .get( '/' )
             .expect( 200 )
             .expect( 'Content-Type', /json/ )

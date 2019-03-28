@@ -1,5 +1,6 @@
-var request = require( 'supertest' );
-var server = require( '../app.ts' );
+import * as request from "supertest";
+import * as server from "../app";
+import * as funcs from "../src/request_funcs";
 
 
 describe( 'GET /v1/members', function () {
@@ -11,7 +12,16 @@ describe( 'GET /v1/members', function () {
                 ,name: "Foo Bar"
                 ,firstName: "Foo"
                 ,lastName: "Bar"
-                ,address: "123 Main St"
+                ,address: {
+                    address1: "123 Main St"
+                    ,address2: ""
+                    ,city: "Madison"
+                    ,state: "WI"
+                    ,zip: "53704"
+                    ,county: "Dane"
+                    ,country: "United States"
+                }
+                ,phone: "15555551234"
                 ,photo: "file:///dev/null"
                 ,profile: []
                 ,approvedTools: []
@@ -21,7 +31,16 @@ describe( 'GET /v1/members', function () {
                 ,name: "Baz Qux"
                 ,firstName: "Baz"
                 ,lastName: "Qux"
-                ,address: "123 Main St"
+                ,address: {
+                    address1: "123 Main St"
+                    ,address2: ""
+                    ,city: "Madison"
+                    ,state: "WI"
+                    ,zip: "53704"
+                    ,county: "Dane"
+                    ,country: "United States"
+                }
+                ,phone: "15555551234"
                 ,photo: "file:///dev/null"
                 ,profile: []
                 ,approvedTools: []
@@ -31,7 +50,16 @@ describe( 'GET /v1/members', function () {
                 ,name: "Quux Quuux"
                 ,firstName: "Quux"
                 ,lastName: "Quuux"
-                ,address: "123 Main St"
+                ,address: {
+                    address1: "123 Main St"
+                    ,address2: ""
+                    ,city: "Madison"
+                    ,state: "WI"
+                    ,zip: "53704"
+                    ,county: "Dane"
+                    ,country: "United States"
+                }
+                ,phone: "15555551234"
                 ,photo: "file:///dev/null"
                 ,profile: []
                 ,approvedTools: []
@@ -41,7 +69,16 @@ describe( 'GET /v1/members', function () {
                 ,name: "Quuuux Quuuuux"
                 ,firstName: "Quuuux"
                 ,lastName: "Quuuuux"
-                ,address: "123 Main St"
+                ,address: {
+                    address1: "123 Main St"
+                    ,address2: ""
+                    ,city: "Madison"
+                    ,state: "WI"
+                    ,zip: "53704"
+                    ,county: "Dane"
+                    ,country: "United States"
+                }
+                ,phone: "15555551234"
                 ,photo: "file:///dev/null"
                 ,profile: []
                 ,approvedTools: []
@@ -49,16 +86,11 @@ describe( 'GET /v1/members', function () {
         ];
 
         let db = {
-            add_member: ( member_data ) => {
+            add_member: function ( member_data: funcs.Member ): boolean {
                 // Ignore
+                return true;
             },
-            get_members: ( args ) => {
-                args = args || {};
-                let id: number = args.id;
-                let limit: number = args.limit;
-                let skip: number = args.skip;
-                let sort: Array<string> = args.sort;
-
+            get_members: function(): Array<funcs.Member> {
                 // TODO get by id
                 // TODO pagination
                 // TODO sort
@@ -71,7 +103,7 @@ describe( 'GET /v1/members', function () {
     });
 
     it( 'Fetches all members', function (done) {
-        request( server.app )
+        request( server.SERVER )
             .get( '/v1/members' )
             .send()
             .expect( 200 )
@@ -90,7 +122,7 @@ describe( 'GET /v1/members', function () {
     });
 
     it( 'Fetch a specific member by ID', function ( done ) {
-        request( server.app )
+        request( server.SERVER )
             .get( '/v1/members' )
             .send({ id: "1235" })
             .expect( 200 )
@@ -111,7 +143,7 @@ describe( 'GET /v1/members', function () {
     });
 
     it( 'Fetch members with limit', function ( done ) {
-        request( server.app )
+        request( server.SERVER )
             .get( '/v1/members' )
             .send({ limit: 3 })
             .expect( 200 )
@@ -129,7 +161,7 @@ describe( 'GET /v1/members', function () {
     });
 
     it( 'Fetch members with limit and skip', function ( done ) {
-        request( server.app )
+        request( server.SERVER )
             .get( '/v1/members' )
             .send({
                 limit: 3
@@ -150,7 +182,7 @@ describe( 'GET /v1/members', function () {
     });
 
     it( 'Fetch members with sorting', function ( done ) {
-        request( server.app )
+        request( server.SERVER )
             .get( '/v1/members' )
             .send({
                 sort: "name"

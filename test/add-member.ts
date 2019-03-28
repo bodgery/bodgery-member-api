@@ -1,12 +1,18 @@
-var request = require( 'supertest' );
-var server = require( '../app.ts' );
+import * as request from "supertest";
+import * as server from "../app";
+import * as funcs from "../src/request_funcs";
 
 
 describe( 'POST /v1/members', function () {
     before( () => {
         let db = {
-            add_member: ( member_data ) => {
+            add_member: function( member_data: funcs.Member ): boolean {
                 // Ignore
+                return true;
+            }
+            ,get_members: function(): Array<funcs.Member> {
+                // Ignore
+                return [];
             }
         };
 
@@ -14,7 +20,7 @@ describe( 'POST /v1/members', function () {
     });
 
     it( 'Adds a member', function (done) {
-        request( server.app )
+        request( server.SERVER )
             .post( '/v1/members' )
             .send({
                 id: "0123456789"

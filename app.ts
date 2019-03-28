@@ -1,10 +1,11 @@
-const bodyParser = require( 'body-parser' );
-const express = require('express');
-const fs = require( 'fs' );
-const pg = require('pg');
-const yaml = require( 'js-yaml' );
-const request_funcs = require( './src/request_funcs.ts' );
-const uuid = require( 'short-uuid' );
+import * as bodyParser from "body-parser";
+import * as express from "express";
+import * as fs from "fs";
+import * as pg from "pg";
+import * as yaml from "js-yaml";
+import * as shortid from "shortid";
+import * as request_funcs from "./src/request_funcs";
+
 
 var conf = yaml.safeLoad(
     fs.readFileSync( 'config.yaml', 'utf8' ),
@@ -15,7 +16,7 @@ var conf = yaml.safeLoad(
 var PORT = conf.port;
 
 // Init server
-const SERVER = express();
+export const SERVER = express();
 let httpServer = require( 'http' ).createServer( SERVER );
 
 SERVER.use( bodyParser.json() );
@@ -27,7 +28,7 @@ let logger = require( 'logger' ).createLogger( conf.log_file );
 logger.setLevel( conf.log_level );
 logger.format = ( level, date, message ) => message;
 let logger_wrap = (callback) => function (req, res) {
-    let request_id = uuid( uuid.constants.flickrBase58 ).new();
+    let request_id = shortid.generate();
     let log_func = function (level, args) {
         let date = new Date();
         args.unshift( "(" + request_id + ")" );
@@ -61,8 +62,12 @@ httpServer.listen( PORT );
 logger.info( "Server running on port", PORT );
 
 
-module.exports = {
-    app: SERVER
-    ,set_db: ( new_db ) => { request_funcs.set_db( new_db ) }
-    ,stop: () => { httpServer.close() }
-};
+export function set_db ( new_db )
+{
+    return request_funcs.set_db( new_db );
+}
+
+export function stop ()
+{
+    httpServer.close();
+}

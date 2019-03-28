@@ -1,4 +1,4 @@
-let validate = function (params, validation_list) {
+export let validate = function (params, validation_list) {
     let errors = [];
 
     validation_list.forEach( (callback) => {
@@ -41,13 +41,13 @@ let matchSingleField = function (field, regex, typeName) {
     };
 };
 
-let isInteger =
+export let isInteger =
     (field) => matchSingleField( field, /^-?[0-9]*$/, "integer" );
-let isName =
+export let isName =
     (field) => matchSingleField( field, /^[A-Za-z]+$/, "name" );
-let isWords =
+export let isWords =
     (field) => matchSingleField( field, /^[A-Za-z0-9\s]*$/, "words" );
-let isUSPhone = 
+export let isUSPhone = 
     (field) => matchSingleField( field,
         // Why can't JavaScript support /x?
         /^(?:1[\s\-]*)?(?:[0-9]{3}[\s\-]*)?[0-9]{3}[\s\-]?[0-9]{4}$/,
@@ -60,10 +60,10 @@ let urlRegex = new RegExp('^(https?:\\/\\/)?'+ // protocol
     '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
     '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
     '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-let isUrl =
+export let isUrl =
     (field) => matchSingleField( field, urlRegex, "URL" );
 
-let isUSAddress = (field) => function (params) {
+export let isUSAddress = (field) => function (params) {
     let value = params[field];
 
     validate( value, [
@@ -79,15 +79,4 @@ let isUSAddress = (field) => function (params) {
         ,isWords( 'county' )
         ,isWords( 'country' )
     ]);
-};
-
-
-module.exports = {
-    validate: validate
-    ,isInteger: isInteger
-    ,isName: isName
-    ,isWords: isWords
-    ,isUSPhone: isUSPhone
-    ,isUrl: isUrl
-    ,isUSAddress: isUSAddress
 };
