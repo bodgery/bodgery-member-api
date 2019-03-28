@@ -18,7 +18,7 @@ module.exports = {
                 ,valid.isWords( 'name' )
                 ,valid.isName( 'firstName' )
                 ,valid.isName( 'lastName' )
-                // TODO address
+                ,valid.isUSAddress( 'address' )
                 ,valid.isUrl( 'photo' )
                 // TODO approvedTools
                 ,valid.isUSPhone( 'phone' )

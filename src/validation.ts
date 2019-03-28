@@ -46,7 +46,7 @@ let isInteger =
 let isName =
     (field) => matchSingleField( field, /^[A-Za-z]+$/, "name" );
 let isWords =
-    (field) => matchSingleField( field, /^[A-Za-z0-9\s]+$/, "words" );
+    (field) => matchSingleField( field, /^[A-Za-z0-9\s]*$/, "words" );
 let isUSPhone = 
     (field) => matchSingleField( field,
         // Why can't JavaScript support /x?
@@ -63,6 +63,24 @@ let urlRegex = new RegExp('^(https?:\\/\\/)?'+ // protocol
 let isUrl =
     (field) => matchSingleField( field, urlRegex, "URL" );
 
+let isUSAddress = (field) => function (params) {
+    let value = params[field];
+
+    validate( value, [
+        // TODO
+        // This set of validations is all wrong. Address1 and 2 might have 
+        // puncutation, zip needs a more formal validation, county and 
+        // country potentially should verify from a list. State, too
+        isWords( 'address1' )
+        ,isWords( 'address2' )
+        ,isWords( 'city' )
+        ,isName( 'state' )
+        ,isWords( 'zip' )
+        ,isWords( 'county' )
+        ,isWords( 'country' )
+    ]);
+};
+
 
 module.exports = {
     validate: validate
@@ -71,4 +89,5 @@ module.exports = {
     ,isWords: isWords
     ,isUSPhone: isUSPhone
     ,isUrl: isUrl
+    ,isUSAddress: isUSAddress
 };
