@@ -1,3 +1,31 @@
+/**
+ * Used for validating parameters from the outside world.
+ *
+ * ```javascript
+    import * as valid from "validation";
+
+
+    try {
+        valid.validate( args, [
+            valid.isInteger( 'id' )
+            ,valid.isWords( 'name' )
+            ,valid.isName( 'firstName' )
+            ,valid.isName( 'lastName' )
+            ,valid.isUSAddress( 'address' )
+            ,valid.isUrl( 'photo' )
+            ,valid.isUSPhone( 'phone' )
+        ]);
+    }
+    catch (err) {
+        console.log( err.toString();
+    }
+ * ```
+ */
+
+/**
+ * @param params  The parameters to validate
+ * @param validation_list  An array of functions that will be used to validate the parameters. The functions in the list will take the parameters being matched. If a parameter fails to match, the function should throw an error.
+ */
 export let validate = function (params, validation_list) {
     let errors = [];
 
