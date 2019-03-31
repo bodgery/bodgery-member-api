@@ -33,7 +33,7 @@ export function post_members( req, res, logger )
         ]);
     }
     catch (err) {
-        console.log( "Errors: " + err.toString() );
+        logger.error( "Errors: " + err.toString() );
         res
             .status( 400 )
             .json({
@@ -41,12 +41,20 @@ export function post_members( req, res, logger )
             });
     }
 
-    // TODO add with an async callback
-    db.add_member( body );
-
-    res
-        .status( 204 )
-        .end();
+    db.add_member( body
+        ,() => {
+            logger.info( "Member added successfully" );
+            res
+                .status( 204 )
+                .end();
+        }
+        ,( err: Error ) => {
+            logger.error( "Error writing to database: " + err.toString() );
+            res
+                .status( 500 )
+                .end();
+        }
+    );
 }
 
 export function get_members( req, res, logger )
@@ -58,30 +66,40 @@ export function get_members( req, res, logger )
     let skip = body['skip'];
     let sort = body['sort'];
 
-    let members: Array<db_impl.Member> = db.get_members();
-    // TODO most of this should be in db.get_members()
-    if( id ) {
-        members = members.filter( function (member) {
-            return member.id == id;
-        });
-    }
-    if( sort ) {
-        members = members.sort( function ( a, b ) {
-            return a[sort].localeCompare( b[sort] );
-        });
-    }
-    if( skip ) {
-        members = members.filter( function (member, index) {
-            return index >= skip;
-        });
-    }
-    if( limit ) {
-        members = members.filter( function (member, index) {
-            return index < limit;
-        });
-    }
+    db.get_members(
+        ( members: Array<db_impl.Member> ) => {
+            // TODO most of this should be in db.get_members()
+            if( id ) {
+                members = members.filter( function (member) {
+                    return member.id == id;
+                });
+            }
+            if( sort ) {
+                members = members.sort( function ( a, b ) {
+                    return a[sort].localeCompare( b[sort] );
+                });
+            }
+            if( skip ) {
+                members = members.filter( function (member, index) {
+                    return index >= skip;
+                });
+            }
+            if( limit ) {
+                members = members.filter( function (member, index) {
+                    return index < limit;
+                });
+            }
 
-    res
-        .status( 200 )
-        .send( members );
+            logger.info( "Returning " + members.length + " members" );
+            res
+                .status( 200 )
+                .send( members );
+        }
+        ,( err: Error ) => {
+            logger.error( "Error fetching members: " + err.toString() );
+            res
+                .status( 500 )
+                .end();
+        }
+    );
 }

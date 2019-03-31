@@ -26,6 +26,14 @@ export interface Member
 
 export interface DB
 {
-    add_member( member: Member ): boolean;
-    get_members(): Array<Member>;
+    add_member(
+        member: Member
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
+
+    get_members(
+        success_callback: ( members: Array<Member> ) => void
+        error_callback: ( err: Error ) => void
+    ): boolean;
 }
