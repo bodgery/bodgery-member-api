@@ -34,6 +34,10 @@ export interface DB
 
     get_members(
         success_callback: ( members: Array<Member> ) => void
-        error_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+        ,id: string = null
+        ,limit: number = null
+        ,skip: number = null
+        ,sort: string = null
     ): boolean;
 }

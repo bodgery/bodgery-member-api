@@ -26,9 +26,36 @@ export class MockDB
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void
         ,error_callback: ( err: Error ) => void
+        ,id: string = null
+        ,limit: number = null
+        ,skip: number = null
+        ,sort: string = null
     ): boolean
     {
-        success_callback( this.members );
+        let members = this.members;
+
+        if( id ) {
+            members = members.filter( function (member) {
+                return member.id == id;
+            });
+        }
+        if( sort ) {
+            members = members.sort( function ( a, b ) {
+                return a[sort].localeCompare( b[sort] );
+            });
+        }
+        if( skip ) {
+            members = members.filter( function (member, index) {
+                return index >= skip;
+            });
+        }
+        if( limit ) {
+            members = members.filter( function (member, index) {
+                return index < limit;
+            });
+        }
+
+        success_callback( members );
         return true;
     }
 }

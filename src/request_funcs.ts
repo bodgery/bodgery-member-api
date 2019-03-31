@@ -61,35 +61,13 @@ export function get_members( req, res, logger )
 {
     // TODO validate params
     let body = req.body || {};
-    let id = body['id'];
-    let limit = body['limit'];
-    let skip = body['skip'];
-    let sort = body['sort'];
+    let id = body['id'] || null;
+    let limit = body['limit'] || null;
+    let skip = body['skip'] || null;
+    let sort = body['sort'] || null;
 
     db.get_members(
         ( members: Array<db_impl.Member> ) => {
-            // TODO most of this should be in db.get_members()
-            if( id ) {
-                members = members.filter( function (member) {
-                    return member.id == id;
-                });
-            }
-            if( sort ) {
-                members = members.sort( function ( a, b ) {
-                    return a[sort].localeCompare( b[sort] );
-                });
-            }
-            if( skip ) {
-                members = members.filter( function (member, index) {
-                    return index >= skip;
-                });
-            }
-            if( limit ) {
-                members = members.filter( function (member, index) {
-                    return index < limit;
-                });
-            }
-
             logger.info( "Returning " + members.length + " members" );
             res
                 .status( 200 )
@@ -101,5 +79,9 @@ export function get_members( req, res, logger )
                 .status( 500 )
                 .end();
         }
+        ,id
+        ,limit
+        ,skip
+        ,sort
     );
 }
