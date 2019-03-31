@@ -1,6 +1,7 @@
 import * as request from "supertest";
 import * as server from "../app";
 import * as funcs from "../src/request_funcs";
+import * as mock_db from "../src/db-mock";
 
 
 describe( 'GET /v1/members', function () {
@@ -85,20 +86,7 @@ describe( 'GET /v1/members', function () {
             }
         ];
 
-        let db = {
-            add_member: function ( member_data: funcs.Member ): boolean {
-                // Ignore
-                return true;
-            },
-            get_members: function(): Array<funcs.Member> {
-                // TODO get by id
-                // TODO pagination
-                // TODO sort
-
-                return members;
-            }
-        };
-
+        let db = new mock_db.MockDB( members );
         server.set_db( db );
     });
 

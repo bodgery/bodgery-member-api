@@ -1,21 +1,13 @@
 import * as request from "supertest";
 import * as server from "../app";
 import * as funcs from "../src/request_funcs";
+import * as mock_db from "../src/db-mock";
+
 
 
 describe( 'POST /v1/members', function () {
     before( () => {
-        let db = {
-            add_member: function( member_data: funcs.Member ): boolean {
-                // Ignore
-                return true;
-            }
-            ,get_members: function(): Array<funcs.Member> {
-                // Ignore
-                return [];
-            }
-        };
-
+        let db = new mock_db.MockDB([]);
         server.set_db( db );
     });
 
