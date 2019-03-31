@@ -59,12 +59,29 @@ export function post_members( req, res, logger )
 
 export function get_members( req, res, logger )
 {
-    // TODO validate params
     let body = req.body || {};
     let id = body['id'] || null;
     let limit = body['limit'] || null;
     let skip = body['skip'] || null;
     let sort = body['sort'] || null;
+
+    try {
+        valid.validate( body, [
+            valid.isInteger( 'id', true )
+            ,valid.isInteger( 'limit', true )
+            ,valid.isInteger( 'skip', true )
+            ,valid.isName( 'sort', true )
+        ]);
+    }
+    catch (err) {
+        logger.error( "Errors: " + err.toString() );
+        res
+            .status( 400 )
+            .json({
+                error: err.toString()
+            });
+    }
+
 
     db.get_members(
         ( members: Array<db_impl.Member> ) => {

@@ -50,9 +50,10 @@ export let validate = function (params, validation_list) {
 };
 
 
-let matchSingleField = function (field, regex, typeName) {
+let matchSingleField = function (field, regex, typeName, allowNull = false) {
     return (params) => {
         let value = params[field];
+        if( allowNull && value == null ) return true;
 
         if(! regex.exec( value )) {
             throw new Error( "Field '"
@@ -70,16 +71,19 @@ let matchSingleField = function (field, regex, typeName) {
 };
 
 export let isInteger =
-    (field) => matchSingleField( field, /^-?[0-9]*$/, "integer" );
+    (field, allowNull = false) => matchSingleField( field, /^-?[0-9]*$/, 
+        "integer", allowNull );
 export let isName =
-    (field) => matchSingleField( field, /^[A-Za-z]+$/, "name" );
+    (field, allowNull = false) => matchSingleField( field, /^[A-Za-z]+$/,
+        "name", allowNull );
 export let isWords =
-    (field) => matchSingleField( field, /^[A-Za-z0-9\s]*$/, "words" );
+    (field, allowNull = false ) => matchSingleField( field, /^[A-Za-z0-9\s]*$/, 
+        "words", allowNull );
 export let isUSPhone = 
-    (field) => matchSingleField( field,
+    (field, allowNull = false) => matchSingleField( field,
         // Why can't JavaScript support /x?
         /^(?:1[\s\-]*)?(?:[0-9]{3}[\s\-]*)?[0-9]{3}[\s\-]?[0-9]{4}$/,
-        "phone" );
+        "phone", allowNull );
 
 // From: https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
 let urlRegex = new RegExp('^(https?:\\/\\/)?'+ // protocol
@@ -89,7 +93,8 @@ let urlRegex = new RegExp('^(https?:\\/\\/)?'+ // protocol
     '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
     '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
 export let isUrl =
-    (field) => matchSingleField( field, urlRegex, "URL" );
+    (field, allowNull = false) => matchSingleField( field, urlRegex, "URL",
+        allowNull );
 
 export let isUSAddress = (field) => function (params) {
     let value = params[field];
