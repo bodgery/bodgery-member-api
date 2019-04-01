@@ -9,6 +9,32 @@ export interface USAddress
     country: string;
 }
 
+export interface Question
+{
+    question: string;
+    answer: string;
+}
+
+enum ToolColor
+{
+    Green = "green",
+    Yellow = "yellow",
+    Red = "red",
+}
+
+export interface Tool
+{
+    id: string;
+    toolName: string;
+    description: string;
+    color: ToolColor;
+    brand: string;
+    model: string;
+    serial: string;
+    manualUrl: string;
+    owner: Member;
+}
+
 export interface Member
 {
     id: string;
@@ -18,10 +44,8 @@ export interface Member
     address: USAddress;
     photo: string;
     phone: string;
-    // TODO
-    profile: Array<string>;
-    // TODO
-    approvedTools: Array<string>;
+    profile: Array<Question>;
+    approvedTools: Array<Tool>;
 }
 
 export interface DB
