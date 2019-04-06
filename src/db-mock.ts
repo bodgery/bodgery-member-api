@@ -58,4 +58,9 @@ export class MockDB
         success_callback( members );
         return true;
     }
+
+    end(): void
+    {
+        // Do nothing, and do it well
+    }
 }

@@ -64,4 +64,6 @@ export interface DB
         ,skip: number = null
         ,sort: string = null
     ): boolean;
+
+    end(): void;
 }

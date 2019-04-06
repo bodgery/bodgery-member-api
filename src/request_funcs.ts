@@ -21,7 +21,7 @@ export function post_members( req, res, logger )
     var body = req.body;
     try {
         valid.validate( body, [
-            valid.isInteger( 'id' )
+            valid.isIdentifier( 'id' )
             ,valid.isWords( 'name' )
             ,valid.isName( 'firstName' )
             ,valid.isName( 'lastName' )
@@ -67,7 +67,7 @@ export function get_members( req, res, logger )
 
     try {
         valid.validate( body, [
-            valid.isInteger( 'id', true )
+            valid.isIdentifier( 'id', true )
             ,valid.isInteger( 'limit', true )
             ,valid.isInteger( 'skip', true )
             ,valid.isName( 'sort', true )

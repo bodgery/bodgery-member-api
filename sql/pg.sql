@@ -1,7 +1,7 @@
 CREATE TABLE "members" (
   "id" serial primary key,
   "wa_id" int,
-  "keyfob_id" int,
+  "keyfob_id" varchar,
   "slack_id" int,
   "first_name" varchar,
   "last_name" varchar,

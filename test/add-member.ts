@@ -8,7 +8,7 @@ import * as mock_db from "../src/db-mock";
 describe( 'POST /v1/members', function () {
     before( () => {
         let db = new mock_db.MockDB([]);
-        server.set_db( db );
+        server.start( db );
     });
 
     it( 'Adds a member', function (done) {

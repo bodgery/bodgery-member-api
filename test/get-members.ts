@@ -87,7 +87,7 @@ describe( 'GET /v1/members', function () {
         ];
 
         let db = new mock_db.MockDB( members );
-        server.set_db( db );
+        server.start( db );
     });
 
     it( 'Fetches all members', function (done) {

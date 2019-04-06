@@ -1,10 +1,11 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as fs from "fs";
-import * as pg from "pg";
 import * as yaml from "js-yaml";
 import * as shortid from "shortid";
 import * as request_funcs from "./src/request_funcs";
+import * as db_impl from "./src/db";
+import * as pg from "./src/db-pg";
 
 
 var conf = yaml.safeLoad(
@@ -57,17 +58,32 @@ SERVER.post('/v1/members', logger_wrap( request_funcs.post_members ) );
 SERVER.get('/v1/members', logger_wrap( request_funcs.get_members ) );
 
 
-// Start server running
-httpServer.listen( PORT );
-logger.info( "Server running on port", PORT );
-
-
-export function set_db ( new_db )
+function default_db(): db_impl.DB
 {
-    return request_funcs.set_db( new_db );
+    let db: db_impl.DB = new pg.PG(
+        conf.db_host
+        ,conf.db_port
+        ,conf.db_name
+        ,conf.db_user
+        ,conf.db_password
+    );
+    return db;
 }
 
-export function stop ()
+export function start( db?: db_impl.DB ): void
+{
+    if(! db) db = default_db();
+    request_funcs.set_db( db );
+
+    // Start server running
+    httpServer.listen( PORT );
+    logger.info( "Server running on port", PORT );
+}
+
+export function stop (): void
 {
     httpServer.close();
 }
+
+
+if( process.argv[2] == "start" ) start();

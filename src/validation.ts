@@ -84,6 +84,9 @@ export let isUSPhone =
         // Why can't JavaScript support /x?
         /^(?:1[\s\-]*)?(?:[0-9]{3}[\s\-]*)?[0-9]{3}[\s\-]?[0-9]{4}$/,
         "phone", allowNull );
+export let isIdentifier = 
+    (field, allowNull = false ) => matchSingleField( field, /^[A-Za-z0-9\-\_]*$/,
+        "identifier", allowNull );
 
 // From: https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
 let urlRegex = new RegExp('^(https?:\\/\\/)?'+ // protocol
