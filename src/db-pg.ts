@@ -114,7 +114,7 @@ export class PG
 
     end(): void
     {
-        this.client.end;
+        this.client.end();
     }
 
 
