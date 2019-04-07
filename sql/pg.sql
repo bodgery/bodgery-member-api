@@ -3,12 +3,12 @@ CREATE TABLE "members" (
   "wa_id" int,
   "keyfob_id" varchar,
   "slack_id" int,
+  "address_id" int,
   "first_name" varchar,
   "last_name" varchar,
   "full_name" varchar,
+  "phone" varchar,
   "status" bool,
-  "city" varchar,
-  "zip" varchar,
   "photo" varchar,
   "member_level" int
 );
@@ -77,6 +77,17 @@ CREATE TABLE "roles" (
   "role_name" varchar
 );
 
+CREATE TABLE "us_address" (
+    "id" serial primary key,
+    "address1" varchar,
+    "address2" varchar,
+    "city" varchar,
+    "state" varchar,
+    "zip" varchar,
+    "county" varchar,
+    "country" varchar
+);
+
 ALTER TABLE "tools" ADD FOREIGN KEY ("owner_id") REFERENCES "members" ("id");
 
 ALTER TABLE "tools" ADD FOREIGN KEY ("area_id") REFERENCES "areas" ("id");
@@ -92,6 +103,8 @@ ALTER TABLE "member_roles" ADD FOREIGN KEY ("area_id") REFERENCES "areas" ("id")
 ALTER TABLE "roles" ADD FOREIGN KEY ("role_id") REFERENCES "member_roles" ("id");
 
 ALTER TABLE "members" ADD FOREIGN KEY ("member_level") REFERENCES "member_levels" ("id");
+
+ALTER TABLE "members" ADD FOREIGN KEY ("address_id") REFERENCES "us_address" ("id");
 
 ALTER TABLE "member_history" ADD FOREIGN KEY ("member_id") REFERENCES "members" ("id");
 

@@ -7,7 +7,7 @@ After cloning, you'll need to install the dependencies with:
 You will need a PostgreSQL database setup:
 
     $ createdb -O USERNAME bodgery_members_USERNAME
-    $ psql -f sql/pg.sql bodgery_members_USERNAME
+    $ sql/rebuild_pg.sh bodgery_members_USERNAME
 
 Replacing `USERNAME` with your own user. You may need sudo access to the 
 owner of the database to set this up.

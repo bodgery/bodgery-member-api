@@ -43,10 +43,16 @@ describe( 'Create member in PostgreSQL', function () {
                 .send({ id: rfid })
                 .expect( function (res) {
                     var data = res.body;
-                    if( data[0]['name'] != name ) {
+                    if( data[0].fullName != name ) {
                         throw new Error( "Name is wrong"
                             + "(expected '" + name + "', got: "
                             + data[0]['name'] + ")"
+                        );
+                    }
+                    if( data[0].address.address1 != "123 Main St" ) {
+                        throw new Error( "Address is wrong"
+                            + "(expected '123 Main St', got: "
+                            + data[0].address.address1 + ")"
                         );
                     }
                 })
@@ -63,7 +69,15 @@ describe( 'Create member in PostgreSQL', function () {
                 ,name: name
                 ,firstName: "Abe"
                 ,lastName: "Foobar"
-                ,address: "123 Main St"
+                ,address: {
+                    address1: "123 Main St"
+                    ,address2: null
+                    ,city: "Madison"
+                    ,state: "WI"
+                    ,zip: "53714"
+                    ,county: "Dane"
+                    ,country: "United States of America"
+                }
                 ,photo: "http://example.com/photo"
                 ,phone: "15551234"
                 ,profile: [

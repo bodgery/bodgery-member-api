@@ -33,18 +33,25 @@ export class PG
         ,error_callback: (err: Error) => void
     ): boolean
     {
-        this.transaction( () => {
-            this.add_member_data( member
-                ,(id) => {
-                    this.add_questions_to_member( id, member.profile, () => {
-                        this.add_tools_to_member( id, member.approvedTools,
-                            success_callback, error_callback );
-                    }, error_callback );
-                }
-                ,error_callback
-            );
-        }, error_callback );
+        let add_tools = (id) => {
+            return () => this.add_tools_to_member( id, member.approvedTools,
+                success_callback, error_callback );
+        };
+        let add_questions = (id) => {
+            return () => this.add_questions_to_member( id, member.profile,
+                add_tools(id), error_callback );
+        };
+        let add_address = (id) => {
+            this.add_address_to_member( id, member.address,
+                add_questions(id), error_callback );
+        };
+        let add_member = () => {
+            this.add_member_data( member,
+                add_address,
+                error_callback );
+        };
 
+        this.transaction( add_member, error_callback );
         return true;
     }
 
@@ -63,13 +70,20 @@ export class PG
         let query_text = [
             "SELECT"
                 ,"keyfob_id AS id"
-                ,",first_name"
-                ,",last_name"
+                ,",first_name AS firstName"
+                ,",last_name AS lastName"
                 ,",full_name AS name"
-                ,",city"
-                ,",zip"
                 ,",photo"
+                ,",phone"
+                ,",address1"
+                ,",address2"
+                ,",city"
+                ,",state"
+                ,",zip"
+                ,",county"
+                ,",country"
             ,"FROM members"
+            ,"JOIN us_address ON (members.address_id = us_address.id)"
         ];
         let name = "get-member";
         let values = [];
@@ -106,7 +120,26 @@ export class PG
                 error_callback( err );
             }
             else {
-                success_callback( res.rows );
+                let results = res.rows.map( (row) => {
+                    return {
+                        keyfob_id: row.keyfob_id
+                        ,fullName: row.name
+                        ,firstName: row.firstName
+                        ,lastName: row.lastName
+                        ,photo: row.photo
+                        ,phone: row.phone
+                        ,address: {
+                            address1: row.address1
+                            ,address2: row.address2
+                            ,city: row.city
+                            ,state: row.state
+                            ,zip: row.zip
+                            ,county: row.county
+                            ,country: row.country
+                        }
+                    };
+                });
+                success_callback( results );
             }
         });
         return true;
@@ -131,20 +164,20 @@ export class PG
                     ,"first_name"
                     ,",last_name"
                     ,",status"
-                    ,",city"
-                    ,",zip"
                     ,",keyfob_id"
                     ,",full_name"
-                ,") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+                    ,",phone"
+                    ,",photo"
+                ,") VALUES ($1, $2, $3, $4, $5, $6, $7 ) RETURNING id"
             ].join( " " )
             ,values: [
                 member.firstName
                 ,member.lastName
                 ,"TRUE"
-                ,member.address.city
-                ,member.address.zip
                 ,member.id
                 ,member.name
+                ,member.phone
+                ,member.photo
             ]
         };
 
@@ -154,6 +187,79 @@ export class PG
             }
             else {
                 success_callback( res.rows[0].id );
+            }
+        });
+    }
+
+    private add_address_to_member(
+        id: number
+        ,addr: db_impl.USAddress
+        ,success_callback: () => void
+        ,error_callback: (err: Error) => void
+    ): void
+    {
+        let query = {
+            name: "add-address"
+            ,text: [
+                "INSERT INTO us_address ("
+                    ,"address1"
+                    ,",address2"
+                    ,",city"
+                    ,",state"
+                    ,",zip"
+                    ,",county"
+                    ,",country"
+                ,") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+            ].join( " " )
+            ,values: [
+                addr.address1
+                ,addr.address2
+                ,addr.city
+                ,addr.state
+                ,addr.zip
+                ,addr.county
+                ,addr.country
+            ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else {
+                let address_id = res.rows[0].id;
+                this.update_addr_id( id, address_id, success_callback,
+                    error_callback );
+            }
+        });
+    }
+
+    private update_addr_id(
+        id: number
+        ,address_id: number
+        ,success_callback: () => void
+        ,error_callback: (err: Error) => void
+    ): void
+    {
+        let query = {
+            name: "update-member-address"
+            ,text: [
+                "UPDATE members"
+                    ,"SET address_id = $1"
+                    ,"WHERE id = $2"
+            ].join( " " )
+            ,values: [
+                address_id
+                ,id
+            ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else {
+                success_callback();
             }
         });
     }
