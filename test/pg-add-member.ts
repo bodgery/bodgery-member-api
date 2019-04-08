@@ -39,7 +39,7 @@ describe( 'Create member in PostgreSQL', function () {
 
         let test_fetch = () => {
             request( server.SERVER )
-                .get( '/v1/members' )
+                .get( '/api/v1/members' )
                 .send({ id: rfid })
                 .expect( function (res) {
                     var data = res.body;
@@ -63,7 +63,7 @@ describe( 'Create member in PostgreSQL', function () {
         };
 
         request( server.SERVER )
-            .post( '/v1/members' )
+            .post( '/api/v1/members' )
             .send({
                 id: rfid
                 ,name: name

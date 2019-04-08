@@ -92,7 +92,7 @@ describe( 'GET /v1/members', function () {
 
     it( 'Fetches all members', function (done) {
         request( server.SERVER )
-            .get( '/v1/members' )
+            .get( '/api/v1/members' )
             .send()
             .expect( 200 )
             .expect( function(res) {
@@ -111,7 +111,7 @@ describe( 'GET /v1/members', function () {
 
     it( 'Fetch a specific member by ID', function ( done ) {
         request( server.SERVER )
-            .get( '/v1/members' )
+            .get( '/api/v1/members' )
             .send({ id: "1235" })
             .expect( 200 )
             .expect( function(res) {
@@ -132,7 +132,7 @@ describe( 'GET /v1/members', function () {
 
     it( 'Fetch members with limit', function ( done ) {
         request( server.SERVER )
-            .get( '/v1/members' )
+            .get( '/api/v1/members' )
             .send({ limit: 3 })
             .expect( 200 )
             .expect( function(res) {
@@ -150,7 +150,7 @@ describe( 'GET /v1/members', function () {
 
     it( 'Fetch members with limit and skip', function ( done ) {
         request( server.SERVER )
-            .get( '/v1/members' )
+            .get( '/api/v1/members' )
             .send({
                 limit: 3
                 ,skip: 3
@@ -171,7 +171,7 @@ describe( 'GET /v1/members', function () {
 
     it( 'Fetch members with sorting', function ( done ) {
         request( server.SERVER )
-            .get( '/v1/members' )
+            .get( '/api/v1/members' )
             .send({
                 sort: "name"
             })

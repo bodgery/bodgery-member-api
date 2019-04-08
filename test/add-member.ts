@@ -13,7 +13,7 @@ describe( 'POST /v1/members', function () {
 
     it( 'Adds a member', function (done) {
         request( server.SERVER )
-            .post( '/v1/members' )
+            .post( '/api/v1/members' )
             .send({
                 id: "0123456789"
                 ,name: "Abe Foobar"

@@ -22,6 +22,7 @@ let httpServer = require( 'http' ).createServer( SERVER );
 
 SERVER.use( bodyParser.json() );
 SERVER.use( bodyParser.urlencoded({ extended: true }) );
+SERVER.use( express.static( 'public' ) );
 
 
 // Init logger
@@ -53,9 +54,9 @@ let logger_wrap = (callback) => function (req, res) {
 
 
 // Add server routing callbacks
-SERVER.get('/', logger_wrap( request_funcs.get_versions ) );
-SERVER.post('/v1/members', logger_wrap( request_funcs.post_members ) );
-SERVER.get('/v1/members', logger_wrap( request_funcs.get_members ) );
+SERVER.get('/api/', logger_wrap( request_funcs.get_versions ) );
+SERVER.post('/api/v1/members', logger_wrap( request_funcs.post_members ) );
+SERVER.get('/api/v1/members', logger_wrap( request_funcs.get_members ) );
 
 
 function default_db(): db_impl.DB

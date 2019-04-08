@@ -5,7 +5,7 @@ import * as server from "../app";
 describe( 'Returns version list', function () {
     it( 'Gets versions', function (done) {
         request( server.SERVER )
-            .get( '/' )
+            .get( '/api/' )
             .expect( 200 )
             .expect( 'Content-Type', /json/ )
             .expect( function(res) {
