@@ -9,6 +9,15 @@ export function set_db (new_db: db_impl.DB)
     db = new_db;
 }
 
+function get_generic_db_error( logger, res )
+{
+    return ( err: Error ) => {
+        logger.error( "Error writing to database: " + err.toString() );
+        res
+            .status( 500 )
+            .end();
+    };
+}
 
 export function get_versions ( req, res, ctx: c.Context )
 {
@@ -45,14 +54,9 @@ export function put_member( req, res, ctx: c.Context )
             logger.info( "Member added successfully" );
             res
                 .status( 204 )
-                 .end();
-         }
-         ,( err: Error ) => {
-            logger.error( "Error writing to database: " + err.toString() );
-            res
-                .status( 500 )
                 .end();
         }
+        ,get_generic_db_error( logger, res )
     );
 }
 
@@ -90,11 +94,6 @@ export function get_member( req, res, ctx: c.Context )
                 .status( 404 )
                 .end();
         }
-        ,( err: Error ) => {
-            logger.error( "Error writing to database: " + err.toString() );
-            res
-                .status( 500 )
-                .end();
-        }
+        ,get_generic_db_error( logger, res )
     );
 }
