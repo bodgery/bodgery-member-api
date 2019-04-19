@@ -3,7 +3,7 @@ servers:
   - url: '{protocol}://www.thebodgery.com/api'
     variables:
       protocol:
-        description: 'The Bodgery API is accessible via https and http'
+        description: The Bodgery API is accessible via https and http
         enum:
           - https
           - http
@@ -12,9 +12,9 @@ info:
   description: >-
     The Bodgery api allows users to query access many programatic functions 
     related to The Bodgery makerspace in Madison, WI. These functions include
-    querying Wild Apricot for current member status and tool checkoff status.
-    It also includes task management functions. More functionality to be added 
-    as needed.
+    querying Wild Apricot for current member status and tool checkoff status. It
+    also includes task management functions. More functionality to be added  as
+    needed.
   version: 1.0.0
   title: Bodgery API
   contact:
@@ -28,8 +28,7 @@ tags:
   - name: Tools
     description: Get Tool info
   - name: Telemetry
-    description: 'Get telemetry information such as temp, air quality, or 
-    shop open status'
+    description: 'Get telemetry information such as temp, air quality, or  shop open status'
 paths:
   /:
     get:
@@ -49,67 +48,6 @@ paths:
       responses:
         '200':
           description: Request OK
-  /v1/members:
-    get:
-      operationId: getAllMembersv1
-      summary: Get a list of all members
-      tags:
-        - Members
-      parameters:
-        - name: id
-          in: query
-          description: memberId to pull a single member
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: limit
-          in: query
-          description: maximum number of members to return
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: skip
-          in: query
-          description: number of members to skip
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: sort
-          in: query
-          description: property to sort returned members by
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-      responses:
-        '200':
-          description: Request OK - Member response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Members'
-        '404':
-          description: Member not found
-    post:
-      operationId: addMemberv1
-      summary: Add a member
-      tags:
-        - Members
-      requestBody:
-        description: The member to add
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Member'
-      responses:
-        '204':
-          description: Member successfully created
-        '400':
-          description: Could not create member
   /v1/tools:
     get:
       operationId: getToolsv1
@@ -169,20 +107,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/taskList'
               example:
-                {
-                  tasks:[
-                    {
-                      "id": "0",
-                      "name": "Empty trash into bins",
-                      "description": "All inside trash and recycling bins should be emptied into the large rolling bins outside the building"
-                    },
-                    {
-                      "id": "1",
-                      "name": "Take bins to curb",
-                      "description": "Outside rolling trash bins should be taken to the curb every week on Tuesday. Recycling should be taken to the curb every other Tuesday."
-                    }
-                  ]
-                }
+                tasks:
+                  - id: '0'
+                    name: Empty trash into bins
+                    description: >-
+                      All inside trash and recycling bins should be emptied into
+                      the large rolling bins outside the building
+                  - id: '1'
+                    name: Take bins to curb
+                    description: >-
+                      Outside rolling trash bins should be taken to the curb
+                      every week on Tuesday. Recycling should be taken to the
+                      curb every other Tuesday.
     post:
       tags:
         - Tasks
@@ -200,8 +136,185 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/task'
+  /v1/member:
+    summary: Manage members
+    put:
+      tags:
+        - Members
+      summary: Add a member
+      description: ''
+      operationId: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleMemberData'
+      responses:
+        '204':
+          description: Created
+          content:
+            text/plain:
+              schmea:
+                type: string
+  '/v1/member/:member_id/photo':
+    summary: Add member photo
+    put:
+      tags:
+        - Members
+      summary: Add member photo
+      description: ''
+      operationId: ''
+      requestBody:
+        content:
+          image/jpeg:
+            type: string
+            format: binary
+      responses:
+        '204':
+          description: Photo Set
+    get:
+      tags:
+        - Members
+      summary: Returns the member photo
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              type: string
+              format: binary
+  '/v1/member/:member_id/address':
+    put:
+      tags:
+        - Members
+      summary: Add US address to member
+      description: ''
+      operationId: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/USAddress'
+      responses:
+        '204':
+          description: Address Added
+    get:
+      tags:
+        - Members
+      summary: Returns member address
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/USAddress'
+  '/v1/member/:member_id/status':
+    put:
+      tags:
+        - Members
+      summary: Sets a member to be active or not
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+    get:
+      tags:
+        - Members
+      summary: Returns current member status
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          description: Returns active or inactive
+          content:
+            text/plain:
+              schema:
+                type: string
+  '/v1/rfid/:rfid':
+    get:
+      tags:
+        - Members
+      summary: Check if given RFID is active
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          description: RFID is active
+        '403':
+          description: RFID exists, but not active
+        '404':
+          description: RFID not found
+  '/v1/member/:member_id':
+    get:
+      tags:
+        - Members
+      summary: Returns basic member data
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+            description: Member data
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/SimpleMemberData'
+  '/v1/member/:member_id/wildapricot':
+    put:
+      tags:
+        - Members
+      summary: Set the member's Wild Apricot ID
+      description: ''
+      operationId: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WildApricotMemberID'
+      responses:
+        '204':
+          description: Set member's Wild Apricot ID
+  '/v/1/member/:member_id/list/:name':
+    put:
+      summary: Sign a member up for the specified mailing list
+      description: ''
+      operationId: ''
+      responses:
+        '204':
+          description: Signed member up for the mailing list
+  '/v1/meber/:member_id/slack':
+    put:
+      summary: Signs member up for Slack
+      description: ''
+      operationId: ''
+      responses:
+        '204':
+          description: Signed member up for Slack
 components:
   schemas:
+    SimpleMemberData:
+      required:
+        - rfid
+      properties:
+        rfid:
+          type: string
+          description: RFID Number
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+          format: phone
+        email:
+          type: string
+          format: email
     Member:
       required:
         - id
@@ -240,6 +353,20 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Member'
+    SimpleMemberData:
+      properties:
+        rfid:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+          format: phone
+        email:
+          type: string
+          format: email
     Address:
       properties:
         address1:
@@ -285,6 +412,12 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Tool'
+    WildApricotMemberID:
+      properties:
+        wild_apricot_id:
+          type: integer
+        is_active:
+          type: boolean
     Area:
       properties:
         id:
@@ -374,4 +507,3 @@ components:
         description:
           type: string
           maxLength: 8000
-          
