@@ -35,35 +35,41 @@ export interface Tool
     owner: Member;
 }
 
-export interface Member
+export interface SimpleMember
 {
-    id: string;
-    name: string;
+    rfid: string;
     firstName: string;
     lastName: string;
-    address: USAddress;
-    photo: string;
     phone: string;
-    profile: Array<Question>;
-    approvedTools: Array<Tool>;
+    email: string;
 }
 
 export interface DB
 {
+    client: any;
+
     add_member(
-        member: Member
+        member: SimpleMember
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
 
-    get_members(
-        success_callback: ( members: Array<Member> ) => void
+    get_member(
+        member_id: string
+        ,success_callback: ( member: SimpleMember ) => void
+        ,no_member_found_callback: () => void
         ,error_callback: ( err: Error ) => void
-        ,id: string = null
-        ,limit: number = null
-        ,skip: number = null
-        ,sort: string = null
     ): boolean;
+/*
+    get_members(
+        success_callback: ( members: Array<SimpleMember> ) => void
+        ,error_callback: ( err: Error ) => void
+        ,id: string
+        ,limit: number
+        ,skip: number
+        ,sort: string
+    ): boolean;
+*/
 
     end(): void;
 }

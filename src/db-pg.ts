@@ -5,7 +5,7 @@ import * as db_impl from "./db";
 
 export class PG
 {
-    private client: any;
+    client: any;
 
 
     constructor(
@@ -28,26 +28,14 @@ export class PG
 
 
     add_member(
-        member: db_impl.Member
+        member: db_impl.SimpleMember
         ,success_callback: () => void
         ,error_callback: (err: Error) => void
     ): boolean
     {
-        let add_tools = (id) => {
-            return () => this.add_tools_to_member( id, member.approvedTools,
-                success_callback, error_callback );
-        };
-        let add_questions = (id) => {
-            return () => this.add_questions_to_member( id, member.profile,
-                add_tools(id), error_callback );
-        };
-        let add_address = (id) => {
-            this.add_address_to_member( id, member.address,
-                add_questions(id), error_callback );
-        };
         let add_member = () => {
             this.add_member_data( member,
-                add_address,
+                success_callback,
                 error_callback );
         };
 
@@ -55,8 +43,19 @@ export class PG
         return true;
     }
 
+    get_member(
+        member_id: string
+        ,success_callback: ( member: db_impl.SimpleMember ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        // TODO
+        return true;
+    }
+/*
     get_members(
-        success_callback: ( members: Array<db_impl.Member> ) => void
+        success_callback: ( members: Array<db_impl.SimpleMember> ) => void
         ,error_callback: ( err: Error ) => void
         ,id: string = null
         ,limit: number = null
@@ -69,7 +68,8 @@ export class PG
         // TODO fetch address, approved tools, and profile questions
         let query_text = [
             "SELECT"
-                ,"keyfob_id AS id"
+                ,"id"
+                ,"keyfob_id"
                 ,",first_name AS firstName"
                 ,",last_name AS lastName"
                 ,",full_name AS name"
@@ -122,8 +122,9 @@ export class PG
             else {
                 let results = res.rows.map( (row) => {
                     return {
-                        keyfob_id: row.keyfob_id
-                        ,fullName: row.name
+                        id: row.id
+                        ,keyfob_id: row.keyfob_id
+                        ,name: row.name
                         ,firstName: row.firstName
                         ,lastName: row.lastName
                         ,photo: row.photo
@@ -137,13 +138,17 @@ export class PG
                             ,county: row.county
                             ,country: row.country
                         }
+                        ,approvedTools: []
                     };
                 });
-                success_callback( results );
+                this.gather_approved_tools( results, (res) => {
+                    success_callback( res );
+                }, error_callback );
             }
         });
         return true;
     }
+*/
 
     end(): void
     {
@@ -152,7 +157,7 @@ export class PG
 
 
     private add_member_data(
-        member: db_impl.Member
+        member: db_impl.SimpleMember
         ,success_callback: (id: number) => void
         ,error_callback: (err: Error) => void
     ): void
@@ -161,23 +166,19 @@ export class PG
             name: "add-member"
             ,text: [
                 "INSERT INTO members ("
-                    ,"first_name"
+                    ,"rfid"
+                    ,",first_name"
                     ,",last_name"
-                    ,",status"
-                    ,",keyfob_id"
-                    ,",full_name"
                     ,",phone"
-                    ,",photo"
-                ,") VALUES ($1, $2, $3, $4, $5, $6, $7 ) RETURNING id"
+                    ,",email"
+                ,") VALUES ($1, $2, $3, $4 ) RETURNING id"
             ].join( " " )
             ,values: [
-                member.firstName
+                member.rfid
+                ,member.firstName
                 ,member.lastName
-                ,"TRUE"
-                ,member.id
-                ,member.name
                 ,member.phone
-                ,member.photo
+                ,member.email
             ]
         };
 
@@ -189,101 +190,6 @@ export class PG
                 success_callback( res.rows[0].id );
             }
         });
-    }
-
-    private add_address_to_member(
-        id: number
-        ,addr: db_impl.USAddress
-        ,success_callback: () => void
-        ,error_callback: (err: Error) => void
-    ): void
-    {
-        let query = {
-            name: "add-address"
-            ,text: [
-                "INSERT INTO us_address ("
-                    ,"address1"
-                    ,",address2"
-                    ,",city"
-                    ,",state"
-                    ,",zip"
-                    ,",county"
-                    ,",country"
-                ,") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-            ].join( " " )
-            ,values: [
-                addr.address1
-                ,addr.address2
-                ,addr.city
-                ,addr.state
-                ,addr.zip
-                ,addr.county
-                ,addr.country
-            ]
-        };
-
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else {
-                let address_id = res.rows[0].id;
-                this.update_addr_id( id, address_id, success_callback,
-                    error_callback );
-            }
-        });
-    }
-
-    private update_addr_id(
-        id: number
-        ,address_id: number
-        ,success_callback: () => void
-        ,error_callback: (err: Error) => void
-    ): void
-    {
-        let query = {
-            name: "update-member-address"
-            ,text: [
-                "UPDATE members"
-                    ,"SET address_id = $1"
-                    ,"WHERE id = $2"
-            ].join( " " )
-            ,values: [
-                address_id
-                ,id
-            ]
-        };
-
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else {
-                success_callback();
-            }
-        });
-    }
-
-    private add_questions_to_member(
-        id: number
-        ,questions: Array<db_impl.Question>
-        ,success_callback: () => void
-        ,error_callback: (err: Error) => void
-    ): void
-    {
-        // TODO there is no place for questions in current schema
-        success_callback();
-    }
-
-    private add_tools_to_member(
-        id: number
-        ,tools: Array<db_impl.Tool>
-        ,success_callback: () => void
-        ,error_callback: (err: Error) => void
-    ): void
-    {
-        // TODO
-        success_callback();
     }
 
     private transaction(

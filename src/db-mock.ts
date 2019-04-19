@@ -3,17 +3,18 @@ import * as db_impl from "./db";
 
 export class MockDB
 {
-    members: Array<db_impl.Member> = [];
+    client: any = null;
+    members: Array<db_impl.SimpleMember> = [];
 
 
-    constructor( members: Array<db_impl.Member> )
+    constructor( members: Array<db_impl.SimpleMember> )
     {
         this.members = members;
     }
 
 
     add_member(
-        member: db_impl.Member
+        member: db_impl.SimpleMember
         ,success_callback: () => void
         ,error_callback: (err: Error) => void
     ): boolean
@@ -23,6 +24,32 @@ export class MockDB
         return true;
     }
 
+    get_member(
+        member_id: string
+        ,success_callback: ( member: db_impl.SimpleMember ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let members_matched = this.members.find(
+            (_) => member_id == _.rfid
+        );
+
+        if( members_matched != null ) {
+            success_callback( members_matched );
+        }
+        else {
+            error_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
+/*
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void
         ,error_callback: ( err: Error ) => void
@@ -58,6 +85,7 @@ export class MockDB
         success_callback( members );
         return true;
     }
+ */
 
     end(): void
     {

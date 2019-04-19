@@ -4,8 +4,7 @@ import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
 
 
-
-describe( 'POST /v1/members', function () {
+describe( 'PUT /v1/member', function () {
     before( () => {
         let db = new mock_db.MockDB([]);
         server.start( db );
@@ -13,29 +12,14 @@ describe( 'POST /v1/members', function () {
 
     it( 'Adds a member', function (done) {
         request( server.SERVER )
-            .post( '/api/v1/members' )
+            .put( '/api/v1/member' )
             .send({
-                id: "0123456789"
-                ,name: "Abe Foobar"
+                rfid: "00000000"
                 ,firstName: "Abe"
                 ,lastName: "Foobar"
-                ,address: "123 Main St"
-                ,photo: "http://example.com/photo"
                 ,phone: "15551234"
-                ,profile: [
-                    {
-                        question: "Question 1"
-                        ,answer: "Foo"
-                    }
-                    ,{
-                        question: "Question 2"
-                        ,answer: "Bar"
-                    }
-                ]
-                ,approvedTools: [
-                    { id: 1234 }
-                    ,{ id: 5678 }
-                ]
+                ,email: "abe.foobar@example.com"
+                ,photo: "https://example.com/"
             })
             .expect( 204 )
             .end( function( err, res ) {

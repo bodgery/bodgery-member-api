@@ -116,3 +116,20 @@ export let isUSAddress = (field) => function (params) {
         ,isWords( 'country' )
     ]);
 };
+
+
+/*
+ * OK, let's talk about email validation. There's a big, long, scary looking 
+ * regex that supposedly validates email addresses. It actually still misses 
+ * some of the insane things that are allowed inside email addresses (like 
+ * deeply nested comments). It also can't tell you that an email address 
+ * goes to an actual user on the other end. Only sending a validation message 
+ * can do this ("click here to validate your account").
+ *
+ * Since this is for a public web site, we don't need to deal with internal 
+ * email addresses that have no domain, or have a domain with no TLD suffix.
+ * Therefore, we sanity check that there's at least an @-sign and a dot in 
+ * the domain. Checking for almost anything else doesn't get us anywhere.
+ */
+ export let isPublicEmail = (field, allowNull = false) => matchSingleField(
+     field, /^.+@.+\..+$/, "email", allowNull );
