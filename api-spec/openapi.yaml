@@ -180,34 +180,6 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/SimpleMemberData'
-  '/v1/member/:member_id/photo':
-    summary: Add member photo
-    put:
-      tags:
-        - Members
-      summary: Add member photo
-      description: ''
-      operationId: ''
-      requestBody:
-        content:
-          image/jpeg:
-            type: string
-            format: binary
-      responses:
-        '204':
-          description: Photo Set
-    get:
-      tags:
-        - Members
-      summary: Returns the member photo
-      description: ''
-      operationId: ''
-      responses:
-        '200':
-          content:
-            image/jpeg:
-              type: string
-              format: binary
   '/v1/member/:member_id/address':
     put:
       tags:
@@ -325,6 +297,9 @@ components:
         email:
           type: string
           format: email
+        photo:
+          type: string
+          format: url
     Member:
       required:
         - id
