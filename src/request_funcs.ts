@@ -19,6 +19,16 @@ function get_generic_db_error( logger, res )
     };
 }
 
+function handle_generic_validation_error( logger, res, err ): void
+{
+    logger.error( "Errors: " + err.toString() );
+    res
+        .status( 400 )
+        .json({
+            error: err.toString()
+        });
+}
+
 export function get_versions ( req, res, ctx: c.Context )
 {
     res
@@ -39,16 +49,11 @@ export function put_member( req, res, ctx: c.Context )
             ,valid.isPublicEmail( 'email' )
             ,valid.isUrl( 'photo' )
          ]);
-     }
-     catch (err) {
-        logger.error( "Errors: " + err.toString() );
-        res
-            .status( 400 )
-            .json({
-                error: err.toString()
-            });
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
         return;
-     }
+    }
 
     db.add_member( body
         ,() => {
@@ -70,12 +75,7 @@ export function get_member( req, res, ctx: c.Context )
         ]);
     }
     catch (err) {
-        logger.error( "Errors: " + err.toString() );
-        res
-            .status( 400 )
-            .json({
-                error: err.toString()
-            });
+        handle_generic_validation_error( logger, res, err );
         return;
     }
 
@@ -87,6 +87,43 @@ export function get_member( req, res, ctx: c.Context )
             res
                 .status( 200 )
                 .send( member )
+                .end();
+        }
+        ,() => {
+            logger.info( "No member found for RFID " + member_id );
+            res
+                .status( 404 )
+                .end();
+        }
+        ,get_generic_db_error( logger, res )
+    );
+}
+
+export function put_member_address( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let body = req.body;
+
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+        valid.validate( body, [
+            valid.isUSAddress()
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params.member_id;
+
+    db.put_member_address( member_id, body
+        ,() => {
+            logger.info( "Address set on member successfully" );
+            res
+                .status( 204 )
                 .end();
         }
         ,() => {

@@ -99,10 +99,8 @@ export let isUrl =
     (field, allowNull = false) => matchSingleField( field, urlRegex, "URL",
         allowNull );
 
-export let isUSAddress = (field) => function (params) {
-    let value = params[field];
-
-    validate( value, [
+export let isUSAddress = () => function (params) {
+    validate( params, [
         // TODO
         // This set of validations is all wrong. Address1 and 2 might have 
         // puncutation, zip needs a more formal validation, county and 
