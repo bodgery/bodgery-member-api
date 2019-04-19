@@ -35,17 +35,13 @@ export interface Tool
     owner: Member;
 }
 
-export interface Member
+export interface SimpleMember
 {
-    id: string;
-    name: string;
+    rfid: string;
     firstName: string;
     lastName: string;
-    address: USAddress;
-    photo: string;
     phone: string;
-    profile: Array<Question>;
-    approvedTools: Array<Tool>;
+    email: string;
 }
 
 export interface DB
@@ -53,19 +49,21 @@ export interface DB
     client: any;
 
     add_member(
-        member: Member
+        member: SimpleMember
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
 
+/*
     get_members(
-        success_callback: ( members: Array<Member> ) => void
+        success_callback: ( members: Array<SimpleMember> ) => void
         ,error_callback: ( err: Error ) => void
         ,id: string
         ,limit: number
         ,skip: number
         ,sort: string
     ): boolean;
+*/
 
     end(): void;
 }

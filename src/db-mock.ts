@@ -4,17 +4,17 @@ import * as db_impl from "./db";
 export class MockDB
 {
     client: any = null;
-    members: Array<db_impl.Member> = [];
+    members: Array<db_impl.SimpleMember> = [];
 
 
-    constructor( members: Array<db_impl.Member> )
+    constructor( members: Array<db_impl.SimpleMember> )
     {
         this.members = members;
     }
 
 
     add_member(
-        member: db_impl.Member
+        member: db_impl.SimpleMember
         ,success_callback: () => void
         ,error_callback: (err: Error) => void
     ): boolean
@@ -24,6 +24,7 @@ export class MockDB
         return true;
     }
 
+/*
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void
         ,error_callback: ( err: Error ) => void
@@ -59,6 +60,7 @@ export class MockDB
         success_callback( members );
         return true;
     }
+ */
 
     end(): void
     {
