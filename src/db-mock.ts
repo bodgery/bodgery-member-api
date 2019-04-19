@@ -3,6 +3,7 @@ import * as db_impl from "./db";
 
 export class MockDB
 {
+    client: any = null;
     members: Array<db_impl.Member> = [];
 
 

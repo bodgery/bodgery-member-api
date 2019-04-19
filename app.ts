@@ -1,4 +1,5 @@
 import * as bodyParser from "body-parser";
+import * as c from "./src/context";
 import * as express from "express";
 import * as fs from "fs";
 import * as yaml from "js-yaml";
@@ -25,11 +26,12 @@ SERVER.use( bodyParser.urlencoded({ extended: true }) );
 SERVER.use( express.static( 'public' ) );
 
 
-// Init logger
+// Init context
 let logger = require( 'logger' ).createLogger( conf.log_file );
 logger.setLevel( conf.log_level );
 logger.format = ( level, date, message ) => message;
-let logger_wrap = (callback) => function (req, res) {
+
+let make_logger = () => {
     let request_id = shortid.generate();
     let log_func = function (level, args) {
         let date = new Date();
@@ -46,17 +48,32 @@ let logger_wrap = (callback) => function (req, res) {
         ,debug: function(...args) { log_func( "debug", args ) }
     };
 
+    return request_logger;
+};
+
+let context_wrap = (callback) => function (req, res) {
+    let request_logger = make_logger();
     request_logger.info( "Begin request to", req.method, req.path );
-    let ret = callback( req, res, request_logger );
+
+    let context = new c.Context( conf, request_logger );
+
+    let ret;
+    try {
+        ret = callback( req, res, context );
+    }
+    catch(err) {
+        request_logger.error( "Error running request: ", err.toString() );
+    }
+
     request_logger.info( "Finished request to", req.method, req.path );
     return ret;
 };
 
 
 // Add server routing callbacks
-SERVER.get('/api/', logger_wrap( request_funcs.get_versions ) );
-SERVER.post('/api/v1/members', logger_wrap( request_funcs.post_members ) );
-SERVER.get('/api/v1/members', logger_wrap( request_funcs.get_members ) );
+SERVER.get('/api/', context_wrap( request_funcs.get_versions ) );
+SERVER.post('/api/v1/members', context_wrap( request_funcs.post_members ) );
+SERVER.get('/api/v1/members', context_wrap( request_funcs.get_members ) );
 
 
 function default_db(): db_impl.DB

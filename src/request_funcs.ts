@@ -1,5 +1,6 @@
-import * as valid from "./validation";
+import * as c from "./context";
 import * as db_impl from "./db";
+import * as valid from "./validation";
 
 
 let db : db_impl.DB;
@@ -9,16 +10,17 @@ export function set_db (new_db: db_impl.DB)
 }
 
 
-export function get_versions ( req, res, logger )
+export function get_versions ( req, res, ctx: c.Context )
 {
     res
         .status(200)
         .json([ '/v1' ]);
 }
 
-export function post_members( req, res, logger )
+export function post_members( req, res, ctx: c.Context )
 {
-    var body = req.body;
+    let logger = ctx.logger;
+    let body = req.body;
     try {
         valid.validate( body, [
             valid.isIdentifier( 'id' )
@@ -57,8 +59,9 @@ export function post_members( req, res, logger )
     );
 }
 
-export function get_members( req, res, logger )
+export function get_members( req, res, ctx: c.Context )
 {
+    let logger = ctx.logger;
     let body = req.body || {};
     let id = body['id'] || null;
     let limit = body['limit'] || null;

@@ -50,6 +50,8 @@ export interface Member
 
 export interface DB
 {
+    client: any;
+
     add_member(
         member: Member
         ,success_callback: () => void
@@ -59,10 +61,10 @@ export interface DB
     get_members(
         success_callback: ( members: Array<Member> ) => void
         ,error_callback: ( err: Error ) => void
-        ,id: string = null
-        ,limit: number = null
-        ,skip: number = null
-        ,sort: string = null
+        ,id: string
+        ,limit: number
+        ,skip: number
+        ,sort: string
     ): boolean;
 
     end(): void;

@@ -5,7 +5,7 @@ import * as db_impl from "./db";
 
 export class PG
 {
-    private client: any;
+    client: any;
 
 
     constructor(
@@ -69,7 +69,8 @@ export class PG
         // TODO fetch address, approved tools, and profile questions
         let query_text = [
             "SELECT"
-                ,"keyfob_id AS id"
+                ,"id"
+                ,"keyfob_id"
                 ,",first_name AS firstName"
                 ,",last_name AS lastName"
                 ,",full_name AS name"
@@ -122,8 +123,9 @@ export class PG
             else {
                 let results = res.rows.map( (row) => {
                     return {
-                        keyfob_id: row.keyfob_id
-                        ,fullName: row.name
+                        id: row.id
+                        ,keyfob_id: row.keyfob_id
+                        ,name: row.name
                         ,firstName: row.firstName
                         ,lastName: row.lastName
                         ,photo: row.photo
@@ -137,9 +139,12 @@ export class PG
                             ,county: row.county
                             ,country: row.country
                         }
+                        ,approvedTools: []
                     };
                 });
-                success_callback( results );
+                this.gather_approved_tools( results, (res) => {
+                    success_callback( res );
+                }, error_callback );
             }
         });
         return true;
@@ -276,14 +281,78 @@ export class PG
     }
 
     private add_tools_to_member(
-        id: number
+        member_id: number
         ,tools: Array<db_impl.Tool>
         ,success_callback: () => void
         ,error_callback: (err: Error) => void
     ): void
     {
-        // TODO
-        success_callback();
+        let next_placeholder = this.placeholder_generator();
+
+        let query = {
+            name: "insert-member-tool"
+            ,text: [
+                "INSERT INTO tool_training ("
+                    ,"tool_id"
+                    ,",member_id"
+                ,") SELECT id, " + member_id
+                ,"FROM tools WHERE name IN ("
+                    ,tools.map( (_) => next_placeholder() ).join( ", " )
+                ,")"
+            ].join( " " )
+            ,values: tools.map( (_) => _.id )
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else {
+                success_callback();
+            }
+        });
+    }
+
+    private gather_approved_tools(
+        members
+        ,success_callback
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let members_by_id: any = {};
+        members.forEach( (_) => {
+            let id = _.id;
+            members_by_id[id] = _;
+        });
+
+        let placeholder = this.placeholder_generator();
+        let query = {
+            name: "gather-tool-training"
+            ,text: [
+                "SELECT"
+                    ,"name"
+                    ,"member_id"
+                ,"FROM tool_training"
+                ,"JOIN tools ON (tools.id = tool_training.tool_id)"
+            ].join( " " )
+            ,values: members_by_id.keys()
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else {
+                res.rows.forEach( (_) => {
+                    let tool_name = _.name;
+                    let member_id = _.member_id;
+                    members_by_id[member_id].approvedTools.push({
+                        toolName: tool_name
+                    });
+                });
+                success_callback( members_by_id.values() );
+            }
+        });
     }
 
     private transaction(
