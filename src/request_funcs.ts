@@ -37,6 +37,7 @@ export function put_member( req, res, ctx: c.Context )
             ,valid.isName( 'lastName' )
             ,valid.isUSPhone( 'phone' )
             ,valid.isPublicEmail( 'email' )
+            ,valid.isUrl( 'photo' )
          ]);
      }
      catch (err) {

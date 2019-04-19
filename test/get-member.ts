@@ -14,6 +14,7 @@ describe( 'GET /v1/member', function () {
                 ,lastName: "Bar"
                 ,phone: "15555551234"
                 ,email: "foo.bar@example.com"
+                ,photo: "https://example.com/"
             }
         ];
         let db = new mock_db.MockDB( members );
@@ -29,6 +30,8 @@ describe( 'GET /v1/member', function () {
                 var data = res.body;
                 assert.strictEqual( data.firstName, "Foo",
                     "Returned correct user" );
+                assert.strictEqual( data.photo, "https://example.com/",
+                    "Returned correct photo URL" );
             })
             .end( function( err, res ) {
                 if( err ) done(err);
