@@ -4,7 +4,6 @@ import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
 
 
-
 describe( 'PUT /v1/member', function () {
     before( () => {
         let db = new mock_db.MockDB([]);

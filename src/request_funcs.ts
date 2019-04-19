@@ -28,6 +28,40 @@ export function put_member( req, res, ctx: c.Context )
             ,valid.isName( 'lastName' )
             ,valid.isUSPhone( 'phone' )
             ,valid.isPublicEmail( 'email' )
+         ]);
+     }
+     catch (err) {
+        logger.error( "Errors: " + err.toString() );
+        res
+            .status( 400 )
+            .json({
+                error: err.toString()
+            });
+        return;
+     }
+
+    db.add_member( body
+        ,() => {
+            logger.info( "Member added successfully" );
+            res
+                .status( 204 )
+                 .end();
+         }
+         ,( err: Error ) => {
+            logger.error( "Error writing to database: " + err.toString() );
+            res
+                .status( 500 )
+                .end();
+        }
+    );
+}
+
+export function get_member( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
         ]);
     }
     catch (err) {
@@ -37,13 +71,23 @@ export function put_member( req, res, ctx: c.Context )
             .json({
                 error: err.toString()
             });
+        return;
     }
 
-    db.add_member( body
-        ,() => {
-            logger.info( "Member added successfully" );
+    let member_id = req.params.member_id;
+
+    db.get_member( member_id
+        ,( member: db_impl.SimpleMember ) => {
+            logger.info( "Fetched member" );
             res
-                .status( 204 )
+                .status( 200 )
+                .send( member )
+                .end();
+        }
+        ,() => {
+            logger.info( "No member found for RFID " + member_id );
+            res
+                .status( 404 )
                 .end();
         }
         ,( err: Error ) => {

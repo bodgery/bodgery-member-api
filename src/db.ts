@@ -54,6 +54,12 @@ export interface DB
         ,error_callback: ( err: Error ) => void
     ): boolean;
 
+    get_member(
+        member_id: string
+        ,success_callback: ( member: SimpleMember ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
 /*
     get_members(
         success_callback: ( members: Array<SimpleMember> ) => void

@@ -73,6 +73,8 @@ let context_wrap = (callback) => function (req, res) {
 // Add server routing callbacks
 SERVER.get('/api/', context_wrap( request_funcs.get_versions ) );
 SERVER.put( '/api/v1/member', context_wrap( request_funcs.put_member ) );
+SERVER.get( '/api/v1/member/:member_id',
+    context_wrap( request_funcs.get_member ) );
 
 
 function default_db(): db_impl.DB

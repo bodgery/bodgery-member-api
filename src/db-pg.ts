@@ -43,6 +43,16 @@ export class PG
         return true;
     }
 
+    get_member(
+        member_id: string
+        ,success_callback: ( member: db_impl.SimpleMember ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        // TODO
+        return true;
+    }
 /*
     get_members(
         success_callback: ( members: Array<db_impl.SimpleMember> ) => void

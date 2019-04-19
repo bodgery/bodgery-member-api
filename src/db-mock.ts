@@ -24,6 +24,31 @@ export class MockDB
         return true;
     }
 
+    get_member(
+        member_id: string
+        ,success_callback: ( member: db_impl.SimpleMember ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let members_matched = this.members.find(
+            (_) => member_id == _.rfid
+        );
+
+        if( members_matched != null ) {
+            success_callback( members_matched );
+        }
+        else {
+            error_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
 /*
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void
