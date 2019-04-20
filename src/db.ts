@@ -76,6 +76,21 @@ export interface DB
         ,no_member_found_callback: ( err: Error ) => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
+
+    set_member_is_active(
+        member_id: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
+
+    get_member_is_active(
+        member_id: string
+        ,success_callback: ( is_active: boolean ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
 /*
     get_members(
         success_callback: ( members: Array<SimpleMember> ) => void

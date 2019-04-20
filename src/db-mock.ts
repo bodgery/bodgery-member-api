@@ -95,8 +95,56 @@ export class MockDB
         }
 
         return true;
-
     }
+
+    set_member_is_active(
+        member_id: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            member_matched.is_active = is_active;
+            success_callback();
+        }
+        else {
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
+    get_member_is_active(
+        member_id: string
+        ,success_callback: ( is_active: boolean ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            success_callback( member_matched.is_active );
+        }
+        else {
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
 /*
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void

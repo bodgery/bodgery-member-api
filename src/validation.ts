@@ -115,6 +115,17 @@ export let isUSAddress = () => function (params) {
     ]);
 };
 
+export let isBoolean = (field) => function (params) {
+    if( "boolean" != typeof params[field] ) {
+        throw new Error( "Field '"
+            + field
+            + "' was supposed to be a boolean"
+            + ", value is '"
+            + params[field]
+            + "'" );
+    }
+};
+
 
 /*
  * OK, let's talk about email validation. There's a big, long, scary looking 

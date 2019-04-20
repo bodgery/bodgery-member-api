@@ -19,6 +19,16 @@ function get_generic_db_error( logger, res )
     };
 }
 
+function get_member_id_not_found_error( logger, res, member_id )
+{
+    return () => {
+        logger.info( "No member found for RFID " + member_id );
+        res
+            .status( 404 )
+            .end();
+    };
+}
+
 function handle_generic_validation_error( logger, res, err ): void
 {
     logger.error( "Errors: " + err.toString() );
@@ -89,12 +99,7 @@ export function get_member( req, res, ctx: c.Context )
                 .send( member )
                 .end();
         }
-        ,() => {
-            logger.info( "No member found for RFID " + member_id );
-            res
-                .status( 404 )
-                .end();
-        }
+        ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )
     );
 }
@@ -126,12 +131,7 @@ export function put_member_address( req, res, ctx: c.Context )
                 .status( 204 )
                 .end();
         }
-        ,() => {
-            logger.info( "No member found for RFID " + member_id );
-            res
-                .status( 404 )
-                .end();
-        }
+        ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )
     );
 }
@@ -159,12 +159,66 @@ export function get_member_address( req, res, ctx: c.Context )
                 .send( address )
                 .end();
         }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
+    );
+}
+
+export function put_member_is_active( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+        valid.validate( req.body, [
+            valid.isBoolean( 'is_active' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+
+    let member_id = req.params.member_id;
+    let is_active = req.body.is_active;
+    db.set_member_is_active( member_id, is_active
         ,() => {
-            logger.info( "No member found for RFID " + member_id );
+            logger.info( "Set is active: " + is_active );
             res
-                .status( 404 )
+                .status( 200 )
+                .send()
                 .end();
         }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
+    );
+}
+
+export function get_member_is_active( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params.member_id;
+    db.get_member_is_active( member_id
+        ,(is_active: boolean) => {
+            logger.info( "Set is active: " + is_active );
+            res
+                .status( 200 )
+                .send( is_active )
+                .end();
+        }
+        ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )
     );
 }

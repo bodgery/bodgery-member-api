@@ -79,6 +79,10 @@ SERVER.put( '/api/v1/member/:member_id/address',
     context_wrap( request_funcs.put_member_address ) );
 SERVER.get( '/api/v1/member/:member_id/address',
     context_wrap( request_funcs.get_member_address ) );
+SERVER.put( '/api/v1/member/:member_id/is_active',
+    context_wrap( request_funcs.put_member_is_active ) );
+SERVER.get( '/api/v1/member/:member_id/is_active',
+    context_wrap( request_funcs.get_member_is_active ) );
 
 
 function default_db(): db_impl.DB
