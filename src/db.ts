@@ -69,6 +69,13 @@ export interface DB
         ,no_member_found_callback: ( err: Error ) => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
+
+    get_member_address(
+        member_id: string
+        ,success_callback: ( address: USAddress ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
 /*
     get_members(
         success_callback: ( members: Array<SimpleMember> ) => void

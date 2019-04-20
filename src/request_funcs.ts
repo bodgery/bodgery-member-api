@@ -135,3 +135,36 @@ export function put_member_address( req, res, ctx: c.Context )
         ,get_generic_db_error( logger, res )
     );
 }
+
+export function get_member_address( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params.member_id;
+
+    db.get_member_address( member_id
+        ,( address: db_impl.USAddress ) => {
+            logger.info( "Fetched member address" );
+            res
+                .status( 200 )
+                .send( address )
+                .end();
+        }
+        ,() => {
+            logger.info( "No member found for RFID " + member_id );
+            res
+                .status( 404 )
+                .end();
+        }
+        ,get_generic_db_error( logger, res )
+    );
+}
