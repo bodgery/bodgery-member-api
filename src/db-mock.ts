@@ -145,6 +145,58 @@ export class MockDB
         return true;
     }
 
+    set_member_rfid(
+        member_id: string
+        ,rfid: string
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            member_matched.rfid = rfid;
+            success_callback();
+        }
+        else {
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
+    get_member_rfid(
+        rfid: string
+        ,success_callback: () => void
+        ,inactive_member_callback: () => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_id_matched = Object.keys( this.members )
+            .find( (_, i, obj) => this.members[_].rfid == rfid );
+
+        if( member_id_matched != null ) {
+            let member_matched = this.members[member_id_matched];
+            if( member_matched.is_active ) {
+                success_callback();
+            }
+            else {
+                inactive_member_callback();
+            }
+        }
+        else {
+            no_member_found_callback();
+        }
+
+        return true;
+    }
+
 /*
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void

@@ -83,6 +83,10 @@ SERVER.put( '/api/v1/member/:member_id/is_active',
     context_wrap( request_funcs.put_member_is_active ) );
 SERVER.get( '/api/v1/member/:member_id/is_active',
     context_wrap( request_funcs.get_member_is_active ) );
+SERVER.put( '/api/v1/member/:member_id/rfid',
+    context_wrap( request_funcs.put_member_rfid ) );
+SERVER.get( '/api/v1/rfid/:rfid',
+    context_wrap( request_funcs.get_member_rfid ) );
 
 
 function default_db(): db_impl.DB

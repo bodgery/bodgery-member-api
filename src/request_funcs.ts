@@ -222,3 +222,77 @@ export function get_member_is_active( req, res, ctx: c.Context )
         ,get_generic_db_error( logger, res )
     );
 }
+
+export function put_member_rfid( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+        valid.validate( req.body, [
+            valid.isInteger( 'rfid' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+
+    let member_id = req.params.member_id;
+    let rfid = req.body.rfid;
+    db.set_member_rfid( member_id, rfid
+        ,() => {
+            // Don't put RFID in log
+            logger.info( "Set RFID on member " + member_id );
+            res
+                .status( 200 )
+                .send()
+                .end();
+        }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
+    );
+}
+
+export function get_member_rfid( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'rfid' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let rfid = req.params.rfid;
+    db.get_member_rfid( rfid
+        ,() => {
+            // Don't put RFID tag in log
+            logger.info( "RFID check OK" );
+            res
+                .status( 200 )
+                .send()
+                .end();
+        }
+        ,() => {
+            logger.info( "RFID is inactive for RFID check" );
+            res
+                .status( 403 )
+                .send()
+                .end();
+        }
+        ,() => {
+            logger.info( "RFID is not found for check" );
+            res
+                .status( 404 )
+                .send()
+                .end();
+        }
+        ,get_generic_db_error( logger, res )
+    );
+}

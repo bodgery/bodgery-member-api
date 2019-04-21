@@ -91,6 +91,22 @@ export interface DB
         ,no_member_found_callback: ( err: Error ) => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
+
+    set_member_rfid(
+        member_id: string
+        ,rfid: string
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
+
+    get_member_rfid(
+        rfid: string
+        ,success_callback: () => void
+        ,inactive_member_callback: () => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
 /*
     get_members(
         success_callback: ( members: Array<SimpleMember> ) => void
