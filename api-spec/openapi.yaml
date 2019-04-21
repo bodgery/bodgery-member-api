@@ -195,6 +195,10 @@ paths:
       responses:
         '204':
           description: Address Added
+        '404':
+          description: Could not find member for given ID
+        '500':
+          description: Server error
     get:
       tags:
         - Members
@@ -207,6 +211,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/USAddress'
+        '406':
+          description: Could not find member for given ID
+        '500':
+          description: Server error
   '/v1/member/:member_id/status':
     put:
       tags:
@@ -314,7 +322,7 @@ components:
         lastName:
           type: string
         address:
-          $ref: '#/components/schemas/Address'
+          $ref: '#/components/schemas/USAddress'
         photo:
           type: string
           description: Url for photo
@@ -352,8 +360,10 @@ components:
         email:
           type: string
           format: email
-    Address:
+    USAddress:
       properties:
+        name:
+          type: string
         address1:
           type: string
         address2:
@@ -363,10 +373,6 @@ components:
         state:
           type: string
         zip:
-          type: string
-        county:
-          type: string
-        country:
           type: string
     Tool:
       properties:
