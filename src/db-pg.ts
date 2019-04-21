@@ -46,7 +46,53 @@ export class PG
     get_member(
         member_id: string
         ,success_callback: ( member: db_impl.SimpleMember ) => void
-        ,no_member_found_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        // TODO
+        return true;
+    }
+
+    put_member_address(
+        member_id: string
+        ,address: db_impl.USAddress
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        // TODO
+        return true;
+    }
+
+    get_member_address(
+        member_id: string
+        ,success_callback: ( address: db_impl.USAddress ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        // TODO
+        return true;
+    }
+
+    set_member_is_active(
+        member_id: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        // TODO
+        return true;
+    }
+
+    get_member_is_active(
+        member_id: string
+        ,success_callback: ( is_active: boolean ) => void
+        ,no_member_found_callback: ( err: Error ) => void
         ,error_callback: ( err: Error ) => void
     ): boolean
     {

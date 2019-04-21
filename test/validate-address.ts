@@ -15,8 +15,8 @@ describe( 'Validate US address', function () {
         };
 
         try {
-            validation.validate( { value: address }, [
-                validation.isUSAddress( 'value' ),
+            validation.validate( address, [
+                validation.isUSAddress(),
             ]);
         }
         catch(err) {
@@ -41,8 +41,8 @@ describe( 'Validate US address', function () {
         };
 
         try {
-            validation.validate( { value: address }, [
-                validation.isUSAddress( 'value' ),
+            validation.validate( address, [
+                validation.isUSAddress(),
             ]);
         }
         catch (err) {

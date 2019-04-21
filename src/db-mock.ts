@@ -4,10 +4,10 @@ import * as db_impl from "./db";
 export class MockDB
 {
     client: any = null;
-    members: Array<db_impl.SimpleMember> = [];
+    members: Object = {};
 
 
-    constructor( members: Array<db_impl.SimpleMember> )
+    constructor( members: Object )
     {
         this.members = members;
     }
@@ -19,7 +19,9 @@ export class MockDB
         ,error_callback: (err: Error) => void
     ): boolean
     {
-        this.members.push( member );
+        let id = member.rfid;
+        this.members[id] = {};
+        this.members[id].simple_data = member;
         success_callback();
         return true;
     }
@@ -27,19 +29,113 @@ export class MockDB
     get_member(
         member_id: string
         ,success_callback: ( member: db_impl.SimpleMember ) => void
-        ,no_member_found_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        let members_matched = this.members.find(
-            (_) => member_id == _.rfid
-        );
+        let member_matched = this.members[member_id];
 
-        if( members_matched != null ) {
-            success_callback( members_matched );
+        if( member_matched != null ) {
+            success_callback( member_matched.simple_data );
         }
         else {
-            error_callback(
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
+    put_member_address(
+        member_id: string
+        ,address: db_impl.USAddress
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            member_matched.address = address;
+            success_callback();
+        }
+        else {
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
+    get_member_address(
+        member_id: string
+        ,success_callback: ( address: db_impl.USAddress ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            success_callback( member_matched.address );
+        }
+        else {
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
+    set_member_is_active(
+        member_id: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            member_matched.is_active = is_active;
+            success_callback();
+        }
+        else {
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
+    get_member_is_active(
+        member_id: string
+        ,success_callback: ( is_active: boolean ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            success_callback( member_matched.is_active );
+        }
+        else {
+            no_member_found_callback(
                 new Error( "Could not find match for member ID '"
                     + member_id + "'"
                 )
