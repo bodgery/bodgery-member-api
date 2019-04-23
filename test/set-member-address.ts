@@ -18,7 +18,7 @@ describe( 'PUT /v1/member/:member_id/address', function () {
                 }
             }
         };
-        let db = new mock_db.MockDB( members );
+        let db = new mock_db.MockDB( members, {} );
         server.start( db );
     });
 

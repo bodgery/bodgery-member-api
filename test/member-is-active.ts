@@ -12,7 +12,7 @@ describe( '/v1/member/:member_id/is_active', function () {
                 is_active: true
             }
         };
-        let db = new mock_db.MockDB( members );
+        let db = new mock_db.MockDB( members, {} );
         server.start( db );
     });
 

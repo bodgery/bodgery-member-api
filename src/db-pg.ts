@@ -123,6 +123,31 @@ export class PG
         // TODO
         return true;
     }
+
+    get_password_data_for_user(
+        username: string
+        ,success_callback: ( stored_data: {
+            password: string
+            ,crypt_type: string
+        }) => void
+        ,no_user_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO
+    }
+
+    set_password_data_for_user(
+        username: string
+        ,new_password: string
+        ,new_crypt_method: string
+        ,success_callback: () => void
+        ,no_user_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO
+    }
 /*
     get_members(
         success_callback: ( members: Array<db_impl.SimpleMember> ) => void

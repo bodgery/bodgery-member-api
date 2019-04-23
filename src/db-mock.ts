@@ -5,11 +5,13 @@ export class MockDB
 {
     client: any = null;
     members: Object = {};
+    users: Object = {};
 
 
-    constructor( members: Object )
+    constructor( members: Object, users: Object )
     {
         this.members = members;
+        this.users = users;
     }
 
 
@@ -197,6 +199,42 @@ export class MockDB
         return true;
     }
 
+    get_password_data_for_user(
+        username: string
+        ,success_callback: ( stored_data: {
+            password: string
+            ,crypt_type: string
+        }) => void
+        ,no_user_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let user = this.users[username];
+        if(! user) no_user_found_callback();
+
+        success_callback({
+            password: user.password
+            ,crypt_type: user.crypt_type
+        });
+    }
+
+    set_password_data_for_user(
+        username: string
+        ,new_password: string
+        ,new_crypt_method: string
+        ,success_callback: () => void
+        ,no_user_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let user = this.users[username];
+        if(! user) no_user_found_callback();
+
+        user.password = new_password;
+        user.crypt_type = new_crypt_method;
+
+        success_callback();
+    }
 /*
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void

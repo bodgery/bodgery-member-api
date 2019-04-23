@@ -22,7 +22,7 @@ describe( 'RFID management', function () {
                 ,rfid: inactive_rfid
             }
         };
-        let db = new mock_db.MockDB( members );
+        let db = new mock_db.MockDB( members, {} );
         server.start( db );
     });
 
