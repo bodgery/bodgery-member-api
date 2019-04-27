@@ -1,20 +1,45 @@
 import * as db from "./db";
 import * as bcrypt from "./password/bcrypt";
+import * as crypto from "crypto";
+import * as scrypt from "./password/scrypt";
 
+const SALT_SIZE_BYTES = 16;
+
+
+export function string_match( str1: string, str2: string ): boolean
+{
+    if( str1.length != str2.length ) return false;
+
+    // Constant time string eq algorithm. Do not return until 
+    // entire string is matched
+    let str2_chars = str2.split('');
+    let is_match = true;
+
+    str1.split('').forEach( (val, i) => {
+        if( val != str2_chars[i] ) is_match = false;
+    });
+
+    return is_match;
+}
+
+export function make_salt(): Buffer
+{
+    let rnd_buf = crypto.randomBytes( SALT_SIZE_BYTES );
+    return rnd_buf;
+}
 
 export interface Crypter
 {
     crypt(
         password: string
+        ,salt: Buffer
     ): string;
+
     isMatch(
         plaintext: string
         ,crypted: string
+        ,salt_hex: string
     ): boolean;
-}
-
-export class DefaultStringMatch
-{
 }
 
 export class Checker
@@ -52,10 +77,11 @@ export class Checker
         let success_callback = (stored_data) => {
             let stored_password = stored_data.password;
             let stored_crypt_type = stored_data.crypt_type;
+            let stored_salt = stored_data.salt;
             let crypter = this._parseCryptType( stored_crypt_type );
 
             let is_matched = crypter.isMatch( passwd,
-                stored_password );
+                stored_password, stored_salt );
 
             if( is_matched
                 && (stored_crypt_type == this.preferred_method_str)) {
@@ -64,10 +90,13 @@ export class Checker
             else if( is_matched ) {
                 // Matched fine, but we aren't using the preferred method of
                 // password encryption, so reencrypt
-                let new_crypt_password = this.preferred_method.crypt( passwd );
+                let new_salt = make_salt();
+                let new_crypt_password = this.preferred_method.crypt(
+                    passwd, new_salt );
                 this.db.set_password_data_for_user(
                     username
                     ,new_crypt_password
+                    ,new_salt.toString( 'hex' )
                     ,this.preferred_method_str
                     ,is_match_callback
                     ,() => {
@@ -98,23 +127,6 @@ export class Checker
         );
     }
 
-
-    private _isStringsEqual( str1: string, str2: string ): boolean
-    {
-        if( str1.length != str2.length ) return false;
-
-        // Constant time string eq algorithm. Do not return until 
-        // entire string is matched
-        let str2_chars = str2.split('');
-        let is_match = true;
-
-        str1.split('').forEach( (val, i) => {
-            if( val != str2_chars[i] ) is_match = false;
-        });
-
-        return is_match;
-    }
-
     private _parseCryptType( crypt_string: string ): Crypter
     {
         let parts = crypt_string.split( '_' );
@@ -140,6 +152,9 @@ export class Checker
         switch( crypt_type ) {
             case 'bcrypt':
                 crypter = new bcrypt.BCrypt( crypt_args );
+                break;
+            case 'scrypt':
+                crypter = new scrypt.SCrypt( crypt_args );
                 break;
             default:
                 throw new Error( "Unknown crypter type: " + crypt_type );

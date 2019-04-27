@@ -203,6 +203,7 @@ export class MockDB
         username: string
         ,success_callback: ( stored_data: {
             password: string
+            ,salt: string
             ,crypt_type: string
         }) => void
         ,no_user_found_callback: () => void
@@ -215,6 +216,7 @@ export class MockDB
         success_callback({
             password: user.password
             ,crypt_type: user.crypt_type
+            ,salt: user.salt
         });
     }
 
@@ -222,6 +224,7 @@ export class MockDB
         username: string
         ,new_password: string
         ,new_crypt_method: string
+        ,salt: string
         ,success_callback: () => void
         ,no_user_found_callback: () => void
         ,error_callback: ( err: Error ) => void
@@ -232,6 +235,7 @@ export class MockDB
 
         user.password = new_password;
         user.crypt_type = new_crypt_method;
+        user.salt = salt;
 
         success_callback();
     }

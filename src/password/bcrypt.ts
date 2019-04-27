@@ -14,14 +14,16 @@ export class BCrypt
 
     crypt(
         password: string
+        ,salt: Buffer = Buffer.from( '' )
     ): string
     {
         return bcrypt.hashSync( password, this.rounds );
     }
 
     isMatch(
-        plaintext: string,
-        crypted: string
+        plaintext: string
+        ,crypted: string
+        ,salt_hex: string = ""
     ): boolean
     {
         return bcrypt.compareSync( plaintext, crypted );

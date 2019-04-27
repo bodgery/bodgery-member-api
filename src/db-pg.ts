@@ -129,6 +129,7 @@ export class PG
         ,success_callback: ( stored_data: {
             password: string
             ,crypt_type: string
+            ,salt: string
         }) => void
         ,no_user_found_callback: () => void
         ,error_callback: ( err: Error ) => void
@@ -141,6 +142,7 @@ export class PG
         username: string
         ,new_password: string
         ,new_crypt_method: string
+        ,salt: string
         ,success_callback: () => void
         ,no_user_found_callback: () => void
         ,error_callback: ( err: Error ) => void
