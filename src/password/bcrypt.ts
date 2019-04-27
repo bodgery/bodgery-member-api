@@ -15,17 +15,21 @@ export class BCrypt
     crypt(
         password: string
         ,salt: Buffer = Buffer.from( '' )
-    ): string
+        ,callback: (string) => void
+    ): void
     {
-        return bcrypt.hashSync( password, this.rounds );
+        bcrypt.hash( password, this.rounds,
+            (err, hash) => callback( hash ) );
     }
 
     isMatch(
         plaintext: string
         ,crypted: string
         ,salt_hex: string = ""
-    ): boolean
+        ,callback: (boolean) => void
+    ): void
     {
-        return bcrypt.compareSync( plaintext, crypted );
+        bcrypt.compare( plaintext, crypted,
+            (err, res) => callback(res) );
     }
 }

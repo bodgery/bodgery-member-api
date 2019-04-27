@@ -12,18 +12,22 @@ describe( "Password crypt type changes on the fly", function () {
     let stored_checker_str = "scrypt_16384_8_1";
     let db: db.DB;
 
-    before( () => {
+    before( (done) => {
         let crypter = new scrypt.SCrypt( [ "16384", "8", "1" ] );
         let salt = passwd.make_salt();
-        let crypted_good_passwd = crypter.crypt( good_password, salt );
-        db = new mock_db.MockDB( null, {
-            "test@example.com": {
-                password: crypted_good_passwd
-                ,crypt_type: stored_checker_str
-                ,salt: salt.toString( 'hex' )
+        let crypted_good_passwd = crypter.crypt( good_password, salt
+            ,(crypted_good_passwd) => {
+                db = new mock_db.MockDB( null, {
+                    "test@example.com": {
+                        password: crypted_good_passwd
+                        ,crypt_type: stored_checker_str
+                        ,salt: salt.toString( 'hex' )
+                    }
+                });
+                checker = new passwd.Checker( checker_str, db );
+                done();
             }
-        });
-        checker = new passwd.Checker( checker_str, db );
+        );
     });
 
     it( "Checks password with scrypt, rencrypts with bcrypt", function (done) {

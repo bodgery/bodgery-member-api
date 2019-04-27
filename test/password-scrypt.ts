@@ -10,18 +10,23 @@ describe( "Check a password encrypted with scrypt", function () {
     let bad_password = "barfoo123";
     let checker_str = "scrypt_16384_8_1";
 
-    before( () => {
+    before( (done) => {
         let crypter = new scrypt.SCrypt( [ "16384", "8", "1" ] );
         let salt = passwd.make_salt();
-        let crypted_good_passwd = crypter.crypt( good_password, salt );
-        let db = new mock_db.MockDB( null, {
-            "test@example.com": {
-                password: crypted_good_passwd
-                ,crypt_type: checker_str
-                ,salt: salt.toString( 'hex' )
+
+        crypter.crypt( good_password, salt
+            ,(crypted_good_passwd) => {
+                let db = new mock_db.MockDB( null, {
+                    "test@example.com": {
+                        password: crypted_good_passwd
+                        ,crypt_type: checker_str
+                        ,salt: salt.toString( 'hex' )
+                    }
+                });
+                checker = new passwd.Checker( checker_str, db );
+                done();
             }
-        });
-        checker = new passwd.Checker( checker_str, db );
+        );
     });
 
     it( "Checks good password with scrypt", function (done) {

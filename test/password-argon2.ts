@@ -1,17 +1,18 @@
 import * as assert from "assert";
-import * as bcrypt from "../src/password/bcrypt";
+import * as argon2 from "../src/password/argon2";
 import * as mock_db from "../src/db-mock";
 import * as passwd from "../src/password";
 
 
-describe( "Check a password encrypted with bcrypt", function () {
+describe( "Check a password encrypted with argon2", function () {
     let checker: passwd.Checker;
     let good_password = "foobar123";
     let bad_password = "barfoo123";
-    let checker_str = "bcrypt_10";
+    let checker_str = "argon2_32_3_4096_1";
 
     before( (done) => {
-        let crypter = new bcrypt.BCrypt( ["10"] );
+        let crypter = new argon2.Argon2( [ "32", "3", "4096", "1" ] );
+
         crypter.crypt( good_password, Buffer.from('')
             ,(crypted_good_passwd) => {
                 let db = new mock_db.MockDB( null, {
@@ -26,7 +27,7 @@ describe( "Check a password encrypted with bcrypt", function () {
         );
     });
 
-    it( "Checks good password with bcrypt", function (done) {
+    it( "Checks good password with argon2", function (done) {
         checker.isMatch({
             username: "test@example.com"
             ,passwd: good_password
@@ -40,7 +41,7 @@ describe( "Check a password encrypted with bcrypt", function () {
             }
         });
     });
-    it( "Checks bad password with bcrypt", function (done) {
+    it( "Checks bad password with argon2", function (done) {
         checker.isMatch({
             username: "test@example.com"
             ,passwd: bad_password

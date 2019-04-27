@@ -23,28 +23,34 @@ export class SCrypt
     crypt(
         key: string
         ,salt: Buffer = password.make_salt()
-    ): string
+        ,callback: (string) => void
+    ): void
     {
         let salt_hex = salt.toString( 'hex' );
-        let result = crypto.scryptSync( key, salt_hex, KEYLEN, {
+        let result = crypto.scrypt( key, salt_hex, KEYLEN, {
             // Typescript type mapping does not have the options 
             // mapped for 'cost', 'blockSize', or 'parallelization'.
             // Boo this API!
             N: this.cost
             ,r: this.block_size
             ,p: this.parallelization
+        }, (err, res) => {
+            let str = res.toString( 'hex' );
+            callback( str );
         });
-        return result.toString( 'hex' );
     }
 
     isMatch(
         plaintext: string
         ,crypted: string
         ,salt_hex: string
-    ): boolean
+        ,callback: (boolean) => void
+    ): void
     {
         let salt_buf = Buffer.from( salt_hex, 'hex' );
-        let check_crypted = this.crypt( plaintext, salt_buf );
-        return password.string_match( check_crypted, crypted );
+        this.crypt( plaintext, salt_buf, (check_crypted) => {
+            let val = password.string_match( check_crypted, crypted );
+            callback( val );
+        });
     }
 }

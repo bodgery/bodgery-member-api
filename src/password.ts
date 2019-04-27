@@ -1,4 +1,5 @@
 import * as db from "./db";
+import * as argon from "./password/argon2";
 import * as bcrypt from "./password/bcrypt";
 import * as crypto from "crypto";
 import * as scrypt from "./password/scrypt";
@@ -33,13 +34,15 @@ export interface Crypter
     crypt(
         password: string
         ,salt: Buffer
-    ): string;
+        ,callback: (string) => void
+    ): void;
 
     isMatch(
         plaintext: string
         ,crypted: string
         ,salt_hex: string
-    ): boolean;
+        ,callback: (boolean) => void
+    ): void;
 }
 
 export class Checker
@@ -73,16 +76,9 @@ export class Checker
         let passwd = args.passwd;
         let is_match_callback = args.is_match_callback;
         let is_not_match_callback = args.is_not_match_callback;
+        let stored_crypt_type: string;
 
-        let success_callback = (stored_data) => {
-            let stored_password = stored_data.password;
-            let stored_crypt_type = stored_data.crypt_type;
-            let stored_salt = stored_data.salt;
-            let crypter = this._parseCryptType( stored_crypt_type );
-
-            let is_matched = crypter.isMatch( passwd,
-                stored_password, stored_salt );
-
+        let match_success_callback = (is_matched: boolean) => {
             if( is_matched
                 && (stored_crypt_type == this.preferred_method_str)) {
                 is_match_callback();
@@ -91,22 +87,24 @@ export class Checker
                 // Matched fine, but we aren't using the preferred method of
                 // password encryption, so reencrypt
                 let new_salt = make_salt();
-                let new_crypt_password = this.preferred_method.crypt(
-                    passwd, new_salt );
-                this.db.set_password_data_for_user(
-                    username
-                    ,new_crypt_password
-                    ,this.preferred_method_str
-                    ,new_salt.toString( 'hex' )
-                    ,is_match_callback
-                    ,() => {
-                        // How did we get to a 'no user found' error
-                        // when we already checked it? DB interface 
-                        // would likely be buggy if we get here.
-                        is_not_match_callback();
-                    }
-                    ,( err: Error ) => {
-                        throw err;
+                this.preferred_method.crypt( passwd, new_salt
+                    ,(new_crypt_passwd) => {
+                        this.db.set_password_data_for_user(
+                            username
+                            ,new_crypt_passwd
+                            ,this.preferred_method_str
+                            ,new_salt.toString( 'hex' )
+                            ,is_match_callback
+                            ,() => {
+                                // How did we get to a 'no user found' error
+                                // when we already checked it? DB interface 
+                                // would likely be buggy if we get here.
+                                is_not_match_callback();
+                            }
+                            ,( err: Error ) => {
+                                throw err;
+                            }
+                        );
                     }
                 );
             }
@@ -115,9 +113,19 @@ export class Checker
             }
         };
 
+        let db_success_callback = (stored_data) => {
+            let stored_password = stored_data.password;
+            stored_crypt_type = stored_data.crypt_type;
+            let stored_salt = stored_data.salt;
+            let crypter = this._parseCryptType( stored_crypt_type );
+
+            crypter.isMatch( passwd,
+                stored_password, stored_salt, match_success_callback );
+        };
+
         this.db.get_password_data_for_user(
             username
-            ,success_callback
+            ,db_success_callback
             ,() => {
                 is_not_match_callback();
             }
@@ -155,6 +163,9 @@ export class Checker
                 break;
             case 'scrypt':
                 crypter = new scrypt.SCrypt( crypt_args );
+                break;
+            case 'argon2':
+                crypter = new argon.Argon2( crypt_args );
                 break;
             default:
                 throw new Error( "Unknown crypter type: " + crypt_type );
