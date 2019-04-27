@@ -203,8 +203,8 @@ export class MockDB
         username: string
         ,success_callback: ( stored_data: {
             password: string
-            ,salt: string
             ,crypt_type: string
+            ,salt: string
         }) => void
         ,no_user_found_callback: () => void
         ,error_callback: ( err: Error ) => void

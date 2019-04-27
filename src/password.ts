@@ -96,8 +96,8 @@ export class Checker
                 this.db.set_password_data_for_user(
                     username
                     ,new_crypt_password
-                    ,new_salt.toString( 'hex' )
                     ,this.preferred_method_str
+                    ,new_salt.toString( 'hex' )
                     ,is_match_callback
                     ,() => {
                         // How did we get to a 'no user found' error
