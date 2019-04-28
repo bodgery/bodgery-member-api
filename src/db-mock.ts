@@ -195,6 +195,18 @@ export class MockDB
         return true;
     }
 
+    add_user(
+        username: string
+        ,password: string
+        ,salt: string
+        ,crypt_type: string
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO
+    }
+
     get_password_data_for_user(
         username: string
         ,success_callback: ( stored_data: {

@@ -106,6 +106,15 @@ export interface DB
         ,error_callback: ( err: Error ) => void
     ): boolean;
 
+    add_user(
+        username: string
+        ,password: string
+        ,salt: string
+        ,crypt_type: string
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
+
     get_password_data_for_user(
         username: string
         ,success_callback: ( stored_data: {

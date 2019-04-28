@@ -314,6 +314,43 @@ export class PG
         return true;
     }
 
+    add_user(
+        username: string
+        ,password: string
+        ,salt: string
+        ,crypt_type: string
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let query = {
+            name: "add-user"
+            ,text: [
+                "INSERT INTO users ("
+                    ,"email"
+                    ,",password"
+                    ,",password_salt"
+                    ,",password_storage"
+                ,") VALUES ($1, $2, $3, $4)"
+            ].join( " " )
+            ,values: [
+                username
+                ,password
+                ,salt
+                ,crypt_type
+            ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else {
+                success_callback();
+            }
+        });
+    }
+
     get_password_data_for_user(
         username: string
         ,success_callback: ( stored_data: {
@@ -325,7 +362,29 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): void
     {
-        // TODO
+        let query = {
+            name: "get-user-password"
+            ,text: [
+                "SELECT"
+                    ,"password"
+                    ,",password_storage"
+                    ,",password_salt"
+                ,"FROM users"
+                ,"WHERE email = $1"
+            ].join( " " )
+            ,values: [ username ]
+        };
+
+        this.call_query(
+            query
+            ,(rows) => success_callback({
+                password: rows[0].password
+                ,crypt_type: rows[0].password_storage
+                ,salt: rows[0].password_salt
+            })
+            ,no_user_found_callback
+            ,error_callback
+        );
     }
 
     set_password_data_for_user(
@@ -338,7 +397,30 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): void
     {
-        // TODO
+        let query = {
+            name: "set-user-password"
+            ,text: [
+                "UPDATE users"
+                ,"SET"
+                    ,"password = $1"
+                    ,",password_storage = $2"
+                    ,",password_salt = $3"
+                ,"WHERE email = $4"
+            ].join( " " )
+            ,values: [
+                new_password
+                ,new_crypt_method
+                ,salt
+                ,username
+            ]
+        };
+
+        this.call_query(
+            query
+            ,(rows) => success_callback()
+            ,no_user_found_callback
+            ,error_callback
+        );
     }
 /*
     get_members(

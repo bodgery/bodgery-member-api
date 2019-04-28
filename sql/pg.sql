@@ -22,9 +22,10 @@ CREATE TABLE "members" (
     "photo" text
 );
 
-CREATE TABLE "user" (
+CREATE TABLE "users" (
     id SERIAL PRIMARY KEY,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
     password_storage TEXT NOT NULL
 );
