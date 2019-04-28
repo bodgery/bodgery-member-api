@@ -1,31 +1,17 @@
 import * as assert from "assert";
-import * as db_impl from "../src/db";
-import * as fs from "fs";
 import * as pg from "../src/db-pg";
-import * as shortid from "shortid";
-import * as yaml from "js-yaml";
-
-
-let error_handler = (err) => { throw err };
+import {
+    error_handler
+    ,get_pg_connection
+    ,test_member_data
+} from "../src/util";
 
 
 describe( 'Create address in PostgreSQL', function () {
     let db: pg.PG;
 
     before( () => {
-        var conf = yaml.safeLoad(
-            fs.readFileSync( './config.yaml', 'utf8' ),
-            {
-                filename: "./config.yaml"
-            }
-        );
-        db = new pg.PG(
-            conf.db_host
-            ,conf.db_port
-            ,conf.db_name
-            ,conf.db_user
-            ,conf.db_password
-        );
+        db = get_pg_connection();
     });
 
     it( 'Creates address, sets on user', function (done) {
@@ -58,14 +44,7 @@ describe( 'Create address in PostgreSQL', function () {
         };
 
         db.add_member(
-            {
-                rfid: shortid.generate()
-                ,firstName: "Foo"
-                ,lastName: "Bar"
-                ,phone: "555 123 4567"
-                ,email: "foo@example.com"
-                ,photo: "file:///dev/null"
-            }
+            test_member_data()
             ,set_address
             ,error_handler
         );

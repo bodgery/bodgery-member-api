@@ -174,8 +174,8 @@ export class PG
                 success_callback( res.rows[0] );
             }
         });
-        return true;
 
+        return true;
     }
 
     set_member_is_active(
@@ -186,7 +186,33 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        // TODO
+        let query = {
+            name: "update-member-active"
+            ,text: [
+                "UPDATE members"
+                ,"SET status = $1"
+                ,"WHERE member_id = $2"
+            ].join( " " )
+            ,values: [
+                is_active
+                ,member_id
+            ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else if(! res.rowCount) {
+                no_member_found_callback(
+                    new Error( "Could not find member for ID " + member_id )
+                );
+            }
+            else {
+                success_callback();
+            }
+        });
+
         return true;
     }
 
@@ -197,7 +223,29 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        // TODO
+        let query = {
+            name: "get-member-active"
+            ,text: [
+                "SELECT status"
+                ,"FROM members"
+                ,"WHERE members.member_id = $1"
+            ].join( " " )
+            ,values: [ member_id ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else if(! res.rowCount ) {
+                no_member_found_callback(
+                    new Error( "Could not find member for ID " + member_id )
+                );
+            }
+            else {
+                success_callback( res.rows[0].status );
+            }
+        });
         return true;
     }
 

@@ -18,7 +18,7 @@ CREATE TABLE "members" (
     "last_name" text,
     "phone" text,
     "email" text,
-    "status" bool,
+    "status" bool DEFAULT TRUE,
     "photo" text
 );
 
