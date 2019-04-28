@@ -1,20 +1,18 @@
 CREATE TABLE "us_address" (
     "id" serial primary key,
-    "address1" text,
+    "address1" text NOT NULL,
     "address2" text,
-    "city" text,
-    "state" text,
-    "zip" text,
-    "county" text,
-    "country" text
+    "city" text NOT NULL,
+    "state" text NOT NULL,
+    "zip" text NOT NULL
 );
 
 CREATE TABLE "members" (
     "id" serial primary key,
-    "member_id" uuid DEFAULT uuid_generate_v4(),
-    "wildapricot_id" int,
-    "rfid" text,
-    "slack_id" int,
+    "member_id" uuid DEFAULT uuid_generate_v4() UNIQUE,
+    "wildapricot_id" int UNIQUE,
+    "rfid" text UNIQUE,
+    "slack_id" int UNIQUE,
     "address_id" int REFERENCES us_address (id),
     "first_name" text,
     "last_name" text,

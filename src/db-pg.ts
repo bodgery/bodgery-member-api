@@ -91,7 +91,7 @@ export class PG
             if( err ) {
                 error_callback( err );
             }
-            else if(! res) {
+            else if(! res.rowCount ) {
                 no_member_found_callback(
                     new Error( "Could not find member for ID " + member_id )
                 );
@@ -119,7 +119,22 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        // TODO
+        this.transaction(
+            () => this.insert_address(
+                address
+                ,(addr_id) => {
+                    this.update_user_address(
+                        member_id
+                        ,addr_id
+                        ,success_callback
+                        ,no_member_found_callback
+                        ,error_callback
+                    );
+                }
+                ,error_callback
+            )
+            ,error_callback
+        );
         return true;
     }
 
@@ -130,8 +145,37 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        // TODO
+        let query = {
+            name: "get-member-address"
+            ,text: [
+                "SELECT"
+                    ,"address1"
+                    ,",address2"
+                    ,",city"
+                    ,",state"
+                    ,",zip"
+                ,"FROM us_address"
+                ,"JOIN members ON (members.address_id = us_address.id)"
+                ,"WHERE members.member_id = $1"
+            ].join( " " )
+            ,values: [ member_id ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else if(! res.rowCount ) {
+                no_member_found_callback(
+                    new Error( "Could not find member for ID " + member_id )
+                );
+            }
+            else {
+                success_callback( res.rows[0] );
+            }
+        });
         return true;
+
     }
 
     set_member_is_active(
@@ -341,5 +385,78 @@ export class PG
             placeholder_num++;
             return placeholder;
         };
+    }
+
+
+    private insert_address(
+        address: db_impl.USAddress
+        ,success_callback: (addr_id: number) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let query = {
+            name: "add-address"
+            ,text: [
+                "INSERT INTO us_address ("
+                    ,"address1"
+                    ,",address2"
+                    ,",city"
+                    ,",state"
+                    ,",zip"
+                ,") VALUES ($1, $2, $3, $4, $5) RETURNING id"
+            ].join( " " )
+            ,values: [
+                address.address1
+                ,address.address2
+                ,address.city
+                ,address.state
+                ,address.zip
+            ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else {
+                success_callback( res.rows[0].id );
+            }
+        });
+    }
+
+    private update_user_address(
+        member_id: string
+        ,addr_id: number
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let query = {
+            name: "update-user-address"
+            ,text: [
+                "UPDATE members"
+                ,"SET address_id = $1"
+                ,"WHERE member_id = $2"
+            ].join( " " )
+            ,values: [
+                addr_id
+                ,member_id
+            ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else if(! res.rowCount) {
+                no_member_found_callback(
+                    new Error( "Could not find member for ID " + member_id )
+                );
+            }
+            else {
+                success_callback();
+            }
+        });
     }
 }

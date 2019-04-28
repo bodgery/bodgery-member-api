@@ -9,7 +9,7 @@ import * as yaml from "js-yaml";
 let error_handler = (err) => { throw err };
 
 
-describe( 'Create member in PostgreSQL', function () {
+describe( 'Create address in PostgreSQL', function () {
     let db: pg.PG;
 
     before( () => {
@@ -28,14 +28,30 @@ describe( 'Create member in PostgreSQL', function () {
         );
     });
 
-    it( 'Adds a member to database', function (done) {
-        let fetch_member = (member_id) => {
-            db.get_member( member_id
-                ,(member) => {
-                    assert.strictEqual( member.firstName, "Foo",
-                        "Fetched member" );
+    it( 'Creates address, sets on user', function (done) {
+        let fetch_address = (member_id) => {
+            db.get_member_address(
+                member_id
+                ,(addr) => {
+                    assert.strictEqual( addr.state, "WI",
+                        "Fetched member address" );
                     done();
                 }
+                ,error_handler
+                ,error_handler
+            );
+        };
+
+        let set_address = (member_id) => {
+            db.put_member_address(
+                member_id
+                ,{
+                    address1: "123 Main St"
+                    ,city: "Madison"
+                    ,state: "WI"
+                    ,zip: "53711"
+                }
+                ,() => fetch_address( member_id )
                 ,error_handler
                 ,error_handler
             );
@@ -50,7 +66,7 @@ describe( 'Create member in PostgreSQL', function () {
                 ,email: "foo@example.com"
                 ,photo: "file:///dev/null"
             }
-            ,fetch_member
+            ,set_address
             ,error_handler
         );
     });
