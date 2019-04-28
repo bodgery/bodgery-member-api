@@ -1,6 +1,17 @@
+CREATE TABLE "us_address" (
+    "id" serial primary key,
+    "address1" text,
+    "address2" text,
+    "city" text,
+    "state" text,
+    "zip" text,
+    "county" text,
+    "country" text
+);
+
 CREATE TABLE "members" (
     "id" serial primary key,
-    "member_id" uuid,
+    "member_id" uuid DEFAULT uuid_generate_v4(),
     "wildapricot_id" int,
     "rfid" text,
     "slack_id" int,
@@ -19,16 +30,3 @@ CREATE TABLE "user" (
     password TEXT NOT NULL,
     password_storage TEXT NOT NULL
 );
-
-CREATE TABLE "us_address" (
-    "id" serial primary key,
-    "address1" text,
-    "address2" text,
-    "city" text,
-    "state" text,
-    "zip" text,
-    "county" text,
-    "country" text
-);
-
-ALTER TABLE "members" ADD FOREIGN KEY ("address_id") REFERENCES "us_address" ("id");

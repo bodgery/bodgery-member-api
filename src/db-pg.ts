@@ -29,17 +29,39 @@ export class PG
 
     add_member(
         member: db_impl.SimpleMember
-        ,success_callback: () => void
+        ,success_callback: (member_id) => void
         ,error_callback: (err: Error) => void
     ): boolean
     {
-        let add_member = () => {
-            this.add_member_data( member,
-                success_callback,
-                error_callback );
+        let query = {
+            name: "add-member"
+            ,text: [
+                "INSERT INTO members ("
+                    ,"rfid"
+                    ,",first_name"
+                    ,",last_name"
+                    ,",phone"
+                    ,",email"
+                ,") VALUES ($1, $2, $3, $4, $5) RETURNING member_id"
+            ].join( " " )
+            ,values: [
+                member.rfid
+                ,member.firstName
+                ,member.lastName
+                ,member.phone
+                ,member.email
+            ]
         };
 
-        this.transaction( add_member, error_callback );
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else {
+                success_callback( res.rows[0].member_id );
+            }
+        });
+
         return true;
     }
 
@@ -50,7 +72,42 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        // TODO
+        let query = {
+            name: "get-member"
+            ,text: [
+                "SELECT"
+                    ,"rfid"
+                    ,",first_name"
+                    ,",last_name"
+                    ,",phone"
+                    ,",email"
+                    ,",photo"
+                ,"FROM members WHERE member_id = $1"
+            ].join( " " )
+            ,values: [ member_id ]
+        };
+
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else if(! res) {
+                no_member_found_callback(
+                    new Error( "Could not find member for ID " + member_id )
+                );
+            }
+            else {
+                let member = res.rows[0];
+                // Would like to use aliases in the SQL statement 
+                // (e.g., "first_name AS firstName"), but PostgreSQL 
+                // returns it in all lowercase
+                member.firstName = member.first_name;
+                member.lastName = member.last_name;
+                delete member.first_name;
+                delete member.last_name;
+                success_callback( member );
+            }
+        });
         return true;
     }
 
@@ -252,42 +309,6 @@ export class PG
         this.client.end();
     }
 
-
-    private add_member_data(
-        member: db_impl.SimpleMember
-        ,success_callback: (id: number) => void
-        ,error_callback: (err: Error) => void
-    ): void
-    {
-        let query = {
-            name: "add-member"
-            ,text: [
-                "INSERT INTO members ("
-                    ,"rfid"
-                    ,",first_name"
-                    ,",last_name"
-                    ,",phone"
-                    ,",email"
-                ,") VALUES ($1, $2, $3, $4 ) RETURNING id"
-            ].join( " " )
-            ,values: [
-                member.rfid
-                ,member.firstName
-                ,member.lastName
-                ,member.phone
-                ,member.email
-            ]
-        };
-
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else {
-                success_callback( res.rows[0].id );
-            }
-        });
-    }
 
     private transaction(
         success_callback: () => void
