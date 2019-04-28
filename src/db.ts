@@ -94,7 +94,7 @@ export interface DB
         member_id: string
         ,rfid: string
         ,success_callback: () => void
-        ,no_member_found_callback: ( err: Error ) => void
+        ,no_member_found_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
 

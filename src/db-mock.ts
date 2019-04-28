@@ -151,7 +151,7 @@ export class MockDB
         member_id: string
         ,rfid: string
         ,success_callback: () => void
-        ,no_member_found_callback: ( err: Error ) => void
+        ,no_member_found_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
@@ -162,11 +162,7 @@ export class MockDB
             success_callback();
         }
         else {
-            no_member_found_callback(
-                new Error( "Could not find match for member ID '"
-                    + member_id + "'"
-                )
-            );
+            no_member_found_callback();
         }
 
         return true;

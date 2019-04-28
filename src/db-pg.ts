@@ -253,11 +253,29 @@ export class PG
         member_id: string
         ,rfid: string
         ,success_callback: () => void
-        ,no_member_found_callback: ( err: Error ) => void
+        ,no_member_found_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        // TODO
+        let query = {
+            name: "set-member-rfid"
+            ,text: [
+                "UPDATE members"
+                ,"SET rfid = $1"
+                ,"WHERE member_id = $2"
+            ].join( " " )
+            ,values: [
+                rfid
+                ,member_id
+            ]
+        };
+
+        this.call_query(
+            query
+            ,(rows) => success_callback()
+            ,no_member_found_callback
+            ,error_callback
+        );
         return true;
     }
 
@@ -269,7 +287,30 @@ export class PG
         ,error_callback: ( err: Error ) => void
     ): boolean
     {
-        // TODO
+        let query = {
+            name: "get-member-rfid"
+            ,text: [
+                "SELECT status"
+                ,"FROM members"
+                ,"WHERE rfid = $1"
+            ].join( " " )
+            ,values: [ rfid ]
+        };
+
+        this.call_query(
+            query
+            ,(rows) => {
+                if( rows[0].status ) {
+                    success_callback()
+                }
+                else {
+                    inactive_member_callback()
+                }
+            }
+            ,no_member_found_callback
+            ,error_callback
+        );
+
         return true;
     }
 
@@ -433,6 +474,26 @@ export class PG
             placeholder_num++;
             return placeholder;
         };
+    }
+
+    private call_query(
+        query
+        ,success_callback: ( rows: Array<any> ) => void
+        ,no_rows_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        this.client.query( query, (err, res) => {
+            if( err ) {
+                error_callback( err );
+            }
+            else if(! res.rowCount ) {
+                no_rows_callback();
+            }
+            else {
+                success_callback( res.rows );
+            }
+        });
     }
 
 
