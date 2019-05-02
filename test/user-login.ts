@@ -14,6 +14,11 @@ describe( "User login", function () {
     let bad_password = "barfoo123";
     let checker_str = "terribadplaintext";
 
+    // Since session cookie is HTTPS-only, need to put this header in to make
+    // server think we're coming from the frontend proxy
+    let trust_header_name = 'X-Forwarded-Proto';
+    let trust_header_value = 'https';
+
 
     before( () => {
         let conf = server.default_conf();
@@ -37,6 +42,7 @@ describe( "User login", function () {
         let start = () => {
             request( server.SERVER )
                 .get( '/user/is-logged-in' )
+                .set( trust_header_name, trust_header_value )
                 .expect( 403 )
                 .end( (err, res) => {
                     if(err) throw err;
@@ -47,6 +53,7 @@ describe( "User login", function () {
         login = () => {
             request( server.SERVER )
                 .put( '/user/login' )
+                .set( trust_header_name, trust_header_value )
                 .send({
                     username: good_username
                     ,password: good_password
@@ -63,6 +70,7 @@ describe( "User login", function () {
         check_is_logged_in = () => {
             let req = request( server.SERVER )
                 .get( '/user/is-logged-in' )
+                .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
                 .send()
                 .expect( 200 )
@@ -77,6 +85,7 @@ describe( "User login", function () {
         logout = () => {
             let req = request( server.SERVER )
                 .put( '/user/logout' )
+                .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
                 .send()
                 .expect( 200 )
@@ -89,6 +98,7 @@ describe( "User login", function () {
         check_final_logged_out = () => {
             let req = request( server.SERVER )
                 .get( '/user/is-logged-in' )
+                .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
                 .send()
                 .expect( 403 )
@@ -104,6 +114,7 @@ describe( "User login", function () {
     it( "Logs in with bad user", function (done) {
         request( server.SERVER )
             .put( '/user/login' )
+            .set( trust_header_name, trust_header_value )
             .send({
                 username: bad_username
                 ,password: good_password
@@ -118,6 +129,7 @@ describe( "User login", function () {
     it( "Logs in with bad password", function (done) {
         request( server.SERVER )
             .put( '/user/login' )
+            .set( trust_header_name, trust_header_value )
             .send({
                 username: good_username
                 ,password: bad_password

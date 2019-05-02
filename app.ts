@@ -78,8 +78,8 @@ function init_server( conf, db, logger )
         ,cookie: {
             maxAge: conf.session_length_sec
             ,sameSite: true
-            //,secure: true
-            //,httpOnly: true
+            ,secure: true
+            ,httpOnly: true
         }
     };
     let session_store = db.session_store( session );
