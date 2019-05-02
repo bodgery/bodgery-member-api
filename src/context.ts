@@ -1,3 +1,6 @@
+import * as password from "./password";
+
+
 export interface Logger
 {
     fatal(...args): void;
@@ -12,13 +15,16 @@ export class Context
 {
     public conf: any;
     public logger: Logger;
+    public password_checker: password.Checker;
 
 
     constructor(
         conf: any
         ,logger: Logger
+        ,password_checker: password.Checker
     ) {
         this.conf = conf;
         this.logger = logger;
+        this.password_checker = password_checker;
     }
 }

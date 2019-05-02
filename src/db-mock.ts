@@ -3,7 +3,6 @@ import * as db_impl from "./db";
 
 export class MockDB
 {
-    client: any = null;
     members: Object = {};
     users: Object = {};
 
@@ -218,8 +217,11 @@ export class MockDB
         ,error_callback: ( err: Error ) => void
     ): void
     {
+        if(! this.users.hasOwnProperty( username ) ) {
+            no_user_found_callback();
+            return;
+        }
         let user = this.users[username];
-        if(! user) no_user_found_callback();
 
         success_callback({
             password: user.password
@@ -247,6 +249,12 @@ export class MockDB
 
         success_callback();
     }
+
+    session_store( express_session )
+    {
+        return null;
+    }
+
 /*
     get_members(
         success_callback: ( members: Array<db_impl.Member> ) => void

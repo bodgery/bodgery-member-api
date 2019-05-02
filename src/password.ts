@@ -2,6 +2,7 @@ import * as db from "./db";
 import * as argon from "./password/argon2";
 import * as bcrypt from "./password/bcrypt";
 import * as crypto from "crypto";
+import * as plaintext from "./password/plaintext";
 import * as scrypt from "./password/scrypt";
 
 const SALT_SIZE_BYTES = 16;
@@ -166,6 +167,9 @@ export class Checker
                 break;
             case 'argon2':
                 crypter = new argon.Argon2( crypt_args );
+                break;
+            case 'terribadplaintext':
+                crypter = new plaintext.Plaintext( crypt_args );
                 break;
             default:
                 throw new Error( "Unknown crypter type: " + crypt_type );

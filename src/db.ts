@@ -45,8 +45,6 @@ export interface SimpleMember
 
 export interface DB
 {
-    client: any;
-
     add_member(
         member: SimpleMember
         ,success_callback: () => void
@@ -135,6 +133,8 @@ export interface DB
         ,no_user_found_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): void;
+
+    session_store( express_session );
 /*
     get_members(
         success_callback: ( members: Array<SimpleMember> ) => void

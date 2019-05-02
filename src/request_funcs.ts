@@ -296,3 +296,94 @@ export function get_member_rfid( req, res, ctx: c.Context )
         ,get_generic_db_error( logger, res )
     );
 }
+
+export function login_user( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.body, [
+            valid.isPublicEmail( 'username' )
+            // Password field is allowed to be anything
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let username = req.body.username;
+    let password = req.body.password;
+
+    let is_match_callback = () => {
+        logger.info( "User " + username + " logged in successfully" );
+        req.session.username = username;
+        req.session.is_logged_in = true;
+
+        // TODO send to default account page
+        res
+            .status( 200 )
+            .send()
+            .end();
+    };
+
+    let is_not_match_callback = () => {
+        logger.info( "User " + username + " failed to login" );
+
+        // TODO send back login page
+        res
+            .status( 403 )
+            .send()
+            .end();
+    };
+
+    let checker = ctx.password_checker;
+    checker.isMatch({
+        username: username
+        ,passwd: password
+        ,is_match_callback: is_match_callback
+        ,is_not_match_callback: is_not_match_callback
+    });
+}
+
+export function logout_user( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let username = req.session.username;
+    let is_logged_in = req.session.is_logged_in;
+
+    if( is_logged_in ) {
+        logger.info( "Username " + username + " is logging out" );
+        req.session.destroy( () => {
+            // TODO send to login page
+            res
+                .status( 200 )
+                .send()
+                .end();
+        });
+    }
+    else {
+        logger.info( "Asked for logout, but is not logged in" );
+        res
+            .status( 403 )
+            .send()
+            .end();
+    }
+}
+
+export function is_user_logged_in( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let username = req.session.username;
+    let is_logged_in = req.session.is_logged_in;
+
+    if(! req.session.check_login) req.session.check_login = 0;
+    req.session.check_login += 1;
+
+    logger.info( "Username [" + username + "], checking logged in setting"
+        + ", which is " + is_logged_in );
+
+    res
+        .status( is_logged_in ? 200 : 403 )
+        .send({ username: username })
+        .end();
+}

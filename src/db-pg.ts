@@ -1,11 +1,27 @@
+import * as db_impl from "./db";
 import * as pg from "pg";
 import * as pg_escape from "pg-escape";
-import * as db_impl from "./db";
+import * as session from "connect-pg-simple";
+
+
+let no_rows_callback_builder = (member_id, callback) => {
+    return () => callback(
+        new Error( "Could not find member for ID " + member_id )
+    );
+};
+
+let success_no_rows_callback_builder = (success_callback) => {
+    return (rows) => success_callback();
+};
+
+let success_first_rows_callback_builder = (success_callback) => {
+    return (rows) => success_callback( rows[0] );
+};
 
 
 export class PG
 {
-    client: any;
+    private pool: any;
 
 
     constructor(
@@ -16,14 +32,13 @@ export class PG
         ,pass: string
     )
     {
-        this.client = new pg.Client({
+        this.pool = new pg.Pool({
             host: host
             ,port: port
             ,database: name
             ,user: user
             ,password: pass
         });
-        this.client.connect();
     }
 
 
@@ -53,14 +68,14 @@ export class PG
             ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else {
-                success_callback( res.rows[0].member_id );
-            }
-        });
+        let main_callback = (rows) => success_callback( rows[0].member_id );
+
+        this.call_query(
+            query
+            ,main_callback
+            ,null
+            ,error_callback
+        );
 
         return true;
     }
@@ -87,27 +102,25 @@ export class PG
             ,values: [ member_id ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else if(! res.rowCount ) {
-                no_member_found_callback(
-                    new Error( "Could not find member for ID " + member_id )
-                );
-            }
-            else {
-                let member = res.rows[0];
-                // Would like to use aliases in the SQL statement 
-                // (e.g., "first_name AS firstName"), but PostgreSQL 
-                // returns it in all lowercase
-                member.firstName = member.first_name;
-                member.lastName = member.last_name;
-                delete member.first_name;
-                delete member.last_name;
-                success_callback( member );
-            }
-        });
+        let main_callback = (rows) => {
+            let member = rows[0];
+            // Would like to use aliases in the SQL statement 
+            // (e.g., "first_name AS firstName"), but PostgreSQL 
+            // returns it in all lowercase
+            member.firstName = member.first_name;
+            member.lastName = member.last_name;
+            delete member.first_name;
+            delete member.last_name;
+            success_callback( member );
+        };
+
+        this.call_query(
+            query
+            ,main_callback
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
+
         return true;
     }
 
@@ -120,16 +133,19 @@ export class PG
     ): boolean
     {
         this.transaction(
-            () => this.insert_address(
-                address
+            (client, done) => this.insert_address(
+                client
+                ,address
                 ,(addr_id) => {
                     this.update_user_address(
-                        member_id
+                        client
+                        ,member_id
                         ,addr_id
                         ,success_callback
                         ,no_member_found_callback
                         ,error_callback
                     );
+                    done();
                 }
                 ,error_callback
             )
@@ -161,19 +177,14 @@ export class PG
             ,values: [ member_id ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else if(! res.rowCount ) {
-                no_member_found_callback(
-                    new Error( "Could not find member for ID " + member_id )
-                );
-            }
-            else {
-                success_callback( res.rows[0] );
-            }
-        });
+        let main_callback = (rows) => success_callback( rows[0] );
+
+        this.call_query(
+            query
+            ,success_first_rows_callback_builder( success_callback )
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
 
         return true;
     }
@@ -199,19 +210,12 @@ export class PG
             ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else if(! res.rowCount) {
-                no_member_found_callback(
-                    new Error( "Could not find member for ID " + member_id )
-                );
-            }
-            else {
-                success_callback();
-            }
-        });
+        this.call_query(
+            query
+            ,success_no_rows_callback_builder( success_callback )
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
 
         return true;
     }
@@ -233,19 +237,17 @@ export class PG
             ,values: [ member_id ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else if(! res.rowCount ) {
-                no_member_found_callback(
-                    new Error( "Could not find member for ID " + member_id )
-                );
-            }
-            else {
-                success_callback( res.rows[0].status );
-            }
-        });
+        let main_callback = (rows) => {
+            success_callback( rows[0].status );
+        };
+
+        this.call_query(
+            query
+            ,main_callback
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
+
         return true;
     }
 
@@ -341,14 +343,12 @@ export class PG
             ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else {
-                success_callback();
-            }
-        });
+        this.call_query(
+            query
+            ,success_no_rows_callback_builder( success_callback )
+            ,null
+            ,error_callback
+        );
     }
 
     get_password_data_for_user(
@@ -417,10 +417,19 @@ export class PG
 
         this.call_query(
             query
-            ,(rows) => success_callback()
+            ,success_no_rows_callback_builder( success_callback )
             ,no_user_found_callback
             ,error_callback
         );
+    }
+
+    session_store( express_session )
+    {
+        let pg_session = session( express_session );
+        let full_session = new pg_session({
+            pool: this.pool
+        });
+        return full_session;
     }
 /*
     get_members(
@@ -521,29 +530,50 @@ export class PG
 
     end(): void
     {
-        this.client.end();
+        this.pool.end();
     }
 
 
     private transaction(
-        success_callback: () => void
+        success_callback: (client, done) => void
         ,error_callback: (err: Error) => void
     ): void
     {
-        this.client.query( 'BEGIN', (err, res) => {
-            if( err ) {
+        let abort = (client, done) => {
+            client.query( 'ROLLBACK', (err, res) => {
+                done();
+                if( err ) {
+                    throw err;
+                }
                 error_callback( err );
-            }
-            else {
-                this.client.query( 'COMMIT', (err, res) => {
-                    if( err ) {
-                        error_callback( err );
+            });
+        };
+
+        let finish = (client, done) => {
+            client.query( 'COMMIT', (err, res) => {
+                if( err ) {
+                    error_callback( err );
+                }
+                done();
+            });
+        };
+
+        this.pool.connect( (err, client, done) => {
+            client.query( 'BEGIN', (err, res) => {
+                if( err ) {
+                    abort( client, done );
+                }
+                else {
+                    try {
+                        success_callback( client, () => {
+                            finish( client, done );
+                        });
                     }
-                    else {
-                        success_callback();
+                    catch( err ) {
+                        abort( client, done );
                     }
-                });
-            }
+                }
+            });
         });
     }
 
@@ -562,25 +592,39 @@ export class PG
         query
         ,success_callback: ( rows: Array<any> ) => void
         ,no_rows_callback: () => void
-        ,error_callback: ( err: Error ) => void
+        ,error_callback?: ( err: Error ) => void
+        ,client?
     ): void
     {
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else if(! res.rowCount ) {
-                no_rows_callback();
-            }
-            else {
-                success_callback( res.rows );
-            }
-        });
+        let main_callback = (client) => {
+            client.query( query, (err, res) => {
+                if( err ) {
+                    error_callback( err );
+                }
+                else if(! res.rowCount ) {
+                    if( no_rows_callback ) no_rows_callback();
+                }
+                else {
+                    success_callback( res.rows );
+                }
+            });
+        };
+
+        if( client ) {
+            main_callback( client );
+        }
+        else {
+            this.pool.connect( (err, client, done) => {
+                if( err ) throw err;
+                main_callback( client );
+            });
+        }
     }
 
 
     private insert_address(
-        address: db_impl.USAddress
+        client
+        ,address: db_impl.USAddress
         ,success_callback: (addr_id: number) => void
         ,error_callback: ( err: Error ) => void
     ): void
@@ -605,18 +649,22 @@ export class PG
             ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else {
-                success_callback( res.rows[0].id );
-            }
-        });
+        let main_callback = (rows) => {
+            success_callback( rows[0].id );
+        };
+
+        this.call_query(
+            query
+            ,main_callback
+            ,null
+            ,error_callback
+            ,client
+        );
     }
 
     private update_user_address(
-        member_id: string
+        client
+        ,member_id: string
         ,addr_id: number
         ,success_callback: () => void
         ,no_member_found_callback: ( err: Error ) => void
@@ -636,18 +684,12 @@ export class PG
             ]
         };
 
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else if(! res.rowCount) {
-                no_member_found_callback(
-                    new Error( "Could not find member for ID " + member_id )
-                );
-            }
-            else {
-                success_callback();
-            }
-        });
+        this.call_query(
+            query
+            ,success_no_rows_callback_builder( success_callback )
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+            ,client
+        );
     }
 }

@@ -6,6 +6,10 @@ port: 3001
 log_file: dev.log
 log_level: info
 
+# Set to true if this is deployed behind a reverse proxy. This will almost 
+# always be true.
+is_behind_reverse_proxy: true
+
 db_user: test
 db_password: passwd
 db_name: bodgery_members_yourname

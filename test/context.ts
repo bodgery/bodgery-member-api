@@ -16,7 +16,7 @@ describe( 'Init context', function () {
 
         let conf = {};
         let request_id = shortid.generate();
-        let ctx = new c.Context( conf, logger );
+        let ctx = new c.Context( conf, logger, null );
 
         ctx.logger.fatal( "Log error" );
         assert( did_log, "Log happened" );
