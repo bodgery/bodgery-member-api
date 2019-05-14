@@ -1,6 +1,7 @@
 import * as bodyParser from "body-parser";
 import * as c from "./src/context";
 import * as express from "express";
+import * as handlebars from "express-handlebars";
 import * as session from "express-session";
 import * as fs from "fs";
 import * as yaml from "js-yaml";
@@ -91,6 +92,11 @@ function init_server( conf, db, logger )
     server.use( express.static( 'public' ) );
     server.use( session( session_options ) );
 
+    server.engine( 'handlebars', handlebars({
+        defaultLayout: 'main'
+    }) );
+    server.set( 'view engine', 'handlebars' );
+
     server.set( "trust proxy", conf.is_behind_reverse_proxy );
 
     // Init context
@@ -126,6 +132,7 @@ function init_server( conf, db, logger )
         context_wrap( request_funcs.logout_user ) );
     server.get( '/user/is-logged-in',
         context_wrap( request_funcs.is_user_logged_in ) );
+    server.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );
 
     // 404 handler, must be last in the list
     server.use( (req, res, next) => {

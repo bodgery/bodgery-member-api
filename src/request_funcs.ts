@@ -387,3 +387,11 @@ export function is_user_logged_in( req, res, ctx: c.Context )
         .send({ username: username })
         .end();
 }
+
+export function tmpl_view( view: string )
+{
+    return ( req, res, ctx: c.Context ) => {
+        ctx.logger.info( "Rendering view: " + view );
+        res.render( view );
+    };
+}
