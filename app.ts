@@ -126,9 +126,9 @@ function init_server( conf, db, logger )
         context_wrap( request_funcs.put_member_rfid ) );
     server.get( '/api/v1/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
-    server.put( '/user/login',
+    server.post( '/user/login',
         context_wrap( request_funcs.login_user ) );
-    server.put( '/user/logout',
+    server.post( '/user/logout',
         context_wrap( request_funcs.logout_user ) );
     server.get( '/user/is-logged-in',
         context_wrap( request_funcs.is_user_logged_in ) );

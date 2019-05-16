@@ -319,21 +319,23 @@ export function login_user( req, res, ctx: c.Context )
         req.session.username = username;
         req.session.is_logged_in = true;
 
-        // TODO send to default account page
         res
             .status( 200 )
-            .send()
-            .end();
+            .render( "login", {
+                user: username
+            });
     };
 
     let is_not_match_callback = () => {
         logger.info( "User " + username + " failed to login" );
 
-        // TODO send back login page
         res
             .status( 403 )
-            .send()
-            .end();
+            .render( "home", {
+                errors: [
+                    "Invalid username or password"
+                ]
+            });
     };
 
     let checker = ctx.password_checker;
@@ -354,19 +356,20 @@ export function logout_user( req, res, ctx: c.Context )
     if( is_logged_in ) {
         logger.info( "Username " + username + " is logging out" );
         req.session.destroy( () => {
-            // TODO send to login page
             res
                 .status( 200 )
-                .send()
-                .end();
+                .render( "home" );
         });
     }
     else {
         logger.info( "Asked for logout, but is not logged in" );
         res
             .status( 403 )
-            .send()
-            .end();
+            .render( "home", {
+                errors: [
+                    "Not logged in, so you can't log out"
+                ]
+            });
     }
 }
 

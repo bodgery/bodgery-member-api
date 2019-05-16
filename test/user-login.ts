@@ -52,7 +52,7 @@ describe( "User login", function () {
 
         login = () => {
             request( server.SERVER )
-                .put( '/user/login' )
+                .post( '/user/login' )
                 .set( trust_header_name, trust_header_value )
                 .send({
                     username: good_username
@@ -84,7 +84,7 @@ describe( "User login", function () {
 
         logout = () => {
             let req = request( server.SERVER )
-                .put( '/user/logout' )
+                .post( '/user/logout' )
                 .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
                 .send()
@@ -113,7 +113,7 @@ describe( "User login", function () {
 
     it( "Logs in with bad user", function (done) {
         request( server.SERVER )
-            .put( '/user/login' )
+            .post( '/user/login' )
             .set( trust_header_name, trust_header_value )
             .send({
                 username: bad_username
@@ -128,7 +128,7 @@ describe( "User login", function () {
 
     it( "Logs in with bad password", function (done) {
         request( server.SERVER )
-            .put( '/user/login' )
+            .post( '/user/login' )
             .set( trust_header_name, trust_header_value )
             .send({
                 username: good_username
