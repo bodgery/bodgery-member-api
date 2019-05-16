@@ -1,6 +1,7 @@
 <h1>Bodgery Management Login</h1>
 
 <form method="POST" action="/user/login">
+    <input type="hidden" name="_token" value="{{csrf}}">
     <div>
         <label for="user">Username</label>
         <input

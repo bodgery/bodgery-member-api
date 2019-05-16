@@ -1,5 +1,6 @@
 import * as bodyParser from "body-parser";
 import * as c from "./src/context";
+import * as Tokens from "csrf";
 import * as express from "express";
 import * as handlebars from "express-handlebars";
 import * as session from "express-session";
@@ -43,6 +44,12 @@ let make_context_wrap = ( logger, conf, db ) => (callback) => {
         );
 
         let context = new c.Context( conf, request_logger, checker );
+
+        if(! req.session.csrf_secret ) {
+            let tokens = new Tokens();
+            request_logger.info( "Making CSRF secret for new client" );
+            req.session.csrf_secret = tokens.secretSync();
+        }
 
         let ret;
         try {

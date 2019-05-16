@@ -1,4 +1,5 @@
 import * as c from "./context";
+import * as Tokens from "csrf";
 import * as db_impl from "./db";
 import * as valid from "./validation";
 
@@ -319,23 +320,19 @@ export function login_user( req, res, ctx: c.Context )
         req.session.username = username;
         req.session.is_logged_in = true;
 
-        res
-            .status( 200 )
-            .render( "login", {
-                user: username
-            });
+        let render = tmpl_view( "login", {
+            user: username
+        }, [], 200 );
+        render( req, res, ctx );
     };
 
     let is_not_match_callback = () => {
         logger.info( "User " + username + " failed to login" );
 
-        res
-            .status( 403 )
-            .render( "home", {
-                errors: [
-                    "Invalid username or password"
-                ]
-            });
+        let render = tmpl_view( "home", {}, [
+            "Invalid username or password"
+        ], 403);
+        render( req, res, ctx );
     };
 
     let checker = ctx.password_checker;
@@ -391,10 +388,22 @@ export function is_user_logged_in( req, res, ctx: c.Context )
         .end();
 }
 
-export function tmpl_view( view: string )
+export function tmpl_view(
+    view: string
+    ,args = {}
+    ,errors = []
+    ,status_code = 200
+)
 {
     return ( req, res, ctx: c.Context ) => {
         ctx.logger.info( "Rendering view: " + view );
-        res.render( view );
+
+        let tokens = new Tokens();
+        let csrf_token = tokens.create( req.session.csrf_secret );
+        args["csrf"] = csrf_token;
+
+        res
+            .status( status_code )
+            .render( view, args );
     };
 }
