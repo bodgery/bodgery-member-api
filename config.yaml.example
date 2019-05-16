@@ -10,6 +10,20 @@ log_level: info
 # always be true.
 is_behind_reverse_proxy: true
 
+preferred_password_crypt_method: bcrypt_10
+
+# Session cookie settings
+#
+# IMPORTANT: session_secret should be generated uniquely for the deployment.
+# Try:
+#
+# $ dd if=/dev/urandom bs=1k count=1 | sha256sum
+#
+# And paste the hex string output as the session_secret value.
+session_secret: xxxx
+session_length_sec: 3600
+
+
 db_user: test
 db_password: passwd
 db_name: bodgery_members_yourname
