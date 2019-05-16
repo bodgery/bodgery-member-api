@@ -138,7 +138,12 @@ function init_server( conf, db, logger )
     server.use( (req, res, next) => {
         logger.error( "Route {" + req.method + " " + req.path
             + "} not found"  );
-        res.status( 404 );
+        res
+            .status( 404 )
+            .render( 'not-found', {
+                method: req.method
+                ,path: req.path
+            });
     });
     return server;
 }
