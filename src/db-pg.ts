@@ -141,14 +141,14 @@ export class PG
                         client
                         ,member_id
                         ,addr_id
-                        ,success_callback
+                        ,done
                         ,no_member_found_callback
                         ,error_callback
                     );
-                    done();
                 }
                 ,error_callback
             )
+            ,success_callback
             ,error_callback
         );
         return true;
@@ -535,7 +535,8 @@ export class PG
 
 
     private transaction(
-        success_callback: (client, done) => void
+        transaction_callback: (client, done) => void
+        ,success_callback: () => void
         ,error_callback: (err: Error) => void
     ): void
     {
@@ -565,8 +566,11 @@ export class PG
                 }
                 else {
                     try {
-                        success_callback( client, () => {
-                            finish( client, done );
+                        transaction_callback( client, () => {
+                            finish( client, () => {
+                                done();
+                                success_callback();
+                            });
                         });
                     }
                     catch( err ) {

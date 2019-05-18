@@ -79,6 +79,13 @@ function error_handler_builder( logger ) {
 
 function init_server( conf, db, logger )
 {
+    let server = setup_server_params( conf, db, logger );
+    setup_server_routes( conf, db, logger, server );
+    return server;
+}
+
+function setup_server_params( conf, db, logger )
+{
     let use_secure_cookie = (conf['deployment_type'] == "prod");
     let session_options = {
         secret: conf.session_secret
@@ -114,7 +121,11 @@ function init_server( conf, db, logger )
 
     request_funcs.set_db( db );
 
+    return server;
+}
 
+function setup_server_routes( conf, db, logger, server )
+{
     let context_wrap = make_context_wrap( logger, conf, db );
     // Add server routing callbacks
     server.get('/api/', context_wrap( request_funcs.get_versions ) );
@@ -153,7 +164,6 @@ function init_server( conf, db, logger )
                 ,path: req.path
             });
     });
-    return server;
 }
 
 function default_db(conf): db_impl.DB
