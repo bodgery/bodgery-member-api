@@ -136,6 +136,23 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/task'
+  /v1/members/pending:
+    summary: Handle members who have not yet been approved
+    get:
+      tags:
+        - Members
+      summary: Get a list of pending Wild Apricot IDs
+      description: ''
+      operationId: ''
+      responses:
+        '500':
+          description: Server error
+        '200':
+            description: List of pending members
+          content:
+            application/json:
+              schmea:
+                $ref: '#/components/schemas/WildApricotMembers'
   /v1/member:
     summary: Manage members
     put:
@@ -315,7 +332,7 @@ paths:
       responses:
         '204':
           description: Signed member up for the mailing list
-  '/v1/meber/:member_id/slack':
+  '/v1/member/:member_id/slack':
     put:
       summary: Signs member up for Slack
       description: ''
@@ -346,7 +363,7 @@ components:
       properties:
         id:
           type: integer
-          description: RFID Number
+          description: Member ID
         name:
           type: string
         firstName:
@@ -441,6 +458,10 @@ components:
           type: integer
         is_active:
           type: boolean
+    WildApricotMembers:
+      type: array
+      items:
+        $ref: '#/components/schemas/WildApricotMemberID'
     Area:
       properties:
         id:
