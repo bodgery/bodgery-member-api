@@ -3,6 +3,7 @@
 #
 
 port: 3001
+deployment_type: dev
 log_file: dev.log
 log_level: info
 

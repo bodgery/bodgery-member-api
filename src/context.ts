@@ -27,4 +27,14 @@ export class Context
         this.logger = logger;
         this.password_checker = password_checker;
     }
+
+    isDev(): boolean
+    {
+        return "dev" == this.conf['deployment_type'];
+    }
+
+    isProd(): boolean
+    {
+        return "prod" == this.conf['deployment_type'];
+    }
 }

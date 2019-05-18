@@ -79,6 +79,7 @@ function error_handler_builder( logger ) {
 
 function init_server( conf, db, logger )
 {
+    let use_secure_cookie = (conf['deployment_type'] == "prod");
     let session_options = {
         secret: conf.session_secret
         ,resave: false
@@ -86,7 +87,7 @@ function init_server( conf, db, logger )
         ,cookie: {
             maxAge: conf.session_length_sec
             ,sameSite: true
-            ,secure: true
+            ,secure: use_secure_cookie
             ,httpOnly: true
         }
     };
