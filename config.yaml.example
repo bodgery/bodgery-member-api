@@ -24,6 +24,15 @@ preferred_password_crypt_method: bcrypt_10
 session_secret: xxxx
 session_length_sec: 3600
 
+# Wild Apricot API key. To generate a secret, you will need to setup a 
+# key in the Wild Apricot website. Someone with admin access on WA can 
+# follow the instructions at:
+#
+# https://gethelp.wildapricot.com/en/articles/180
+#
+wa_api_client: APIKEY
+wa_api_secret: xxxxxxxx
+wa_account_id: 227272
 
 db_user: test
 db_password: passwd

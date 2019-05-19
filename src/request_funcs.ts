@@ -2,6 +2,7 @@ import * as c from "./context";
 import * as Tokens from "csrf";
 import * as db_impl from "./db";
 import * as valid from "./validation";
+import * as wa_api from "./wild_apricot";
 
 
 let db : db_impl.DB;
@@ -386,6 +387,34 @@ export function is_user_logged_in( req, res, ctx: c.Context )
         .status( is_logged_in ? 200 : 403 )
         .send({ username: username })
         .end();
+}
+
+export function get_members_pending( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let wa = ctx.wa;
+
+    let success_callback = ( members: Array<wa_api.WAMember> ) => {
+        logger.info( "Fetched pending members from Wild Apricot" );
+        res
+            .status( 200 )
+            .send( members )
+            .end();
+    };
+
+    let error_callback = ( err: Error ) => {
+        logger.error( "Could not fetch pending members from Wild Apricot: "
+            + err.toString() );
+        res
+            .status( 500 )
+            .send( "Error fetching data from Wild Apricot" )
+            .end();
+    };
+
+    wa.fetch_pending_members(
+        success_callback
+        ,error_callback
+    );
 }
 
 export function tmpl_view(

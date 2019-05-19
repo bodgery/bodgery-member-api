@@ -11,6 +11,7 @@ import * as request_funcs from "./src/request_funcs";
 import * as db_impl from "./src/db";
 import * as password_checker from "./src/password";
 import * as pg from "./src/db-pg";
+import * as wa_api from "./src/wild_apricot";
 
 
 let make_logger = (logger) => {
@@ -33,7 +34,12 @@ let make_logger = (logger) => {
     return request_logger;
 };
 
-let make_context_wrap = ( logger, conf, db ) => (callback) => {
+let make_context_wrap = (
+    logger
+    ,conf
+    ,db
+    ,wa
+) => (callback) => {
     return function (req, res) {
         let request_logger = make_logger( logger );
         request_logger.info( "Begin request to", req.method, req.path );
@@ -43,7 +49,7 @@ let make_context_wrap = ( logger, conf, db ) => (callback) => {
             ,db
         );
 
-        let context = new c.Context( conf, request_logger, checker );
+        let context = new c.Context( conf, request_logger, checker, wa );
 
         if(! req.session.csrf_secret ) {
             let tokens = new Tokens();
@@ -77,10 +83,15 @@ function error_handler_builder( logger ) {
     };
 };
 
-function init_server( conf, db, logger )
+function init_server(
+    conf
+    ,db
+    ,logger
+    ,wa: wa_api.WA
+)
 {
     let server = setup_server_params( conf, db, logger );
-    setup_server_routes( conf, db, logger, server );
+    setup_server_routes( conf, db, logger, server, wa );
     return server;
 }
 
@@ -124,9 +135,15 @@ function setup_server_params( conf, db, logger )
     return server;
 }
 
-function setup_server_routes( conf, db, logger, server )
+function setup_server_routes(
+    conf
+    ,db
+    ,logger
+    ,server
+    ,wa: wa_api.WA
+)
 {
-    let context_wrap = make_context_wrap( logger, conf, db );
+    let context_wrap = make_context_wrap( logger, conf, db, wa );
     // Add server routing callbacks
     server.get('/api/', context_wrap( request_funcs.get_versions ) );
     server.put( '/api/v1/member',
@@ -143,8 +160,12 @@ function setup_server_routes( conf, db, logger, server )
         context_wrap( request_funcs.get_member_is_active ) );
     server.put( '/api/v1/member/:member_id/rfid',
         context_wrap( request_funcs.put_member_rfid ) );
+    server.get( '/api/v1/members/pending',
+        context_wrap( request_funcs.get_members_pending ) );
     server.get( '/api/v1/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
+    server.get( '/members/pending',
+        context_wrap( request_funcs.tmpl_view( 'members-pending' ) ) );
     server.post( '/user/login',
         context_wrap( request_funcs.login_user ) );
     server.post( '/user/logout',
@@ -190,6 +211,16 @@ export function default_conf(): Object
     return conf;
 }
 
+function default_wa(conf): wa_api.WA
+{
+    let wa = new wa_api.WildApricot(
+        conf['wa_api_client']
+        ,conf['wa_api_secret']
+        ,conf['wa_account_id']
+    );
+    return wa;
+}
+
 
 let httpServer;
 export let SERVER;
@@ -198,14 +229,16 @@ let logger;
 export function start(
     db?: db_impl.DB
     ,conf?: Object
+    ,wa?: wa_api.WA
 ): void
 {
     if(! conf) conf = default_conf();
     if(! db) db = default_db( conf );
+    if(! wa) wa = default_wa( conf );
     logger = require( 'logger' ).createLogger( conf["log_file"] );
 
     // Init server
-    SERVER = init_server( conf, db, logger );
+    SERVER = init_server( conf, db, logger, wa );
     httpServer = require( 'http' ).createServer( SERVER );
 
     let port = conf["port"];
