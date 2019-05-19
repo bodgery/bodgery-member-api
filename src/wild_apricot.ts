@@ -58,7 +58,7 @@ export class WildApricot
         // and try again
         let fetch = (oauth_token: string) => {
             request.get( {
-                url: this.contact_uri,
+                url: this.contact_uri + "&$filter=Status eq PendingNew",
                 headers: {
                     Accept: 'application/json'
                 },
