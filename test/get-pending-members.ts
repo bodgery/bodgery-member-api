@@ -11,10 +11,38 @@ describe( 'GET /v1/members/pending', function() {
         let wa_mock = new wa_api.MockWA({
             // TODO fill in pending and existing members
             pending: [
-                1, 2, 3
+                {
+                    wild_apricot_id: 1
+                    ,first_name: "One"
+                    ,last_name: "Number"
+                    ,is_active: false
+                }
+                ,{
+                    wild_apricot_id: 2
+                    ,first_name: "Two"
+                    ,last_name: "Number"
+                    ,is_active: false
+                }
+                ,{
+                    wild_apricot_id: 3
+                    ,first_name: "Three"
+                    ,last_name: "Number"
+                    ,is_active: false
+                }
             ]
             ,active: [
-                4, 5
+                {
+                    wild_apricot_id: 4
+                    ,first_name: "Four"
+                    ,last_name: "Number"
+                    ,is_active: true
+                }
+                ,{
+                    wild_apricot_id: 5
+                    ,first_name: "Five"
+                    ,last_name: "Number"
+                    ,is_active: true
+                }
             ]
         });
         let db = new mock_db.MockDB( null, null );

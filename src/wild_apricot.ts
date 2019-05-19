@@ -8,6 +8,8 @@ const wa_oauth_uri = "https://oauth.wildapricot.org/auth/token";
 export interface WAMember
 {
     wild_apricot_id: number;
+    first_name: string;
+    last_name: string;
     is_active: boolean;
 }
 
@@ -72,6 +74,8 @@ export class WildApricot
                     let members = parsed_users.Contacts.map( (_) => {
                         return {
                             wild_apricot_id: _.Id
+                            ,first_name: _.FirstName
+                            ,last_name: _.LastName
                             ,is_active: _.MembershipEnabled
                         };
                     });

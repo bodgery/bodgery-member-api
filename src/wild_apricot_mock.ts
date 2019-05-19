@@ -8,18 +8,12 @@ export class MockWA
 
 
     constructor( args: {
-        pending: Array<number>
-        ,active: Array<number>
+        pending: Array<wa_api.WAMember>
+        ,active: Array<wa_api.WAMember>
     })
     {
-        this.pending_members = args.pending.map( (_) => { return {
-            wild_apricot_id: _
-            ,is_active: false
-        }});
-        this.active_members = args.active.map( (_) => { return {
-            wild_apricot_id: _
-            ,is_active: true
-        }});
+        this.pending_members = args.pending;
+        this.active_members = args.active;
     }
 
 

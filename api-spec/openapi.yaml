@@ -456,6 +456,10 @@ components:
       properties:
         wild_apricot_id:
           type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
         is_active:
           type: boolean
     WildApricotMembers:
