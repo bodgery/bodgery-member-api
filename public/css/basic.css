@@ -1,0 +1,27 @@
+/* Suggested palette:
+   https://paletton.com/#uid=13P0u0k7Gll2Jv-5bpUa5h2dSbN
+*/
+
+body {
+    background-color: #9DA0AA;
+    color: #272D40;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    background: #42485C;
+}
+
+li:nth-child(odd) {
+    background: #5B6073;
+}
+
+a {
+    text-decoration: none;
+    color: #AA9D81;
+}

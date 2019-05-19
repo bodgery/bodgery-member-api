@@ -2,19 +2,14 @@
 
 <div id="msg"></div>
 
-<div id="pending-members">
-    <table>
-        <tr class="table-header">
-            <th>Name</th>
-        </tr>
-    </table>
-</div>
+<ul id="pending-members">
+</ul>
 
 
 <script>
 'use strict';
 
-var pending_div;
+var pending_list
 var msg_div;
 
 function load_pending()
@@ -22,7 +17,7 @@ function load_pending()
     var url = "/api/v1/members/pending";
     msg_div.text( "Loading . . . " );
     msg_div.show();
-    pending_div.hide();
+    pending_list.hide();
 
     $.ajax( url, {
         "type": "GET",
@@ -30,28 +25,29 @@ function load_pending()
             msg_div.text( "Error fetching pending members: " + str );
         },
         "success": function (data, str, jqXHR) {
-            update_table( data );
+            update_pending( data );
         }
     });
 }
 
-function update_table( data )
+function update_pending( data )
 {
-    $( ".row_data" ).remove();
+    $( ".member" ).remove();
 
     data.forEach( function (_) {
-        pending_div.append( '<tr class="row_data">'
-            + "<td>" + _.first_name + " " + _.last_name + "</td>"
-            + "</tr>"
+        pending_list.append( '<li class="member">'
+            + '<a href="/member/signup?wa_id=' + _.wild_apricot_id + '">'
+            + _.first_name + " " + _.last_name
+            + "</a></li>"
         );
     });
 
     msg_div.hide();
-    pending_div.show();
+    pending_list.show();
 }
 
 $( document ).ready(function () {
-    pending_div = $( "#pending-members" );
+    pending_list = $( "#pending-members" );
     msg_div = $( "#msg" );
 
     load_pending();
