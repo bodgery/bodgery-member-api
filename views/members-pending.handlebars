@@ -1,5 +1,57 @@
 <h1>Pending Members</h1>
 
-<div id="loading">Loading . . . </div>
+<div id="msg"></div>
 
-<div id="pending-members"></div>
+<div id="pending-members">
+    <table>
+        <tr class="table-header">
+            <th>Client ID</th>
+        </tr>
+    </table>
+</div>
+
+
+<script>
+'use strict';
+
+var pending_div;
+var msg_div;
+
+function load_pending()
+{
+    var url = "/api/v1/members/pending";
+    msg_div.text( "Loading . . . " );
+    msg_div.show();
+
+    $.ajax( url, {
+        "type": "GET",
+        "error": function (jqXHR, str, exception) {
+            msg_div.text( "Error fetching pending members: " + str );
+        },
+        "success": function (data, str, jqXHR) {
+            msg_div.hide();
+            update_table( data );
+        }
+    });
+}
+
+function update_table( data )
+{
+    $( ".row_data" ).remove();
+
+    data.forEach( function (_) {
+        var client_id = _.wild_apricot_id;
+        pending_div.append( '<tr class="row_data">'
+            + "<td>" + client_id + "</td>"
+            + "</tr>"
+        );
+    });
+}
+
+$( document ).ready(function () {
+    pending_div = $( "#pending-members" );
+    msg_div = $( "#loading_div" );
+
+    load_pending();
+});
+</script>
