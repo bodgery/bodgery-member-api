@@ -7,17 +7,17 @@ body {
     color: #272D40;
 }
 
-ul {
+ul.nobullet {
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-li {
+li.nobullet {
     background: #42485C;
 }
 
-li:nth-child(odd) {
+li.nobullet:nth-child(odd) {
     background: #5B6073;
 }
 

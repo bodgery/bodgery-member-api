@@ -324,7 +324,7 @@ paths:
       responses:
         '204':
           description: Set member's Wild Apricot ID
-  '/v/1/member/:member_id/list/:name':
+  '/v1/member/:member_id/list/:name':
     put:
       summary: Sign a member up for the specified mailing list
       description: ''

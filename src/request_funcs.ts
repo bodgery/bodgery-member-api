@@ -417,6 +417,29 @@ export function get_members_pending( req, res, ctx: c.Context )
     );
 }
 
+export function member_signup( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.query, [
+            valid.isInteger( 'wa_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let wa_id = req.query['wa_id'];
+    // TODO fetch full member data from WA
+
+    let render = tmpl_view( "member-signup", {
+        name: null
+        ,wa_id: wa_id
+    }, [], 200 );
+    render( req, res, ctx );
+}
+
 export function tmpl_view(
     view: string
     ,args = {}

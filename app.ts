@@ -144,7 +144,8 @@ function setup_server_routes(
 )
 {
     let context_wrap = make_context_wrap( logger, conf, db, wa );
-    // Add server routing callbacks
+
+    // API routes
     server.get('/api/', context_wrap( request_funcs.get_versions ) );
     server.put( '/api/v1/member',
             context_wrap( request_funcs.put_member ) );
@@ -164,15 +165,19 @@ function setup_server_routes(
         context_wrap( request_funcs.get_members_pending ) );
     server.get( '/api/v1/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
+
+    // View routes
+    server.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );
     server.get( '/members/pending',
         context_wrap( request_funcs.tmpl_view( 'members-pending' ) ) );
+    server.get( '/member/signup',
+        context_wrap( request_funcs.member_signup ) );
+    server.get( '/user/is-logged-in',
+        context_wrap( request_funcs.is_user_logged_in ) );
     server.post( '/user/login',
         context_wrap( request_funcs.login_user ) );
     server.post( '/user/logout',
         context_wrap( request_funcs.logout_user ) );
-    server.get( '/user/is-logged-in',
-        context_wrap( request_funcs.is_user_logged_in ) );
-    server.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );
 
     // 404 handler, must be last in the list
     server.use( (req, res, next) => {
