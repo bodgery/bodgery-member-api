@@ -30,6 +30,7 @@
     "express": "^4.16.4",
     "express-handlebars": "^3.0.2",
     "express-session": "^1.16.1",
+    "googleapis": "^40.0.0",
     "js-yaml": "^3.13.1",
     "logger": "^0.0.1",
     "pg": "^7.8.2",
