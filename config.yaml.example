@@ -69,6 +69,11 @@ wa_account_id: 227272
 # If all goes will, this will give you the values for "google_access_token",
 # "google_refresh_token", and "google_expires_date".
 #
+#
+# - MAKE SURE THE google-credentials.json FILE NEVER GOES INTO SOURCE CONTROL -
+#
+# There is a .gitignore in place, so it should be OK.
+#
 google_credentials_file: google-credentials.json
 google_client_token: xxxx
 google_access_token: xxxx
