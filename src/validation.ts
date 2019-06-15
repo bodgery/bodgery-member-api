@@ -138,7 +138,8 @@ export let isBoolean = (field) => function (params) {
  * Since this is for a public web site, we don't need to deal with internal 
  * email addresses that have no domain, or have a domain with no TLD suffix.
  * Therefore, we sanity check that there's at least an @-sign and a dot in 
- * the domain. Checking for almost anything else doesn't get us anywhere.
+ * the domain. There's also no sense letting whitespace through. Checking for 
+ * almost anything else doesn't get us anywhere.
  */
  export let isPublicEmail = (field, allowNull = false) => matchSingleField(
-     field, /^.+@.+\..+$/, "email", allowNull );
+     field, /^[^\s>]+@[^\s>]+\.[^\s>]+$/, "email", allowNull );

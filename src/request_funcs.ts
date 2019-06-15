@@ -1,6 +1,10 @@
 import * as c from "./context";
+import * as email_sender from "./email_sender";
 import * as Tokens from "csrf";
 import * as db_impl from "./db";
+import * as fs from "fs";
+import * as google from 'googleapis';
+import * as google_auth from 'google-auth-library';
 import * as valid from "./validation";
 import * as wa_api from "./wild_apricot";
 
@@ -39,6 +43,41 @@ function handle_generic_validation_error( logger, res, err ): void
         .json({
             error: err.toString()
         });
+}
+
+function fetch_google_auth(
+    conf
+    ,scopes: Array<string>
+    ,callback: ( client ) => void
+): void
+{
+    fs.readFile( conf.google_credentials_file, (err, data) => {
+        if(err) throw err;
+        let keys = JSON.parse( data.toString() );
+
+        let auth = new google_auth.OAuth2Client(
+            keys.installed.client_id
+            ,keys.installed.client_secret
+            ,keys.installed.redirect_uris[0]
+        );
+
+        auth.setCredentials({
+            access_token: conf.google_access_token
+            ,refresh_token: conf.google_refresh_token
+            ,expiry_date: conf.google_expires_date
+        });
+        callback( auth );
+    });
+}
+
+function fetch_google_email_scopes(): Array<string>
+{
+    return [
+        'https://mail.google.com/'
+        ,'https://www.googleapis.com/auth/gmail.modify'
+        ,'https://www.googleapis.com/auth/gmail.compose'
+        ,'https://www.googleapis.com/auth/gmail.send'
+    ];
 }
 
 export function get_versions ( req, res, ctx: c.Context )
@@ -439,6 +478,89 @@ export function member_signup( req, res, ctx: c.Context )
     }, [], 200 );
     render( req, res, ctx );
 }
+
+export function post_member_signup_email( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params['member_id'];
+
+    db.get_member( member_id
+        ,(member) => {
+            let to_name = member.firstName + " " + member.lastName;
+            let to_email = member.email;
+
+            let auth = fetch_google_auth(
+                ctx.conf
+                ,fetch_google_email_scopes()
+                ,( google_client ) => {
+                    let sender = new email_sender.Email({
+                        auth: google_client
+                    });
+                    sender.send_new_member_signup({
+                        to_name: to_name
+                        ,to_email: to_email
+                        ,from_name: ctx.conf['email_new_member_signup_from_name']
+                        ,from_email: ctx.conf['email_new_member_signup_from_email']
+                        ,success_callback: () => {
+                            logger.info( "New member signup email sent" );
+                            res
+                                .status( 200 )
+                                .end();
+                        }
+                        ,error_callback: ( err: Error ) => {
+                            logger.error( "Error sending new member email: "
+                                + err.toString() );
+                            res
+                                .status( 500 )
+                                .end();
+                        }
+                    });
+            });
+        }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
+    );
+}
+
+// No longer use this alternative method to fetch the OAuth2 ID from Google, 
+// but keep it around just in case.
+/*
+export function google_oauth( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+
+    // TODO authenticate that this is actually coming from Google
+    let token = req.query['code'];
+    let token_file = ctx.conf['google_oauth_token_path'];
+
+    let data = new Uint8Array( Buffer.from( token ) );
+    fs.writeFile( token_file, data, (err) => {
+        if( err ) {
+            logger.error( "Error writing Google OAuth token to "
+                + token_file + ": " + err.toString() );
+            res
+                .status( 500 )
+                .end();
+        }
+        else {
+            logger.info( "Wrote new Google OAuth token to " + token_file );
+            res
+                .status( 200 )
+                .end();
+        }
+    });
+}
+*/
 
 export function tmpl_view(
     view: string

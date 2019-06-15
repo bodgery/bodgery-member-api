@@ -161,10 +161,17 @@ function setup_server_routes(
         context_wrap( request_funcs.get_member_is_active ) );
     server.put( '/api/v1/member/:member_id/rfid',
         context_wrap( request_funcs.put_member_rfid ) );
+    server.post( '/api/v1/member/:member_id/send_signup_email',
+        context_wrap( request_funcs.post_member_signup_email ) );
     server.get( '/api/v1/members/pending',
         context_wrap( request_funcs.get_members_pending ) );
     server.get( '/api/v1/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
+
+    // Undocumented route for the callback on Google's OAuth token
+    // No longer used
+    //server.get( '/api/v1/google_oauth',
+    //    context_wrap( request_funcs.google_oauth ) );
 
     // View routes
     server.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );

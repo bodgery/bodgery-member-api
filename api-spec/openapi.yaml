@@ -232,6 +232,20 @@ paths:
           description: Could not find member for given ID
         '500':
           description: Server error
+  '/v1/member/:member_id/send_signup_email':
+    post:
+      tags:
+        - Members
+      summary: Send the new member signup email to the given member
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          description: Email sent
+        '404':
+          description: Could not find member for given ID
+        '500':
+          description: Server error
   '/v1/member/:member_id/is_active':
     put:
       tags:

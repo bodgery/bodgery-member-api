@@ -11,6 +11,11 @@ log_level: info
 # always be true.
 is_behind_reverse_proxy: true
 
+# If you use a localhost URL here, have the port match the setting 
+# above. For non-dev deployments, it's preferable to use a publically 
+# available address with TLS.
+public_url: http://localhost:3001
+
 preferred_password_crypt_method: bcrypt_10
 
 # Session cookie settings
@@ -33,6 +38,43 @@ session_length_sec: 3600
 wa_api_client: APIKEY
 wa_api_secret: xxxxxxxx
 wa_account_id: 227272
+
+# Google OAuth2 client key credentials. Getting this is a bit of a process, 
+# so read these instructions carefully.
+#
+# Start by going to:
+#
+# https://console.developers.google.com
+#
+# Create a new project, then go to "Credentials". Create a new Oauth client ID.
+# Select "Other" for "Application Type". Then hit "Download JSON" and save 
+# the file to the project directory as "google-credentials.json" (you can 
+# change this file name in "google_credentials_file" below).
+#
+# Next, you will need to get the URL for authorizing the key under your user.
+# To do this, run:
+#
+#     node get_google_oauth.js
+#
+# This will output a URL, where you will need to authorize the scopes. After 
+# doing so, it will show a random string. Copy that string into
+# "google_client_token".
+#
+# Open "google_auth.ts" and find the "credentials" const. Copy the contents of 
+# "google-credentials.json" into this var. Find the "code" const and copy 
+# the contents of "google_client_token" from the previous step. Then run it:
+#
+#     ts-node google_auth.ts
+#
+# If all goes will, this will give you the values for "google_access_token",
+# "google_refresh_token", and "google_expires_date".
+#
+google_credentials_file: google-credentials.json
+google_client_token: xxxx
+google_access_token: xxxx
+google_token_type: Bearer
+google_refresh_token: xxxx
+google_expires_date: xxxx
 
 db_user: test
 db_password: passwd

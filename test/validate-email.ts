@@ -33,6 +33,7 @@ describe( 'Validate Email', function () {
             "foobar"
             ,"foobar@example"
             ,"example.com"
+            ,"foobar @exaple.com"
         ];
         fails.forEach( (val) => {
             try {
