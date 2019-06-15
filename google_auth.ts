@@ -25,7 +25,6 @@ const scopes: Array<string> = [
  */
 
 export const credentials = {
-    "web":{"client_id":"1062829500837-hqnjs9c7hpt45e5ufamvgstgvn2g714c.apps.googleusercontent.com","project_id":"directory-test-214521","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://www.googleapis.com/oauth2/v3/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"B1AmB8v81RzeyXRoDEaoBAyT","redirect_uris":["urn:ietf:wg:oauth:2.0:oob","http://localhost"]}
 };
 
 /**
