@@ -73,6 +73,21 @@ export interface DB
         ,error_callback: ( err: Error ) => void
     ): boolean;
 
+    put_member_wild_apricot(
+        member_id: string
+        ,wild_apricot_id: string
+        ,success_callback: () => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
+
+    get_member_wild_apricot(
+        member_id: string
+        ,success_callback: ( wild_apricot_id: string ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
+
     set_member_is_active(
         member_id: string
         ,is_active: boolean

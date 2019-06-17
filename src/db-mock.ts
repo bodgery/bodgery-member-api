@@ -146,6 +146,46 @@ export class MockDB
         return true;
     }
 
+    put_member_wild_apricot(
+        member_id: string
+        ,wild_apricot_id: string
+        ,success_callback: () => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            member_matched['full_data']['wild_apricot_id'] = wild_apricot_id
+            success_callback();
+        }
+        else {
+            no_member_found_callback();
+        }
+
+        return true;
+    }
+
+    get_member_wild_apricot(
+        member_id: string
+        ,success_callback: ( wild_apricot_id: string ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            success_callback( member_matched.wild_apricot_id );
+        }
+        else {
+            no_member_found_callback();
+        }
+
+        return true;
+    }
+
     set_member_rfid(
         member_id: string
         ,rfid: string

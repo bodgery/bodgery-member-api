@@ -346,14 +346,6 @@ paths:
       responses:
         '204':
           description: Signed member up for the mailing list
-  '/v1/member/:member_id/slack':
-    put:
-      summary: Signs member up for Slack
-      description: ''
-      operationId: ''
-      responses:
-        '204':
-          description: Signed member up for Slack
 components:
   schemas:
     SimpleMemberData:
@@ -480,6 +472,10 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/WildApricotMember'
+    WildApricotMemberID:
+      properties:
+        wild_apricot_id:
+          type: integer
     Area:
       properties:
         id:

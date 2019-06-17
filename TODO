@@ -1,5 +1,0 @@
-* Signup users for slack
-    * See SCIM API
-    * Will need some way of testing it
-        * We can't just make a test Slack workspace, because SCIM is only 
-          available to Slack+ users

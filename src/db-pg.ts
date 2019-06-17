@@ -189,6 +189,68 @@ export class PG
         return true;
     }
 
+    put_member_wild_apricot(
+        member_id: string
+        ,wild_apricot_id: string
+        ,success_callback: () => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let query = {
+            name: "update-member-wild-apricot"
+            ,text: [
+                "UPDATE members"
+                ,"SET wildapricot_id = $1"
+                ,"WHERE member_id = $2"
+            ].join( " " )
+            ,values: [
+                wild_apricot_id
+                ,member_id
+            ]
+        };
+
+        this.call_query(
+            query
+            ,success_no_rows_callback_builder( success_callback )
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
+
+        return true;
+    }
+
+    get_member_wild_apricot(
+        member_id: string
+        ,success_callback: ( wild_apricot_id: string ) => void
+        ,no_member_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let query = {
+            name: "get-member-wild-apricot"
+            ,text: [
+                "SELECT"
+                    ,"wildapricot_id"
+                ,"FROM members"
+                ,"WHERE member_id = $1"
+            ].join( " " )
+            ,values: [ member_id ]
+        };
+
+        let main_callback = (rows) => success_callback(
+            rows[0]['wildapricot_id'] );
+
+        this.call_query(
+            query
+            ,main_callback
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
+
+        return true;
+    }
+
     set_member_is_active(
         member_id: string
         ,is_active: boolean

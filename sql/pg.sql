@@ -10,7 +10,7 @@ CREATE TABLE "us_address" (
 CREATE TABLE "members" (
     "id" serial primary key,
     "member_id" uuid DEFAULT uuid_generate_v4() UNIQUE,
-    "wildapricot_id" int UNIQUE,
+    "wildapricot_id" text UNIQUE,
     "rfid" text UNIQUE,
     "slack_id" int UNIQUE,
     "address_id" int REFERENCES us_address (id),

@@ -338,6 +338,39 @@ export function get_member_rfid( req, res, ctx: c.Context )
     );
 }
 
+export function put_member_wildapricot( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let body = req.body;
+
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+        valid.validate( body, [
+            valid.isInteger( 'wild_apricot_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params.member_id;
+    let wild_apricot_id = body.wild_apricot_id;
+
+    db.put_member_wild_apricot( member_id, wild_apricot_id
+        ,() => {
+            logger.info( "Wild Apricot ID set on member successfully" );
+            res
+                .status( 204 )
+                .end();
+        }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
+    );
+}
+
 export function login_user( req, res, ctx: c.Context )
 {
     let logger = ctx.logger;
