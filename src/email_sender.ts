@@ -1,5 +1,10 @@
 import * as google from 'googleapis';
 import * as oauth from 'google-auth-library';
+import * as Handlebars from "../src/handlebars-preloader";
+
+const EMAIL_TMPL_PATH = './emails';
+
+let email_tmpls;
 
 
 export class Email
@@ -13,6 +18,19 @@ export class Email
         this.auth = args.auth;
     }
 
+    public init(
+        callback: () => void
+    ): void
+    {
+        if(! email_tmpls) {
+            email_tmpls = new Handlebars.handlebars( EMAIL_TMPL_PATH );
+            email_tmpls.load( callback );
+        }
+        else {
+            callback();
+        }
+    }
+
 
     public send_new_member_signup( args: {
         to_name: string
@@ -23,18 +41,23 @@ export class Email
         ,error_callback: ( err: Error ) => void
     }): void
     {
+        if(! email_tmpls ) {
+            let err = new Error( "Need to call init() before sending email" );
+            args.error_callback( err );
+            return;
+        }
+
         const gmail = new google.gmail_v1.Gmail({
             auth: this.auth
         });
 
-		const messageParts = [
-			'From: ' + args.from_name + " <" + args.from_email + ">"
-			,'To: ' + args.to_name + " <" + args.to_email + ">"
-			,'Subject: Test Send Email'
-			,''
-			,'Test message'
-		];
-		const message = messageParts.join('\n');
+        const message = email_tmpls.execute( 'member_signup', {
+            from_name: args.from_name
+            ,from_email: args.from_email
+            ,to_name: args.to_name
+            ,to_email: args.to_email
+            ,subject: "Welcome to the Bodgery"
+        });
         const encoded_message = Buffer.from( message )
             .toString( 'base64' )
             .replace(/\+/g, '-')
@@ -49,7 +72,6 @@ export class Email
                 }
             }
             ,(err) => {
-console.log( "Error: %o", err );
                 if( err ) {
                     args.error_callback( err );
                 }

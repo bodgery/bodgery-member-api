@@ -54,20 +54,15 @@ wa_account_id: 227272
 # Next, you will need to get the URL for authorizing the key under your user.
 # To do this, run:
 #
-#     node get_google_oauth.js
+#     ts-node google_oauth.js
 #
 # This will output a URL, where you will need to authorize the scopes. After 
-# doing so, it will show a random string. Copy that string into
-# "google_client_token".
-#
-# Open "google_auth.ts" and find the "credentials" const. Copy the contents of 
-# "google-credentials.json" into this var. Find the "code" const and copy 
-# the contents of "google_client_token" from the previous step. Then run it:
-#
-#     ts-node google_auth.ts
+# doing so, it will show a random string. The program will sit there until you
+# put that token string in and hit <Enter>.
 #
 # If all goes will, this will give you the values for "google_access_token",
-# "google_refresh_token", and "google_expires_date".
+# "google_refresh_token", etc. Copy and paste its output of these fields, 
+# replacing the fields below
 #
 #
 # - MAKE SURE THE google-credentials.json FILE NEVER GOES INTO SOURCE CONTROL -
