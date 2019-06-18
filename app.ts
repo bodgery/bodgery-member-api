@@ -163,6 +163,8 @@ function setup_server_routes(
         context_wrap( request_funcs.put_member_rfid ) );
     server.post( '/api/v1/member/:member_id/send_signup_email',
         context_wrap( request_funcs.post_member_signup_email ) );
+    server.post( '/api/v1/member/:member_id/send_group_signup_email',
+        context_wrap( request_funcs.post_group_member_signup_email ) );
     server.get( '/api/v1/members/pending',
         context_wrap( request_funcs.get_members_pending ) );
     server.put( '/api/v1/member/:member_id/wildapricot',

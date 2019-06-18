@@ -76,6 +76,13 @@ google_token_type: Bearer
 google_refresh_token: xxxx
 google_expires_date: xxxx
 
+# From name/email address for new member signup emails
+email_new_member_signup_from_name: The Bodgery
+email_new_member_signup_from_email: test@example.com
+
+# Where to send the emails to the group about new member signup
+email_group_new_member_signup_to_email: test@example.com
+
 db_user: test
 db_password: passwd
 db_name: bodgery_members_yourname

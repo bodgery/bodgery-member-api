@@ -568,6 +568,72 @@ export function post_member_signup_email( req, res, ctx: c.Context )
     );
 }
 
+export function post_group_member_signup_email( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params['member_id'];
+
+    let send_email = (
+        first_name: string,
+        answers: db_impl.MemberAnswers
+    ) => {
+        let auth = fetch_google_auth(
+            ctx.conf
+            ,fetch_google_email_scopes()
+            ,( google_client ) => {
+                let sender = new email_sender.Email({
+                    auth: google_client
+                });
+                sender.init( () => {
+                    sender.send_new_group_member_signup({
+                        to_name: ctx.conf['email_group_new_member_signup_to_name']
+                        ,to_email: ctx.conf['email_group_new_member_signup_to_email']
+                        ,from_name: ctx.conf['email_new_member_signup_from_name']
+                        ,from_email: ctx.conf['email_new_member_signup_from_email']
+                        ,member_first_name: first_name
+                        ,answers: answers
+                        ,success_callback: () => {
+                            logger.info( "New member signup email sent" );
+                            res
+                                .status( 200 )
+                                .end();
+                        }
+                        ,error_callback: ( err: Error ) => {
+                            logger.error( "Error sending new member email: "
+                                + err.toString() );
+                            res
+                                .status( 500 )
+                                .end();
+                        }
+                    });
+                });
+            }
+        );
+    };
+
+    db.get_member_answers( member_id
+        ,(member_answers: db_impl.MemberAnswers) => {
+            db.get_member( member_id
+                ,(member) => send_email( member.firstName, member_answers )
+                ,get_member_id_not_found_error( logger, res, member_id )
+                ,get_generic_db_error( logger, res )
+            );
+        }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
+    );
+}
+
 // No longer use this alternative method to fetch the OAuth2 ID from Google, 
 // but keep it around just in case.
 /*

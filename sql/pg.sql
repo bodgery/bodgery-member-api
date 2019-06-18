@@ -17,14 +17,14 @@ CREATE TABLE "members" (
     "first_name" text,
     "last_name" text,
     "phone" text,
-    "email" text,
+    "email" text NOT NULL UNIQUE,
     "status" bool DEFAULT TRUE,
     "photo" text
 );
 
 CREATE TABLE "users" (
     id SERIAL PRIMARY KEY,
-    email TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     password_salt TEXT NOT NULL,
     password_storage TEXT NOT NULL

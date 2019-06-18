@@ -290,6 +290,30 @@ export class MockDB
         success_callback();
     }
 
+    get_member_answers(
+        member_id: string
+        ,success_callback: ( answers: db_impl.MemberAnswers ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let member_matched = this.members[member_id];
+
+        if( member_matched != null ) {
+            let answers = member_matched['member_questions'];
+            success_callback( answers );
+        }
+        else {
+            no_member_found_callback(
+                new Error( "Could not find match for member ID '"
+                    + member_id + "'"
+                )
+            );
+        }
+
+        return true;
+    }
+
     session_store( express_session )
     {
         return null;

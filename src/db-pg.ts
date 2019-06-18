@@ -485,6 +485,54 @@ export class PG
         );
     }
 
+    get_member_answers(
+        member_id: string
+        ,success_callback: ( member: db_impl.MemberAnswers ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let query = {
+            name: "get-member-answers"
+            ,text: [
+                // TODO
+                "SELECT"
+                    ,"rfid"
+                    ,",first_name"
+                    ,",last_name"
+                    ,",phone"
+                    ,",email"
+                    ,",photo"
+                ,"FROM members WHERE member_id = $1"
+            ].join( " " )
+            ,values: [ member_id ]
+        };
+
+        let main_callback = (rows) => {
+            let member = rows[0];
+            // Would like to use aliases in the SQL statement 
+            // (e.g., "first_name AS firstName"), but PostgreSQL 
+            // returns it in all lowercase
+            let answers = {
+                answer1: member.answer1
+                ,answer2: member.answer2
+                ,answer3: member.answer3
+                ,answer4: member.answer4
+                ,answer5: member.answer5
+            };
+            success_callback( answers );
+        };
+
+        this.call_query(
+            query
+            ,main_callback
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
+
+        return true;
+    }
+
     session_store( express_session )
     {
         let pg_session = session( express_session );
