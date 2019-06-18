@@ -80,6 +80,15 @@ function fetch_google_email_scopes(): Array<string>
     ];
 }
 
+function fetch_google_group_scopes(): Array<string>
+{
+    return [
+        'https://www.googleapis.com/auth/admin.directory.group'
+        ,'https://www.googleapis.com/auth/admin.directory.group.member',
+    ];
+}
+
+
 export function get_versions ( req, res, ctx: c.Context )
 {
     res
@@ -365,6 +374,64 @@ export function put_member_wildapricot( req, res, ctx: c.Context )
             res
                 .status( 204 )
                 .end();
+        }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
+    );
+}
+
+export function put_member_google_group( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let body = req.body;
+
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params.member_id;
+
+    db.get_member( member_id
+        ,( member_data ) => {
+            const email = member_data.email;
+
+            fetch_google_auth(
+                ctx.conf
+                ,fetch_google_group_scopes()
+                ,( auth ) => {
+                    const groups = new google.admin_directory_v1.Admin({
+                        auth: auth
+                    });
+
+                    let promises = ctx.conf['google_groups_signup_list'].map(
+                        (_) => {
+                            return new Promise( (resolve, reject) => {
+                                groups.members.insert({
+                                    groupKey: _
+                                    ,requestBody: {
+                                        email: email
+                                    }
+                                }).then( resolve );
+                            });
+                        }
+                    );
+
+                    Promise
+                        .all( promises )
+                        .then( () => {
+                            logger.info( "Signed up for Google Groups" );
+                            res
+                                .status( 200 )
+                                .end();
+                        });
+                }
+            );
         }
         ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )

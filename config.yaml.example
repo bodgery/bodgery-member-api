@@ -81,7 +81,13 @@ email_new_member_signup_from_name: The Bodgery
 email_new_member_signup_from_email: test@example.com
 
 # Where to send the emails to the group about new member signup
+email_group_new_member_signup_to_name: The Bodgery
 email_group_new_member_signup_to_email: test@example.com
+
+# Google Groups to add a new member
+google_groups_signup_list:
+    - thebodgery@googlegroups.com
+    - madcitymakers@googlegroups.com
 
 db_user: test
 db_password: passwd
