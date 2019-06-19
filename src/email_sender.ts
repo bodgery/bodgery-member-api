@@ -1,7 +1,7 @@
 import * as google from 'googleapis';
 import * as oauth from 'google-auth-library';
 import * as Handlebars from "./handlebars-preloader";
-import * as db from "./db";
+import * as wa_api from './wild_apricot';
 
 const EMAIL_TMPL_PATH = './emails';
 
@@ -90,7 +90,7 @@ export class Email
         ,from_name: string
         ,from_email: string
         ,member_first_name: string
-        ,answers: db.MemberAnswers
+        ,answers: Array<wa_api.WAMemberAnswers>
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     }): void
@@ -111,11 +111,11 @@ export class Email
             ,to_name: args.to_name
             ,to_email: args.to_email
             ,first_name: args.member_first_name
-            ,answer1: args.answers.answer1
-            ,answer2: args.answers.answer2
-            ,answer3: args.answers.answer3
-            ,answer4: args.answers.answer4
-            ,answer5: args.answers.answer5
+            ,answer1: args.answers[0].answer
+            ,answer2: args.answers[1].answer
+            ,answer3: args.answers[2].answer
+            ,answer4: args.answers[3].answer
+            ,answer5: args.answers[4].answer
             ,subject: "Welcome to our new member, " + args.member_first_name
         });
         // TODO below should be wrapped into send() private method

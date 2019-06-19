@@ -652,7 +652,7 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
 
     let send_email = (
         first_name: string,
-        answers: db_impl.MemberAnswers
+        answers: Array<wa_api.WAMemberAnswers>
     ) => {
         let auth = fetch_google_auth(
             ctx.conf
@@ -688,16 +688,18 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
         );
     };
 
-    db.get_member_answers( member_id
-        ,(member_answers: db_impl.MemberAnswers) => {
+    ctx.wa.fetch_member_answers( member_id
+        ,( member_answers: Array<wa_api.WAMemberAnswers> ) => {
             db.get_member( member_id
                 ,(member) => send_email( member.firstName, member_answers )
                 ,get_member_id_not_found_error( logger, res, member_id )
                 ,get_generic_db_error( logger, res )
             );
         }
-        ,get_member_id_not_found_error( logger, res, member_id )
-        ,get_generic_db_error( logger, res )
+        ,( err: Error ) => {
+            logger.error( "Error fetching member answers from Wild Apricot: "
+                + err.toString() );
+        }
     );
 }
 

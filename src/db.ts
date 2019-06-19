@@ -43,15 +43,6 @@ export interface SimpleMember
     photo: string;
 }
 
-export interface MemberAnswers
-{
-    answer1: string;
-    answer2: string;
-    answer3: string;
-    answer4: string;
-    answer5: string;
-}
-
 export interface DB
 {
     add_member(
@@ -157,13 +148,6 @@ export interface DB
         ,no_user_found_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): void;
-
-    get_member_answers(
-        member_id: string
-        ,success_callback: ( answers: MemberAnswers ) => void
-        ,no_member_found_callback: ( err: Error ) => void
-        ,error_callback: ( err: Error ) => void
-    ): boolean;
 
     session_store( express_session );
 /*

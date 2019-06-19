@@ -13,10 +13,22 @@ export interface WAMember
     is_active: boolean;
 }
 
+export interface WAMemberAnswers
+{
+    question: string;
+    answer: string;
+}
+
 export interface WA
 {
     fetch_pending_members(
         success_callback: (members: Array<WAMember>) => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
+
+    fetch_member_answers(
+        member_id: string
+        ,success_callback: (answers: Array<WAMemberAnswers> ) => void
         ,error_callback: ( err: Error ) => void
     ): void;
 }
@@ -30,6 +42,7 @@ export class WildApricot
     private oauth_token: string;
 
     private contact_uri: string;
+    private account_uri: string;
 
 
     constructor(
@@ -48,6 +61,12 @@ export class WildApricot
             + "/Accounts"
             + "/" + this.account_id
             + "/Contacts?$async=false";
+        this.account_uri = "https://"
+            + wa_domain
+            + wa_base_uri
+            + "/Accounts"
+            + "/" + this.account_id
+            + "/contacts";
     }
 
 
@@ -80,6 +99,50 @@ export class WildApricot
                         };
                     });
                     success_callback( members );
+                }
+                else {
+                    let err = new Error( "Error fetching WA contact info: "
+                        + error );
+                    error_callback( err );
+                }
+            });
+        };
+
+        this.fetch_oauth_token(
+            fetch
+            ,error_callback
+        );
+    }
+
+    public fetch_member_answers(
+        member_id: string
+        ,success_callback: (answers: Array<WAMemberAnswers> ) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO if we get an auth failure, force refetch of oauth token 
+        // and try again
+        let fetch = (oauth_token: string) => {
+            request.get( {
+                url: this.account_uri + "/" + member_id,
+                headers: {
+                    Accept: 'application/json'
+                },
+                auth: {
+                    bearer: oauth_token
+                }
+            }, (error, response, body) => {
+                if(! error && response.statusCode == 200 ) {
+                    let parsed_users = JSON.parse( body );
+
+                    // TODO get questions out of this
+                    let questions = parsed_users.FieldValues.map( (_) => {
+                        return {
+                            question: _.name
+                            ,answer: _.value
+                        };
+                    });
+                    success_callback( questions );
                 }
                 else {
                     let err = new Error( "Error fetching WA contact info: "

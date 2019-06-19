@@ -2,6 +2,7 @@ import * as request from "supertest";
 import * as server from "../app";
 import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
+import * as wa_api from "../src/wild_apricot_mock";
 
 
 describe( 'POST /v1/member/:member_id/send_group_signup_email', function () {
@@ -17,18 +18,39 @@ describe( 'POST /v1/member/:member_id/send_group_signup_email', function () {
                     ,phone: "15555551234"
                     ,email: test_email
                     ,photo: "https://example.com/"
-                },
-                member_questions: {
-                    answer1: "foo"
-                    ,answer2: "bar"
-                    ,answer3: "baz"
-                    ,answer4: "qux"
-                    ,answer5: "quux"
                 }
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+
+        let wa_mock = new wa_api.MockWA({
+            member_answers: {
+                "01": [
+                    {
+                        question: "foo"
+                        ,answer: "1"
+                    }
+                    ,{
+                        question: "foo"
+                        ,answer: "2"
+                    }
+                    ,{
+                        question: "foo"
+                        ,answer: "3"
+                    }
+                    ,{
+                        question: "foo"
+                        ,answer: "4"
+                    }
+                    ,{
+                        question: "foo"
+                        ,answer: "5"
+                    }
+                ]
+            }
+        });
+
+        server.start( db, null, wa_mock );
     });
 
     it( 'Sends the new member signup email for the group', function (done) {
