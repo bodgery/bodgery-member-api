@@ -360,6 +360,36 @@ paths:
       responses:
         '204':
           description: Signed member up for the mailing list
+  '/v1/member/:member_id/photo':
+    put:
+      tags:
+        - Members
+      summary: Set a member's photo
+      description: ''
+      operationId: ''
+      responses:
+        '204':
+          description: Member's photo is set
+        '404':
+          description: The given member ID was not found
+    get:
+      tags:
+        - Members
+      summary: Returns a member's photo
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          description: The member's photo
+        '404':
+          description: The member's photo was not found, or the given member ID was not found
+      requestBody:
+        content:
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+
 components:
   schemas:
     SimpleMemberData:
