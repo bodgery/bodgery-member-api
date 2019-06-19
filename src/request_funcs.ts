@@ -233,16 +233,24 @@ export function put_member_is_active( req, res, ctx: c.Context )
 
     let member_id = req.params.member_id;
     let is_active = req.body.is_active;
-    db.set_member_is_active( member_id, is_active
+    ctx.wa.set_member_active(
+        member_id, is_active
         ,() => {
-            logger.info( "Set is active: " + is_active );
-            res
-                .status( 200 )
-                .send()
-                .end();
+            db.set_member_is_active( member_id, is_active
+                ,() => {
+                    logger.info( "Set is active: " + is_active );
+                    res
+                        .status( 200 )
+                        .send()
+                        .end();
+                }
+                ,get_member_id_not_found_error( logger, res, member_id )
+                ,get_generic_db_error( logger, res )
+            );
+        },
+        ( err: Error ) => {
+            logger.error( "Error calling Wild Apricot: " + err.toString() );
         }
-        ,get_member_id_not_found_error( logger, res, member_id )
-        ,get_generic_db_error( logger, res )
     );
 }
 

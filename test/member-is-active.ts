@@ -3,9 +3,12 @@ import * as request from "supertest";
 import * as server from "../app";
 import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
+import * as wa_api from "../src/wild_apricot_mock";
 
 
 describe( '/v1/member/:member_id/is_active', function () {
+    let wa_mock: wa_api.MockWA;
+
     before( () => {
         let members = {
             "01": {
@@ -13,7 +16,16 @@ describe( '/v1/member/:member_id/is_active', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+
+        wa_mock = new wa_api.MockWA({
+            members: {
+                "01": {
+                    is_active: true
+                }
+            }
+        });
+
+        server.start( db, null, wa_mock );
     });
 
     it( 'Sets member status', function (done) {
@@ -26,6 +38,8 @@ describe( '/v1/member/:member_id/is_active', function () {
                     if( err ) done(err);
                     else {
                         assert( ! res.body, "Returned false" );
+                        assert( !  wa_mock.members["01"].is_active,
+                            "Set is_active on WA" );
                         done();
                     }
                 });

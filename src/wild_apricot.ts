@@ -31,6 +31,13 @@ export interface WA
         ,success_callback: (answers: Array<WAMemberAnswers> ) => void
         ,error_callback: ( err: Error ) => void
     ): void;
+
+    set_member_active(
+        member_id: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
 }
 
 
@@ -156,6 +163,17 @@ export class WildApricot
             fetch
             ,error_callback
         );
+    }
+
+    public set_member_active(
+        member_id: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO
+        success_callback();
     }
 
 
