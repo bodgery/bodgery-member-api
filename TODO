@@ -1,0 +1,2 @@
+* PostgreSQL tests are not ending the pool, which is causing those 
+  tests to hold mocha open
