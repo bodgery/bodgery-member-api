@@ -50,6 +50,41 @@ export class MockDB
         return true;
     }
 
+    set_member_photo(
+        member_id: string
+        ,path: string
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: (err: Error) => void
+    ): boolean
+    {
+        if( ! this.members[member_id] ){
+            this.members[member_id] = {};
+        }
+        this.members[member_id].photo = path;
+        success_callback();
+        return true;
+    }
+
+    get_member_photo(
+        member_id: string
+        ,success_callback: ( path: string ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        if( this.members[member_id].photo ) {
+            success_callback( this.members[member_id].photo );
+        }
+        else {
+            no_member_found_callback(
+                new Error( "No member found with ID " + member_id )
+            );
+        }
+
+        return true;
+    }
+
     put_member_address(
         member_id: string
         ,address: db_impl.USAddress

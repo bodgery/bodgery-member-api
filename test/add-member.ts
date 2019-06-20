@@ -19,7 +19,6 @@ describe( 'PUT /v1/member', function () {
                 ,lastName: "Foobar"
                 ,phone: "15551234"
                 ,email: "abe.foobar@example.com"
-                ,photo: "https://example.com/"
             })
             .expect( 204 )
             .end( function( err, res ) {

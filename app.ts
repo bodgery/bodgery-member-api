@@ -114,6 +114,10 @@ function setup_server_params( conf, db, logger )
 
     let server = express();
     server.use( bodyParser.json() );
+    server.use( bodyParser.raw({
+        type: "image/*"
+        ,limit: conf['photo_size_limit']
+    }) );
     server.use( bodyParser.urlencoded({ extended: true }) );
     server.use( express.static( 'public' ) );
     server.use( session( session_options ) );
@@ -171,6 +175,10 @@ function setup_server_routes(
         context_wrap( request_funcs.put_member_wildapricot ) );
     server.put( '/api/v1/member/:member_id/google_group_signup',
         context_wrap( request_funcs.put_member_google_group ) );
+    server.put( '/api/v1/member/:member_id/photo',
+        context_wrap( request_funcs.put_member_photo ) );
+    server.get( '/api/v1/member/:member_id/photo',
+        context_wrap( request_funcs.get_member_photo ) );
     server.get( '/api/v1/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
 

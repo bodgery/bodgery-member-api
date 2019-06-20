@@ -3,3 +3,4 @@ config.yaml
 built
 *.log
 google-credentials*
+test_data/photos/*

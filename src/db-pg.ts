@@ -96,7 +96,6 @@ export class PG
                     ,",last_name"
                     ,",phone"
                     ,",email"
-                    ,",photo"
                 ,"FROM members WHERE member_id = $1"
             ].join( " " )
             ,values: [ member_id ]
@@ -112,6 +111,70 @@ export class PG
             delete member.first_name;
             delete member.last_name;
             success_callback( member );
+        };
+
+        this.call_query(
+            query
+            ,main_callback
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
+
+        return true;
+    }
+
+    set_member_photo(
+        member_id: string
+        ,path: string
+        ,success_callback: () => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let query = {
+            name: "update-member-photo"
+            ,text: [
+                "UPDATE members"
+                ,"SET photo = $1"
+                ,"WHERE member_id = $2"
+            ].join( " " )
+            ,values: [
+                path
+                ,member_id
+            ]
+        };
+
+        this.call_query(
+            query
+            ,success_no_rows_callback_builder( success_callback )
+            ,no_rows_callback_builder( member_id, no_member_found_callback )
+            ,error_callback
+        );
+
+        return true;
+    }
+
+    get_member_photo(
+        member_id: string
+        ,success_callback: ( path: string ) => void
+        ,no_member_found_callback: ( err: Error ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let query = {
+            name: "get-member-photo"
+            ,text: [
+                "SELECT"
+                    ,"photo"
+                ,"FROM members WHERE member_id = $1"
+            ].join( " " )
+            ,values: [ member_id ]
+        };
+
+        let main_callback = (rows) => {
+            let member = rows[0];
+            let photo = member.photo;
+            success_callback( photo );
         };
 
         this.call_query(
@@ -513,7 +576,6 @@ export class PG
                 ,",first_name AS firstName"
                 ,",last_name AS lastName"
                 ,",full_name AS name"
-                ,",photo"
                 ,",phone"
                 ,",address1"
                 ,",address2"

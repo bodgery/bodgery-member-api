@@ -50,7 +50,6 @@ export function test_member_data (
         ,lastName: "Bar"
         ,phone: "555 123 4567"
         ,email: "foo@example.com"
-        ,photo: "file:///dev/null"
     };
     return member_data;
 }

@@ -5,6 +5,7 @@ import * as db_impl from "./db";
 import * as fs from "fs";
 import * as google from 'googleapis';
 import * as google_auth from 'google-auth-library';
+import * as shortid from "shortid";
 import * as valid from "./validation";
 import * as wa_api from "./wild_apricot";
 
@@ -107,7 +108,6 @@ export function put_member( req, res, ctx: c.Context )
             ,valid.isName( 'lastName' )
             ,valid.isUSPhone( 'phone' )
             ,valid.isPublicEmail( 'email' )
-            ,valid.isUrl( 'photo' )
          ]);
     }
     catch (err) {
@@ -708,6 +708,80 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
             logger.error( "Error fetching member answers from Wild Apricot: "
                 + err.toString() );
         }
+    );
+}
+
+export function put_member_photo( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+        valid.validate( req.body, [
+            valid.byteLengthLimit( ctx.conf['photo_size_limit'] )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params['member_id'];
+    let path = ctx.conf['photo_dir'] + "/" + shortid.generate();
+
+    let promises = [
+        new Promise( (resolve, reject) => fs.writeFile(
+            path
+            ,res.body
+            ,(err) => {
+                if( err ) reject( err );
+                else resolve();
+            })
+        )
+        ,new Promise( (resolve, reject) => db.set_member_photo(
+            member_id
+            ,path
+            ,resolve
+            ,(err) => reject( err )
+            ,(err) => reject( err )
+        ) )
+    ];
+
+    Promise.all( promises ).then( () => {
+        res
+            .status( 204 )
+            .end();
+    });
+}
+
+export function get_member_photo( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'member_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let member_id = req.params.member_id;
+    db.get_member_photo( member_id
+        ,(path: string) => {
+            fs.realpath( path, ( err, real_path ) => {
+                logger.info( "Member photo: " + real_path );
+                res
+                    .status( 200 )
+                    // TODO set content type based on image
+                    .set( 'Content-Type', 'image/jpeg' )
+                    .sendFile( real_path );
+            });
+        }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
     );
 }
 

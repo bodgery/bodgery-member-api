@@ -29,6 +29,10 @@ preferred_password_crypt_method: bcrypt_10
 session_secret: xxxx
 session_length_sec: 3600
 
+# Directory for storing photos. For development deployments, this can be 
+# test_data/photos/
+photo_dir: test_data/photos/
+
 # Wild Apricot API key. To generate a secret, you will need to setup a 
 # key in the Wild Apricot website. Someone with admin access on WA can 
 # follow the instructions at:

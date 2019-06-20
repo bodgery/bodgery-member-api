@@ -126,6 +126,19 @@ export let isBoolean = (field) => function (params) {
     }
 };
 
+export let byteLengthLimit = (limit) => function (param) {
+    let buf = Buffer.from( param );
+    let length = buf.toString( 'binary' ).length;
+
+    if( length > limit ) {
+        throw new Error( "Parameter is "
+            + length 
+            + " bytes, limit is "
+            + limit
+        );
+    }
+};
+
 
 /*
  * OK, let's talk about email validation. There's a big, long, scary looking 
