@@ -4,6 +4,9 @@ import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
 import * as wa_api from "../src/wild_apricot_mock";
 
+const PHOTO_DIR = "test_data/photos/";
+const TEST_PHOTO = "test_data/bodgery_logo.jpg";
+
 
 describe( 'POST /v1/member/:member_id/send_group_signup_email', function () {
     let test_email;
@@ -17,11 +20,14 @@ describe( 'POST /v1/member/:member_id/send_group_signup_email', function () {
                     ,lastName: "Bar"
                     ,phone: "15555551234"
                     ,email: test_email
-                    ,photo: "https://example.com/"
                 }
+                ,photo: TEST_PHOTO
             }
         };
         let db = new mock_db.MockDB( members, {} );
+
+        let conf = server.default_conf();
+        conf['photo_dir'] = PHOTO_DIR;
 
         let wa_mock = new wa_api.MockWA({
             member_answers: {
@@ -50,7 +56,7 @@ describe( 'POST /v1/member/:member_id/send_group_signup_email', function () {
             }
         });
 
-        server.start( db, null, wa_mock );
+        server.start( db, conf, wa_mock );
     });
 
     it( 'Sends the new member signup email for the group', function (done) {

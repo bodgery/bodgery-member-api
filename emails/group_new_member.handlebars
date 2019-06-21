@@ -1,6 +1,10 @@
 {{>basic_email_headers}}
+Content-Type: multipart/mixed; boundary="theunbound"
 
-{{photo}}
+--theunbound
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
 
 {{first_name}}, how long have you lived in Madison?
 {{answer1}}
@@ -16,3 +20,11 @@ Are you able/willing to teach something?
  
 Other comments about yourself?
 {{answer5}}
+
+
+--theunbound
+Content-Type: image/jpeg; name="{{first_name}}.jpg"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline; filename="{{first_name}}.jpg"
+
+{{photo_base64}}

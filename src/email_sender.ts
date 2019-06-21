@@ -1,4 +1,5 @@
 import * as google from 'googleapis';
+import * as fs from 'fs';
 import * as oauth from 'google-auth-library';
 import * as Handlebars from "./handlebars-preloader";
 import * as wa_api from './wild_apricot';
@@ -90,6 +91,7 @@ export class Email
         ,from_name: string
         ,from_email: string
         ,member_first_name: string
+        ,photo_path: string
         ,answers: Array<wa_api.WAMemberAnswers>
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
@@ -105,41 +107,63 @@ export class Email
             auth: this.auth
         });
 
-        const message = email_tmpls.execute( 'group_new_member', {
-            from_name: args.from_name
-            ,from_email: args.from_email
-            ,to_name: args.to_name
-            ,to_email: args.to_email
-            ,first_name: args.member_first_name
-            ,answer1: args.answers[0].answer
-            ,answer2: args.answers[1].answer
-            ,answer3: args.answers[2].answer
-            ,answer4: args.answers[3].answer
-            ,answer5: args.answers[4].answer
-            ,subject: "Welcome to our new member, " + args.member_first_name
-        });
-        // TODO below should be wrapped into send() private method
-        const encoded_message = Buffer.from( message )
-            .toString( 'base64' )
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
+        const photo_base64 = this.encode_file_attachment( args.photo_path
+            ,(base64_photo) => {
+                const message = email_tmpls.execute( 'group_new_member', {
+                    from_name: args.from_name
+                    ,from_email: args.from_email
+                    ,to_name: args.to_name
+                    ,to_email: args.to_email
+                    ,first_name: args.member_first_name
+                    ,photo_base64: base64_photo
+                    ,answer1: args.answers[0].answer
+                    ,answer2: args.answers[1].answer
+                    ,answer3: args.answers[2].answer
+                    ,answer4: args.answers[3].answer
+                    ,answer5: args.answers[4].answer
+                    ,subject: "Welcome to our new member, " + args.member_first_name
+                });
+                // TODO below should be wrapped into send() private method
+                const encoded_message = Buffer.from( message )
+                    .toString( 'base64' )
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
 
-        gmail.users.messages.send(
-            {
-                userId: 'me'
-                ,requestBody: {
-                    raw: encoded_message
-                }
+                gmail.users.messages.send(
+                    {
+                        userId: 'me'
+                        ,requestBody: {
+                            raw: encoded_message
+                        }
+                    }
+                    ,(err) => {
+                        if( err ) {
+                            args.error_callback( err );
+                        }
+                        else {
+                            args.success_callback();
+                        }
+                    }
+                );
             }
-            ,(err) => {
-                if( err ) {
-                    args.error_callback( err );
-                }
-                else {
-                    args.success_callback();
-                }
-            }
+            ,(err) => args.error_callback( err )
         );
+    }
+
+
+    private encode_file_attachment(
+        photo_path: string
+        ,success_callback: ( encoded_photo: string ) => void
+        ,error_callback: (err: Error) => void
+    ): void
+    {
+        fs.readFile( photo_path, (err, data) => {
+            if( err ) error_callback( err );
+            else {
+                const encoded_photo = data.toString( 'base64' );
+                success_callback( encoded_photo );
+            }
+        });
     }
 }
