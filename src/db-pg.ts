@@ -441,6 +441,36 @@ export class PG
         return true;
     }
 
+    log_rfid_entry(
+        rfid: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let query = {
+            name: "insert-rfid-log"
+            ,text: [
+                "INSERT INTO rfid_log"
+                ,"(rfid, is_active)"
+                ,"VALUES ($1, $2)"
+            ].join( " " )
+            ,values: [
+                rfid
+                ,is_active
+            ]
+        };
+
+        this.call_query(
+            query
+            ,success_callback
+            ,null
+            ,error_callback
+        );
+        return true;
+
+    }
+
     add_user(
         username: string
         ,password: string

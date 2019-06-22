@@ -33,4 +33,24 @@ describe( 'Validate booleans', function () {
         if( error ) done();
         else done( new Error( "Validation was supposed to fail for booleans" ) );
     });
+
+    it( 'is text booleans', function (done) {
+        var error;
+
+        try {
+            validation.validate( {
+                value: "true"
+                ,value2: "false"
+            }, [
+                validation.isBoolean( 'value' )
+                ,validation.isBoolean( 'value2' )
+            ]);
+        }
+        catch(err) {
+            error = err;
+        }
+
+        if( error ) done( error );
+        else done();
+    });
 });

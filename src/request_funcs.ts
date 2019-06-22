@@ -355,6 +355,35 @@ export function get_member_rfid( req, res, ctx: c.Context )
     );
 }
 
+export function post_log_rfid( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.params, [
+            valid.isInteger( 'rfid' )
+            ,valid.isBoolean( 'is_allowed' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let rfid = req.params.rfid;
+    let is_allowed = (req.params.is_allowed === 'true');
+
+    db.log_rfid_entry( rfid, is_allowed
+        ,() => {
+            logger.info( "RFID logged" );
+            res
+                .status( 200 )
+                .send()
+                .end();
+        }
+        ,get_generic_db_error( logger, res )
+    );
+}
+
 export function put_member_wildapricot( req, res, ctx: c.Context )
 {
     let logger = ctx.logger;

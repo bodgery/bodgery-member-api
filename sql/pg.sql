@@ -29,3 +29,10 @@ CREATE TABLE "users" (
     password_salt TEXT NOT NULL,
     password_storage TEXT NOT NULL
 );
+
+CREATE TABLE "rfid_log" (
+    id SERIAL PRIMARY KEY,
+    rfid TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL,
+    log_timestamp TIMESTAMP NOT NULL DEFAULT NOW()
+);

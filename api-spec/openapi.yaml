@@ -337,6 +337,16 @@ paths:
           description: RFID not found
         '500':
           description: Server error
+  '/v1/rfid/log_entry/:rfid/:is_allowed':
+    post:
+      tags:
+        - Members
+      summary: Log the entry of an RFID tag
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          description: Logged
   '/v1/member/:member_id/wildapricot':
     put:
       tags:

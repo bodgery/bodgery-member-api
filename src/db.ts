@@ -133,6 +133,13 @@ export interface DB
         ,error_callback: ( err: Error ) => void
     ): boolean;
 
+    log_rfid_entry(
+        rfid: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean;
+
     add_user(
         username: string
         ,password: string

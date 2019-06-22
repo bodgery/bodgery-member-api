@@ -44,12 +44,13 @@ export function test_member_data (
     rfid: string = shortid.generate()
 ): db.SimpleMember
 {
+    let email = shortid.generate() + "@example.com";
     let member_data = {
         rfid: rfid
         ,firstName: "Foo"
         ,lastName: "Bar"
-        ,phone: "555 123 4567"
-        ,email: "foo@example.com"
+        ,phone: "555 555 4567"
+        ,email: email
     };
     return member_data;
 }

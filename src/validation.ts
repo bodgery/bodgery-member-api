@@ -116,7 +116,11 @@ export let isUSAddress = () => function (params) {
 };
 
 export let isBoolean = (field) => function (params) {
-    if( "boolean" != typeof params[field] ) {
+    if(! ( 
+        ("boolean" == typeof params[field])
+        || ( params[field] === "true" )
+        || ( params[field] === "false" )
+    )) {
         throw new Error( "Field '"
             + field
             + "' was supposed to be a boolean"

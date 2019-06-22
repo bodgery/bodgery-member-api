@@ -5,12 +5,18 @@ export class MockDB
 {
     members: Object = {};
     users: Object = {};
+    rfid_log: Array<[ string, boolean ]>;
 
 
-    constructor( members: Object, users: Object )
+    constructor(
+        members: Object
+        ,users: Object
+        ,rfid_log?: Array<[ string, boolean ]>
+    )
     {
         this.members = members;
         this.users = users;
+        this.rfid_log = rfid_log || [];
     }
 
 
@@ -266,6 +272,18 @@ export class MockDB
             no_member_found_callback();
         }
 
+        return true;
+    }
+
+    log_rfid_entry(
+        rfid: string
+        ,is_active: boolean
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        this.rfid_log.push([ rfid, is_active ]);
+        success_callback();
         return true;
     }
 
