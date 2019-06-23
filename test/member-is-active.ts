@@ -12,7 +12,7 @@ describe( '/v1/member/:member_id/is_active', function () {
     before( () => {
         let members = {
             "01": {
-                is_active: true
+                is_active: false
             }
         };
         let db = new mock_db.MockDB( members, {} );
@@ -20,7 +20,7 @@ describe( '/v1/member/:member_id/is_active', function () {
         wa_mock = new wa_api.MockWA({
             members: {
                 "01": {
-                    is_active: true
+                    is_active: false
                 }
             }
         });
@@ -37,8 +37,8 @@ describe( '/v1/member/:member_id/is_active', function () {
                 .end( function( err, res ) {
                     if( err ) done(err);
                     else {
-                        assert( ! res.body, "Returned false" );
-                        assert( !  wa_mock.members["01"].is_active,
+                        assert( res.body, "Returned true" );
+                        assert( wa_mock.members["01"].is_active,
                             "Set is_active on WA" );
                         done();
                     }
@@ -47,7 +47,7 @@ describe( '/v1/member/:member_id/is_active', function () {
 
         request( server.SERVER )
             .put( '/api/v1/member/01/is_active' )
-            .send({ is_active: false })
+            .send({ is_active: true })
             .expect( 200 )
             .end( function( err, res ) {
                 if( err ) done(err);

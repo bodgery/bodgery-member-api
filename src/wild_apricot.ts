@@ -1,7 +1,7 @@
 import * as request from "request";
 
 const wa_domain = "api.wildapricot.org";
-const wa_base_uri = "/v2";
+const wa_base_uri = "/v2.1";
 const wa_oauth_uri = "https://oauth.wildapricot.org/auth/token";
 
 
@@ -34,7 +34,6 @@ export interface WA
 
     set_member_active(
         member_id: string
-        ,is_active: boolean
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): void;
@@ -50,6 +49,7 @@ export class WildApricot
 
     private contact_uri: string;
     private account_uri: string;
+    private approve_uri: string;
 
 
     constructor(
@@ -74,6 +74,12 @@ export class WildApricot
             + "/accounts"
             + "/" + this.account_id
             + "/contacts";
+        this.approve_uri = "https://"
+            + wa_domain
+            + wa_base_uri
+            + "/rpc"
+            + "/" + this.account_id
+            + "/ApprovePendingMembership";
     }
 
 
@@ -174,13 +180,32 @@ export class WildApricot
 
     public set_member_active(
         member_id: string
-        ,is_active: boolean
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): void
     {
-        // TODO
-        success_callback();
+        // TODO if we get an auth failure, force refetch of oauth token 
+        // and try again
+        let fetch = (oauth_token: string) => {
+            request.get( {
+                url: this.approve_uri + "?contactId=" + member_id,
+                headers: {
+                    Accept: 'application/json'
+                },
+                auth: {
+                    bearer: oauth_token
+                }
+            }, (error, response, body) => {
+                if(! error && response.statusCode == 200 ) {
+                    success_callback();
+                }
+                else {
+                    let err = new Error( "Error setting WA member to active: "
+                        + error );
+                    error_callback( err );
+                }
+            });
+        };
     }
 
 

@@ -221,9 +221,6 @@ export function put_member_is_active( req, res, ctx: c.Context )
         valid.validate( req.params, [
             valid.isInteger( 'member_id' )
         ]);
-        valid.validate( req.body, [
-            valid.isBoolean( 'is_active' )
-        ]);
     }
     catch (err) {
         handle_generic_validation_error( logger, res, err );
@@ -232,13 +229,12 @@ export function put_member_is_active( req, res, ctx: c.Context )
 
 
     let member_id = req.params.member_id;
-    let is_active = req.body.is_active;
     ctx.wa.set_member_active(
-        member_id, is_active
+        member_id
         ,() => {
-            db.set_member_is_active( member_id, is_active
+            db.set_member_is_active( member_id, true
                 ,() => {
-                    logger.info( "Set is active: " + is_active );
+                    logger.info( "Set is active on member: " + member_id );
                     res
                         .status( 200 )
                         .send()

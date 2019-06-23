@@ -58,12 +58,11 @@ export class MockWA
 
     public set_member_active(
         member_id: string
-        ,is_active: boolean
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): void
     {
-        this.members[member_id].is_active = is_active;
+        this.members[member_id].is_active = true;
         success_callback();
     }
 }
