@@ -12,6 +12,7 @@ describe( 'RFID management', function () {
 
 
     before( () => {
+        process.env['TEST_RUN'] = "1";
         let members = {
             "01": {
                 is_active: true
@@ -72,5 +73,6 @@ describe( 'RFID management', function () {
 
     after( () => {
         server.stop();
+        delete process.env['TEST_RUN'];
     });
 });

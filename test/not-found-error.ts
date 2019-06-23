@@ -3,6 +3,10 @@ import * as server from "../app";
 
 
 describe( "Not found error", function () {
+    before( () => {
+        process.env['TEST_RUN'] = "1";
+    });
+
     it( "Checks for not found error", function (done) {
         request( server.SERVER )
             .get( '/not/found' )
@@ -12,5 +16,9 @@ describe( "Not found error", function () {
                 if(err) throw err;
                 done();
             });
+    });
+
+    after( () => {
+        delete process.env['TEST_RUN'];
     });
 });

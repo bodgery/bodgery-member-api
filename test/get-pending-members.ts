@@ -8,6 +8,7 @@ import * as wa_api from "../src/wild_apricot_mock";
 
 describe( 'GET /v1/members/pending', function() {
     before( () => {
+        process.env['TEST_RUN'] = "1";
         let wa_mock = new wa_api.MockWA({
             // TODO fill in pending and existing members
             pending: [
@@ -72,5 +73,6 @@ describe( 'GET /v1/members/pending', function() {
 
     after( () => {
         server.stop();
+        delete process.env['TEST_RUN'];
     });
 });

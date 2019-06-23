@@ -11,6 +11,7 @@ const TEST_PHOTO = "test_data/bodgery_logo.jpg";
 
 describe( 'PUT /v1/member/:member_id/photo', function () {
     before( () => {
+        process.env['TEST_RUN'] = "1";
         let members = {
             "01": {
                 photo: null
@@ -62,6 +63,7 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
 
     after( (done) => {
         server.stop();
+        delete process.env['TEST_RUN'];
 
         // Just delete everything in the test photo dir
         fs.readdir( PHOTO_DIR, (err, files) => {

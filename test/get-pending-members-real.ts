@@ -8,6 +8,7 @@ import * as wa_api from "../src/wild_apricot_mock";
 
 describe( 'GET /v1/members/pending', function() {
     before( () => {
+        process.env['TEST_RUN'] = "1"
         let db = new mock_db.MockDB( null, null );
         server.start( db );
     });
@@ -31,5 +32,6 @@ describe( 'GET /v1/members/pending', function() {
 
     after( () => {
         server.stop();
+        delete process.env['TEST_RUN'];
     });
 });

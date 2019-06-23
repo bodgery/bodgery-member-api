@@ -6,6 +6,7 @@ import * as mock_db from "../src/db-mock";
 
 describe( 'PUT /v1/member', function () {
     before( () => {
+        process.env['TEST_RUN'] = "1";
         let db = new mock_db.MockDB([], {});
         server.start( db );
     });
@@ -29,5 +30,6 @@ describe( 'PUT /v1/member', function () {
 
     after( () => {
         server.stop();
+        delete process.env['TEST_RUN'];
     });
 });

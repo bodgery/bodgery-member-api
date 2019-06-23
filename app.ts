@@ -14,6 +14,13 @@ import * as pg from "./src/db-pg";
 import * as wa_api from "./src/wild_apricot";
 
 
+// The routes listed here can be accessed by a user who isn't logged in
+const ALLOW_UNKNOWN_USER_ROUTES = [
+    '/user/login'
+    ,'/user/is-logged-in'
+];
+
+
 let make_logger = (logger) => {
     let request_id = shortid.generate();
     let log_func = function (level, args) {
@@ -95,6 +102,31 @@ function init_server(
     return server;
 }
 
+function authorization( req, res, next )
+{
+    let route = req.path;
+
+    // Eventually, we'll have more sophisticated checking for users accessing 
+    // individual routes, but for now, any logged in user can access anything
+    if( req.session.is_logged_in ) {
+        next();
+    }
+    // Allow through the whitelisted routes
+    else if( 0 < ALLOW_UNKNOWN_USER_ROUTES.filter(
+        (_) => _ === route
+    ).length ) {
+        next();
+    }
+    // Tests can set an env var to bypass this check
+    else if( process.env['TEST_RUN'] ) {
+        next();
+    }
+    // Everything else gets a 403 Forbidden
+    else {
+        res.send(403);
+    }
+}
+
 function setup_server_params( conf, db, logger )
 {
     let use_secure_cookie = (conf['deployment_type'] == "prod");
@@ -113,6 +145,8 @@ function setup_server_params( conf, db, logger )
     if(session_store) session_options['store'] = session_store;
 
     let server = express();
+    server.use( session( session_options ) );
+    server.use( authorization );
     server.use( bodyParser.json() );
     server.use( bodyParser.raw({
         type: "image/*"
@@ -120,7 +154,6 @@ function setup_server_params( conf, db, logger )
     }) );
     server.use( bodyParser.urlencoded({ extended: true }) );
     server.use( express.static( 'public' ) );
-    server.use( session( session_options ) );
 
     server.engine( 'handlebars', handlebars({
         defaultLayout: 'main'

@@ -8,6 +8,7 @@ import * as mock_db from "../src/db-mock";
 describe( 'PUT /v1/member/:member_id/wildapricot', function () {
     let members;
     before( () => {
+        process.env['TEST_RUN'] = "1";
         members = {
             "01": {
                 full_data: {
@@ -39,5 +40,6 @@ describe( 'PUT /v1/member/:member_id/wildapricot', function () {
 
     after( () => {
         server.stop();
+        delete process.env['TEST_RUN'];
     });
 });

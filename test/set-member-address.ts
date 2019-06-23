@@ -6,6 +6,7 @@ import * as mock_db from "../src/db-mock";
 
 describe( 'PUT /v1/member/:member_id/address', function () {
     before( () => {
+        process.env['TEST_RUN'] = "1";
         let members = {
             "01": {
                 simple_data: {
@@ -41,5 +42,6 @@ describe( 'PUT /v1/member/:member_id/address', function () {
 
     after( () => {
         server.stop();
+        delete process.env['TEST_RUN'];
     });
 });
