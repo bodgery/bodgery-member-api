@@ -71,7 +71,7 @@ export class WildApricot
         this.account_uri = "https://"
             + wa_domain
             + wa_base_uri
-            + "/Accounts"
+            + "/accounts"
             + "/" + this.account_id
             + "/contacts";
     }
@@ -142,13 +142,20 @@ export class WildApricot
                 if(! error && response.statusCode == 200 ) {
                     let parsed_users = JSON.parse( body );
 
-                    // TODO get questions out of this
-                    let questions = parsed_users.FieldValues.map( (_) => {
-                        return {
-                            question: _.name
-                            ,answer: _.value
-                        };
-                    });
+                    let questions = parsed_users.FieldValues
+                        .filter( (_) => {
+                            return 
+                                (_ === "How long have you lived in Madison?")
+                                || (_ === "What do you like to make?")
+                                || (_ === "What would you like to learn?")
+                                || (_ === "What would you like to learn?")
+                                || (_ === "Other comments about yourself?")
+                        } ).map( (_) => {
+                            return {
+                                question: _['FieldName']
+                                ,answer: _['Value']
+                            };
+                        } );
                     success_callback( questions );
                 }
                 else {
