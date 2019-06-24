@@ -16,7 +16,8 @@ import * as wa_api from "./src/wild_apricot";
 
 // The routes listed here can be accessed by a user who isn't logged in
 const ALLOW_UNKNOWN_USER_ROUTES = [
-    '/user/login'
+    '/'
+    ,'/user/login'
     ,'/user/is-logged-in'
 ];
 

@@ -45,10 +45,28 @@ describe( "User authorization", function () {
     });
 
     it( 'Logs in, then tries to access a secure page', (done) => {
+        let login;
         let access_pending;
         let cookie;
 
         let start = () => {
+            request( server.SERVER )
+                .get( '/' )
+                .set( trust_header_name, trust_header_value )
+                .send({
+                    username: username
+                    ,password: password
+                })
+                .expect( 200 )
+                .expect( 'set-cookie', /=/ )
+                .end( (err, res) => {
+                    if(err) throw err;
+                    login()
+                });
+
+        };
+
+        login = () => {
             request( server.SERVER )
                 .post( '/user/login' )
                 .set( trust_header_name, trust_header_value )
