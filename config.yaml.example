@@ -27,7 +27,7 @@ preferred_password_crypt_method: bcrypt_10
 #
 # And paste the hex string output as the session_secret value.
 session_secret: xxxx
-session_length_sec: 3600
+session_length_sec: 3600000
 
 # Directory for storing photos. For development deployments, this can be 
 # test_data/photos/
