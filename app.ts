@@ -19,7 +19,9 @@ const ALLOW_UNKNOWN_USER_ROUTES = [
     '/'
     ,'/user/login'
     ,'/user/is-logged-in'
-];
+    ,'/js/.*'
+    ,'/css/.*'
+].map( (_) => new RegExp( "^" + _ + "$" ) );
 
 
 let make_logger = (logger) => {
@@ -103,29 +105,37 @@ function init_server(
     return server;
 }
 
-function authorization( req, res, next )
+function authorization( logger )
 {
-    let route = req.path;
+    return (req, res, next ) => {
+        let route = req.path;
 
-    // Eventually, we'll have more sophisticated checking for users accessing 
-    // individual routes, but for now, any logged in user can access anything
-    if( req.session.is_logged_in ) {
-        next();
-    }
-    // Allow through the whitelisted routes
-    else if( 0 < ALLOW_UNKNOWN_USER_ROUTES.filter(
-        (_) => _ === route
-    ).length ) {
-        next();
-    }
-    // Tests can set an env var to bypass this check
-    else if( process.env['TEST_RUN'] ) {
-        next();
-    }
-    // Everything else gets a 403 Forbidden
-    else {
-        res.send(403);
-    }
+        logger.info( "Checking user authorization" );
+        // Eventually, we'll have more sophisticated checking for users 
+        // accessing individual routes, but for now, any logged in user can 
+        // access anything
+        if( req.session.is_logged_in ) {
+            logger.info( "User is logged in, allowing" );
+            next();
+        }
+        // Allow through the whitelisted routes
+        else if( 0 < ALLOW_UNKNOWN_USER_ROUTES.filter(
+            (_) => route.match( _ )
+        ).length ) {
+            logger.info( "Route is globally allowed" );
+            next();
+        }
+        // Tests can set an env var to bypass this check
+        else if( process.env['TEST_RUN'] ) {
+            logger.info( "Server in test run mode, allowing" );
+            next();
+        }
+        // Everything else gets a 403 Forbidden
+        else {
+            logger.error( "User not allowed to access " + route );
+            res.send(403);
+        }
+    };
 }
 
 function setup_server_params( conf, db, logger )
@@ -147,7 +157,7 @@ function setup_server_params( conf, db, logger )
 
     let server = express();
     server.use( session( session_options ) );
-    server.use( authorization );
+    server.use( authorization( logger ) );
     server.use( bodyParser.json() );
     server.use( bodyParser.raw({
         type: "image/*"

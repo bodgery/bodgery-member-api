@@ -44,7 +44,7 @@ describe( "User authorization", function () {
             });
     });
 
-    it( 'Logs in, then tries to access a secure page', (done) => {
+    it( 'Gets to login page, logs in, then tries to access a secure page', (done) => {
         let login;
         let access_pending;
         let cookie;
@@ -96,6 +96,28 @@ describe( "User authorization", function () {
         };
 
         start();
+    });
+
+    it( 'Checks that we can access static css files without logging in', (done) => {
+        request( server.SERVER )
+            .get( '/css/basic.css' )
+            .set( trust_header_name, trust_header_value )
+            .expect( 200 )
+            .end( (err, res) => {
+                if(err) throw err;
+                else done();
+            });
+    });
+
+    it( 'Checks that we can access static js files without logging in', (done) => {
+        request( server.SERVER )
+            .get( '/js/jquery-3.4.1.min.js' )
+            .set( trust_header_name, trust_header_value )
+            .expect( 200 )
+            .end( (err, res) => {
+                if(err) throw err;
+                else done();
+            });
     });
 
     after( () => {
