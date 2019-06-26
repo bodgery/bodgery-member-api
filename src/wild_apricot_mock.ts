@@ -65,4 +65,16 @@ export class MockWA
         this.members[member_id].is_active = true;
         success_callback();
     }
+
+    public fetch_member_data(
+        wa_member_id: number
+        ,success_callback: (member: WAMember) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let member = this.members[wa_member_id];
+        member['first_name'] = "Johnson";
+        member['last_name'] = "McHuman";
+        success_callback( member );
+    }
 }

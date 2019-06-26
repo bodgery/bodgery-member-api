@@ -603,13 +603,22 @@ export function member_signup( req, res, ctx: c.Context )
     }
 
     let wa_id = req.query['wa_id'];
-    // TODO fetch full member data from WA
-
-    let render = tmpl_view( "member-signup", {
-        name: null
-        ,wa_id: wa_id
-    }, [], 200 );
-    render( req, res, ctx );
+    let wa = ctx.wa;
+    wa.fetch_member_data(
+        wa_id
+        ,(member) => {
+            let render = tmpl_view( "member-signup", {
+                name: member['first_name'] + " " + member['last_name']
+                ,wa_id: wa_id
+            }, [], 200 );
+            render( req, res, ctx );
+        }
+        ,(err) => {
+            logger.info( "Error fetching WA info for member <" + wa_id + ">: "
+                + err.toString() );
+            res.sendStatus( 500 );
+        }
+    );
 }
 
 export function post_member_signup_email( req, res, ctx: c.Context )

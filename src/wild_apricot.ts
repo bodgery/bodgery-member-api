@@ -26,6 +26,12 @@ export interface WA
         ,error_callback: ( err: Error ) => void
     ): void;
 
+    fetch_member_data(
+        wa_member_id: number
+        ,success_callback: (member: WAMember) => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
+
     fetch_member_answers(
         member_id: string
         ,success_callback: (answers: Array<WAMemberAnswers> ) => void
@@ -114,8 +120,8 @@ export class WildApricot
                     success_callback( members );
                 }
                 else {
-                    let err = new Error( "Error fetching WA contact info: "
-                        + error );
+                    let err = new Error( "Error fetching WA contact info"
+                        + ": " + error );
                     error_callback( err );
                 }
             });
@@ -154,7 +160,7 @@ export class WildApricot
                                 (_ === "How long have you lived in Madison?")
                                 || (_ === "What do you like to make?")
                                 || (_ === "What would you like to learn?")
-                                || (_ === "What would you like to learn?")
+                                || (_ === "Are you able/willing to teach something?")
                                 || (_ === "Other comments about yourself?")
                         } ).map( (_) => {
                             return {
@@ -208,6 +214,49 @@ export class WildApricot
         };
     }
 
+    public fetch_member_data(
+        wa_member_id: number
+        ,success_callback: (member: WAMember) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO if we get an auth failure, force refetch of oauth token 
+        // and try again
+        let fetch = (oauth_token: string) => {
+            request.get( {
+                url: this.account_uri + "/" + wa_member_id,
+                headers: {
+                    Accept: 'application/json'
+                },
+                auth: {
+                    bearer: oauth_token
+                }
+            }, (error, response, body) => {
+                if(! error && response.statusCode == 200 ) {
+                    let parsed_users = JSON.parse( body );
+
+                    let member_data = {
+                        wild_apricot_id: wa_member_id
+                        ,first_name: parsed_users['FirstName']
+                        ,last_name: parsed_users['LastName']
+                        ,is_active: parsed_users['MembershipEnabled']
+                    };
+                    success_callback( member_data );
+                }
+                else {
+                    let err = new Error( "Error fetching WA contact info: "
+                        + error );
+                    error_callback( err );
+                }
+            });
+        };
+
+        this.fetch_oauth_token(
+            fetch
+            ,error_callback
+        );
+    }
+
 
     private fetch_oauth_token(
         success_callback: ( token: string ) => void
@@ -238,7 +287,9 @@ export class WildApricot
                 }
                 else {
                     error_callback( new Error( "Error fetching OAuth token"
-                        + " from Wild Apricot: " + error ) );
+                        + " from Wild Apricot"
+                        + " (HTTP status " + response.statusCode + ")"
+                        + ": " + error ) );
                 }
             });
         }
