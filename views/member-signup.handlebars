@@ -136,29 +136,19 @@ function begin_upload_photo( member_id )
 
 function begin_google( member_id )
 {
-    // TODO need to signup for multiple lists
-    return new Promise( function( resolve, reject ) {
-        $( "#google_activate_bullet" ).text( "⌛" );
-        $( "#google_activate_bullet" ).text( "✓" );
-        resolve();
-    });
+    $( "#google_activate_bullet" ).text( waiting_char );
 
-
-    return new Promise( function( resolve, reject ) {
-        $( "#google_activate_activate_bullet" ).text( waiting_char );
-
-        $.ajax( "/api/v1/member/" + member_id + "/list/" + "foo", {
-            "type": "PUT",
-            "error": function (jqXHR, str, exception) {
-                $( "#google_activate_bullet" ).text( fail_char );
-                reject( new Error( "Error signing up for group: "
-                    + str ) );
-            },
-            "success": function (data, str, jqXHR) {
-                $( "#google_activate_bullet" ).text( success_char );
-                resolve();
-            }
-        });
+    $.ajax( "/api/v1/member/" + member_id + "/google_group_signup", {
+        "type": "PUT",
+        "error": function (jqXHR, str, exception) {
+            $( "#google_activate_bullet" ).text( fail_char );
+            reject( new Error( "Error signing up for group " + list + ": "
+                + str ) );
+        },
+        "success": function (data, str, jqXHR) {
+            $( "#google_activate_bullet" ).text( success_char );
+            resolve();
+        }
     });
 }
 
