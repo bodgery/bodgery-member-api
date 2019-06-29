@@ -74,7 +74,7 @@ export let isInteger =
     (field, allowNull = false) => matchSingleField( field, /^-?[0-9]*$/, 
         "integer", allowNull );
 export let isName =
-    (field, allowNull = false) => matchSingleField( field, /^[A-Za-z]+$/,
+    (field, allowNull = false) => matchSingleField( field, /^[A-Za-z0-9]+$/,
         "name", allowNull );
 export let isWords =
     (field, allowNull = false ) => matchSingleField( field, /^[A-Za-z0-9\s]*$/, 
@@ -160,3 +160,8 @@ export let byteLengthLimit = (limit) => function (param) {
  */
  export let isPublicEmail = (field, allowNull = false) => matchSingleField(
      field, /^[^\s>]+@[^\s>]+\.[^\s>]+$/, "email", allowNull );
+
+// Taken from:
+// https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid
+export let isUUID = (field, allowNull = false) => matchSingleField(
+     field, /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, "email", allowNull );

@@ -7,15 +7,15 @@ import * as mock_db from "../src/db-mock";
 
 const PHOTO_DIR = "test_data/photos/";
 const TEST_PHOTO = "test_data/bodgery_logo.jpg";
+const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 
 
 describe( 'PUT /v1/member/:member_id/photo', function () {
     before( () => {
         process.env['TEST_RUN'] = "1";
-        let members = {
-            "01": {
-                photo: null
-            }
+        let members = {};
+        members[uuid] = {
+            photo: null
         };
 
         let conf = server.default_conf();
@@ -28,7 +28,7 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
     it( 'Sets a member photo', function (done) {
         let check_photo = () => {
             request( server.SERVER )
-                .get( "/api/v1/member/01/photo" )
+                .get( "/api/v1/member/" + uuid + "/photo" )
                 .send()
                 .expect( 200 )
                 .expect( function( res ) {
@@ -45,7 +45,7 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
             if( err ) done(err);
             else {
                 request( server.SERVER )
-                    .put( '/api/v1/member/01/photo' )
+                    .put( '/api/v1/member/' + uuid + '/photo' )
                     .set( 'Content-Type', 'image/jpeg' )
                     .send( data.toString( 'binary' ) )
                     .expect( 204 )

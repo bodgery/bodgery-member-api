@@ -4,21 +4,22 @@ import * as server from "../app";
 import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
 
+const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
+
 
 describe( 'GET /v1/member', function () {
     before( () => {
         process.env['TEST_RUN'] = "1";
 
-        let members = {
-            "01": {
-                simple_data: {
-                    rfid: "01"
-                    ,firstName: "Foo"
-                    ,lastName: "Bar"
-                    ,phone: "15555551234"
-                    ,email: "foo.bar@example.com"
-                    ,photo: "https://example.com/"
-                }
+        let members = {}
+        members[uuid] = {
+            simple_data: {
+                rfid: "01"
+                ,firstName: "Foo"
+                ,lastName: "Bar"
+                ,phone: "15555551234"
+                ,email: "foo.bar@example.com"
+                ,photo: "https://example.com/"
             }
         };
         let db = new mock_db.MockDB( members, {} );
@@ -27,7 +28,7 @@ describe( 'GET /v1/member', function () {
 
     it( 'Fetches a member', function (done) {
         request( server.SERVER )
-            .get( '/api/v1/member/01' )
+            .get( '/api/v1/member/' + uuid )
             .send()
             .expect( 200 )
             .expect( function(res) {

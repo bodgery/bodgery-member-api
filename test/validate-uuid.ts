@@ -1,13 +1,13 @@
 var validation = require( '../src/validation.ts' );
 
 
-describe( 'Validate name', function () {
-    it( 'is a name', function (done) {
+describe( 'Validate UUID', function () {
+    it( 'is a uuid', function (done) {
         var error;
 
         try {
-            validation.validate( { value: "foo1" }, [
-                validation.isName( 'value' ),
+            validation.validate( { value: "c56a4180-65aa-42ec-a945-5fd21dec0538" }, [
+                validation.isUUID( 'value' ),
             ]);
         }
         catch(err) {
@@ -18,12 +18,12 @@ describe( 'Validate name', function () {
         else done();
     });
 
-    it( 'is not a name', function (done) {
+    it( 'is not a uuid', function (done) {
         var error;
 
         try {
             validation.validate( { value: "*&^&" }, [
-                validation.isName( 'value' ),
+                validation.isUUID( 'value' ),
             ]);
         }
         catch(err) {
@@ -31,6 +31,6 @@ describe( 'Validate name', function () {
         }
 
         if( error ) done();
-        else done( new Error( "Validation was supposed to fail for name" ) );
+        else done( new Error( "Validation was supposed to fail for uuid" ) );
     });
 });

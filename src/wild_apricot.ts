@@ -10,6 +10,8 @@ export interface WAMember
     wild_apricot_id: number;
     first_name: string;
     last_name: string;
+    phone: string;
+    email: string;
     is_active: boolean;
 }
 
@@ -193,7 +195,7 @@ export class WildApricot
         // TODO if we get an auth failure, force refetch of oauth token 
         // and try again
         let fetch = (oauth_token: string) => {
-            request.get( {
+            request.post( {
                 url: this.approve_uri + "?contactId=" + member_id,
                 headers: {
                     Accept: 'application/json'
@@ -212,6 +214,11 @@ export class WildApricot
                 }
             });
         };
+
+        this.fetch_oauth_token(
+            fetch
+            ,error_callback
+        );
     }
 
     public fetch_member_data(
@@ -239,6 +246,9 @@ export class WildApricot
                         wild_apricot_id: wa_member_id
                         ,first_name: parsed_users['FirstName']
                         ,last_name: parsed_users['LastName']
+                        // TODO figure out how WA sends phone numbers
+                        ,phone: ""
+                        ,email: parsed_users['Email']
                         ,is_active: parsed_users['MembershipEnabled']
                     };
                     success_callback( member_data );

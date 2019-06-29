@@ -171,12 +171,12 @@ paths:
           description: Validation error
         '500':
           description: Server error
-        '204':
+        '201':
           description: Created
           content:
             text/plain:
               schmea:
-                type: string
+                $ref: '#/components/schemas/SimpleMemberData'
   '/v1/member/:member_id':
     get:
       tags:
@@ -196,7 +196,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/SimpleMemberData'
+                  $ref: '#/components/schemas/MemberId'
   '/v1/member/:member_id/address':
     put:
       tags:
@@ -412,6 +412,15 @@ components:
         photo:
           type: string
           format: url
+        id:
+          type: integer
+    MemberId:
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          description: Member ID
     Member:
       required:
         - id

@@ -25,3 +25,18 @@ a {
     text-decoration: none;
     color: #272D40;
 }
+
+ul.actions {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: fit-content;
+}
+
+li.action {
+    margin: 2px;
+    padding: 0px 2px 0px 4px;
+    background: #272D40;
+    color: #9DA0AA;
+    font-size: 18pt;
+}

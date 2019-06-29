@@ -1,3 +1,4 @@
+import * as assert from "assert";
 import * as request from "supertest";
 import * as server from "../app";
 import * as funcs from "../src/request_funcs";
@@ -21,7 +22,11 @@ describe( 'PUT /v1/member', function () {
                 ,phone: "15551234"
                 ,email: "abe.foobar@example.com"
             })
-            .expect( 204 )
+            .expect( 201 )
+            .expect( function(res) {
+                var data = res.body;
+                assert( data.id, "Returned a member ID" );
+            })
             .end( function( err, res ) {
                 if( err ) done(err);
                 else done();

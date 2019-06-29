@@ -46,7 +46,7 @@ export interface DB
 {
     add_member(
         member: SimpleMember
-        ,success_callback: () => void
+        ,success_callback: ( member_id ) => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
 

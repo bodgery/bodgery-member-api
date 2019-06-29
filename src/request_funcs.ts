@@ -116,10 +116,11 @@ export function put_member( req, res, ctx: c.Context )
     }
 
     db.add_member( body
-        ,() => {
+        ,( member_id ) => {
             logger.info( "Member added successfully" );
             res
-                .status( 204 )
+                .status( 201 )
+                .send({ id: member_id })
                 .end();
         }
         ,get_generic_db_error( logger, res )
@@ -131,7 +132,7 @@ export function get_member( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {
@@ -161,7 +162,7 @@ export function put_member_address( req, res, ctx: c.Context )
 
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
         valid.validate( body, [
             valid.isUSAddress()
@@ -191,7 +192,7 @@ export function get_member_address( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {
@@ -219,7 +220,7 @@ export function put_member_is_active( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {
@@ -229,24 +230,32 @@ export function put_member_is_active( req, res, ctx: c.Context )
 
 
     let member_id = req.params.member_id;
-    ctx.wa.set_member_active(
-        member_id
-        ,() => {
-            db.set_member_is_active( member_id, true
+    logger.info( "Setting member to active in Wild Apricot: " + member_id );
+    db.get_member_wild_apricot( member_id
+        ,( wa_id ) => {
+            ctx.wa.set_member_active(
+                wa_id
                 ,() => {
-                    logger.info( "Set is active on member: " + member_id );
-                    res
-                        .status( 200 )
-                        .send()
-                        .end();
+                    logger.info( "Setting member to active in database: "
+                        + member_id );
+                    db.set_member_is_active( member_id, true
+                        ,() => {
+                            logger.info( "Member now active: " + member_id );
+                            res.sendStatus( 200 );
+                        }
+                        ,get_member_id_not_found_error( logger, res, member_id )
+                        ,get_generic_db_error( logger, res )
+                    );
+                },
+                ( err: Error ) => {
+                    logger.error( "Error calling Wild Apricot to set active: "
+                        + err.toString() );
+                    res.sendStatus( 500 );
                 }
-                ,get_member_id_not_found_error( logger, res, member_id )
-                ,get_generic_db_error( logger, res )
-            );
-        },
-        ( err: Error ) => {
-            logger.error( "Error calling Wild Apricot: " + err.toString() );
+            )
         }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
     );
 }
 
@@ -255,7 +264,7 @@ export function get_member_is_active( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {
@@ -282,7 +291,7 @@ export function put_member_rfid( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
         valid.validate( req.body, [
             valid.isInteger( 'rfid' )
@@ -387,7 +396,7 @@ export function put_member_wildapricot( req, res, ctx: c.Context )
 
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
         valid.validate( body, [
             valid.isInteger( 'wild_apricot_id' )
@@ -420,7 +429,7 @@ export function put_member_google_group( req, res, ctx: c.Context )
 
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {
@@ -608,7 +617,10 @@ export function member_signup( req, res, ctx: c.Context )
         wa_id
         ,(member) => {
             let render = tmpl_view( "member-signup", {
-                name: member['first_name'] + " " + member['last_name']
+                first_name: member['first_name']
+                ,last_name: member['last_name']
+                ,phone: member['phone']
+                ,email: member['email']
                 ,wa_id: wa_id
             }, [], 200 );
             render( req, res, ctx );
@@ -626,7 +638,7 @@ export function post_member_signup_email( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {
@@ -682,7 +694,7 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {
@@ -765,7 +777,7 @@ export function put_member_photo( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
         valid.validate( req.body, [
             valid.byteLengthLimit( ctx.conf['photo_size_limit'] )
@@ -809,7 +821,7 @@ export function get_member_photo( req, res, ctx: c.Context )
     let logger = ctx.logger;
     try {
         valid.validate( req.params, [
-            valid.isInteger( 'member_id' )
+            valid.isUUID( 'member_id' )
         ]);
     }
     catch (err) {

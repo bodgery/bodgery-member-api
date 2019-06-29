@@ -77,7 +77,7 @@ let make_context_wrap = (
             request_logger.error( "Stack trace: ", err.stack );
         }
 
-        request_logger.info( "Finished request to", req.method, req.path );
+        request_logger.info( "Finished setting up", req.method, req.path );
         return ret;
     }
 };

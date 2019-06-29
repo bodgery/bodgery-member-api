@@ -68,13 +68,18 @@ export class MockWA
 
     public fetch_member_data(
         wa_member_id: number
-        ,success_callback: (member: WAMember) => void
+        ,success_callback: (member: wa_api.WAMember) => void
         ,error_callback: ( err: Error ) => void
     ): void
     {
         let member = this.members[wa_member_id];
-        member['first_name'] = "Johnson";
-        member['last_name'] = "McHuman";
-        success_callback( member );
+        success_callback({
+            first_name: "Johnson"
+            ,last_name: "McHuman"
+            ,email: "foo@example.com"
+            ,phone: "555 555 1234"
+            ,wild_apricot_id: wa_member_id
+            ,is_active: member.is_active
+        });
     }
 }

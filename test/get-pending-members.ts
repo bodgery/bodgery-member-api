@@ -16,18 +16,24 @@ describe( 'GET /v1/members/pending', function() {
                     wild_apricot_id: 1
                     ,first_name: "One"
                     ,last_name: "Number"
+                    ,phone: "555 555 1234"
+                    ,email: "one@example.com"
                     ,is_active: false
                 }
                 ,{
                     wild_apricot_id: 2
                     ,first_name: "Two"
                     ,last_name: "Number"
+                    ,phone: "555 555 1234"
+                    ,email: "one@example.com"
                     ,is_active: false
                 }
                 ,{
                     wild_apricot_id: 3
                     ,first_name: "Three"
                     ,last_name: "Number"
+                    ,phone: "555 555 1234"
+                    ,email: "one@example.com"
                     ,is_active: false
                 }
             ]
@@ -36,12 +42,16 @@ describe( 'GET /v1/members/pending', function() {
                     wild_apricot_id: 4
                     ,first_name: "Four"
                     ,last_name: "Number"
+                    ,phone: "555 555 1234"
+                    ,email: "one@example.com"
                     ,is_active: true
                 }
                 ,{
                     wild_apricot_id: 5
                     ,first_name: "Five"
                     ,last_name: "Number"
+                    ,phone: "555 555 1234"
+                    ,email: "one@example.com"
                     ,is_active: true
                 }
             ]

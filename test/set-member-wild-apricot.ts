@@ -4,16 +4,17 @@ import * as server from "../app";
 import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
 
+const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
+
 
 describe( 'PUT /v1/member/:member_id/wildapricot', function () {
     let members;
     before( () => {
         process.env['TEST_RUN'] = "1";
-        members = {
-            "01": {
-                full_data: {
-                    wild_apricot_id: null
-                }
+        members = {};
+        members[uuid] = {
+            full_data: {
+                wild_apricot_id: null
             }
         };
         let db = new mock_db.MockDB( members, {} );
@@ -22,7 +23,7 @@ describe( 'PUT /v1/member/:member_id/wildapricot', function () {
 
     it( 'Sets a member wild apricot ID', function (done) {
         request( server.SERVER )
-            .put( '/api/v1/member/01/wildapricot' )
+            .put( '/api/v1/member/' + uuid + '/wildapricot' )
             .send({
                 wild_apricot_id: "567"
             })
@@ -31,7 +32,7 @@ describe( 'PUT /v1/member/:member_id/wildapricot', function () {
                 if( err ) done(err);
                 else {
                     assert.strictEqual(
-                        members["01"]["full_data"]["wild_apricot_id"],
+                        members[uuid]["full_data"]["wild_apricot_id"],
                         "567" );
                     done();
                 }

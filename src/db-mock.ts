@@ -22,14 +22,14 @@ export class MockDB
 
     add_member(
         member: db_impl.SimpleMember
-        ,success_callback: () => void
+        ,success_callback: ( member_id ) => void
         ,error_callback: (err: Error) => void
     ): boolean
     {
         let id = member.rfid;
         this.members[id] = {};
         this.members[id].simple_data = member;
-        success_callback();
+        success_callback( id );
         return true;
     }
 

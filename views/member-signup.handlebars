@@ -1,6 +1,253 @@
 <h1>Signup Member</h1>
 
+<div id="msg_div"></div>
+
+
+<script>
+'use strict';
+
+var member_id;
+var wa_id = {{{wa_id}}};
+var first_name = "{{{first_name}}}";
+var last_name = "{{{last_name}}}";
+var phone = "{{{phone}}}";
+var email = "{{{email}}}";
+
+var msg_div;
+var actions;
+var create_member;
+var wa_create;
+var rfid_activate;
+var member_activate;
+var upload_photo;
+var google_activate;
+var email_indiv_activate;
+var email_group_activate;
+var rfid;
+var photo;
+
+
+
+function begin_member_create()
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#create_member_bullet" ).text( "⌛" );
+
+        $.ajax( "/api/v1/member", {
+            "type": "PUT",
+            "contentType": "application/json",
+            "data": JSON.stringify({
+                rfid: rfid.val()
+                ,firstName: first_name
+                ,lastName: last_name
+                ,phone: phone || "000 000 0000"
+                ,email: email
+            }),
+            "error": function (jqXHR, str, exception) {
+                $( "#create_member_bullet" ).text( "✗" );
+                reject( new Error( "Error creating member: " + str ) );
+            },
+            "success": function (data, str, jqXHR) {
+                $( "#create_member_bullet" ).text( "✓" );
+                resolve( data.id );
+            }
+        });
+    });
+}
+
+function begin_wa( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#wa_create_bullet" ).text( "⌛" );
+
+        $.ajax( "/api/v1/member/" + member_id + "/wildapricot", {
+            "type": "PUT",
+            "contentType": "application/json",
+            "data": JSON.stringify({
+                wild_apricot_id: wa_id
+            }),
+            "error": function (jqXHR, str, exception) {
+                $( "#wa_create_bullet" ).text( "✗" );
+                reject( new Error( "Error activating Wild Apricot: " + str ) );
+            },
+            "success": function (data, str, jqXHR) {
+                $( "#wa_create_bullet" ).text( "✓" );
+                resolve();
+            }
+        });
+    });
+}
+
+function begin_rfid( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#rfid_activate_bullet" ).text( "⌛" );
+        $( "#rfid_activate_bullet" ).text( "✓" );
+        resolve();
+    });
+}
+
+function begin_member_activate( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#member_activate_bullet" ).text( "⌛" );
+
+        $.ajax( "/api/v1/member/" + member_id + "/is_active", {
+            "type": "PUT",
+            "error": function (jqXHR, str, exception) {
+                $( "#member_activate_bullet" ).text( "✗" );
+                reject( new Error( "Error activating Wild Apricot: " + str ) );
+            },
+            "success": function (data, str, jqXHR) {
+                $( "#member_activate_bullet" ).text( "✓" );
+                resolve();
+            }
+        });
+    });
+}
+
+function begin_upload_photo( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#upload_photo_bullet" ).text( "⌛" );
+        $( "#upload_photo_bullet" ).text( "✓" );
+        resolve();
+    });
+}
+
+function begin_google( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#google_activate_bullet" ).text( "⌛" );
+        $( "#google_activate_bullet" ).text( "✓" );
+        resolve();
+    });
+}
+
+function begin_email_indiv( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#email_indiv_activate_bullet" ).text( "⌛" );
+        $( "#email_indiv_activate_bullet" ).text( "✓" );
+        resolve();
+    });
+}
+
+function begin_email_group( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        $( "#email_group_activate_bullet" ).text( "⌛" );
+        $( "#email_group_activate_bullet" ).text( "✓" );
+        resolve();
+    });
+}
+
+function begin_activation_process( member_id )
+{
+    // RFID must be set before we do anything
+    var is_valid = true;
+    if(! rfid.val() ) {
+        rfid.effect( "shake" );
+        is_valid = false;
+    }
+
+    // Photo must also be set
+    if(! photo.val() ) {
+        photo.effect( "shake" );
+        is_valid = false;
+    }
+
+    if(! is_valid) return;
+
+
+    // Critical items go first, with any other dependencies later. Finally, 
+    // less critical items run together.
+    begin_member_create()
+        .then( function( member_id ) {
+            Promise.all([
+                begin_wa( member_id )
+                ,begin_rfid( member_id )
+            ]).then(
+                begin_member_activate( member_id )
+            ).then(
+                begin_upload_photo( member_id )
+            ).then(
+                Promise.all([
+                    begin_google( member_id )
+                    ,begin_email_indiv( member_id )
+                    ,begin_email_group( member_id )
+                ])
+            );
+        })
+        .catch( (err) => {
+            msg_div.text( err.toString() );
+        });
+    return;
+}
+
+
+$( document ).ready(function () {
+    msg_div = $( "#msg_div" );
+    actions = $( ".action" );
+    create_member = $( "#create_member" );
+    wa_create = $( "#wa_create" );
+    rfid_activate = $( "#rfid_activate" );
+    member_activate = $( "#member_activate" );
+    upload_photo = $( "#upload_photo" );
+    google_activate = $( "#google_activate" );
+    email_indiv_activate = $( "#email_indiv_activate" );
+    email_group_activate = $( "#email_group_activate" );
+    rfid = $( "#rfid" );
+    photo = $( "#photo" );
+
+    var activate_btn = $( "#activate_btn" );
+    activate_btn.on( "click", begin_activation_process );
+});
+</script>
+
+
+<form id="signup" method="POST">
+
+
+<p>Photo: <input id="photo" type="file" name="photo"></p>
 <ul>
-    <li>Name: {{{name}}}</li>
+    <li>First Name: {{{first_name}}}</li>
+    <li>Last Name: {{{last_name}}}</li>
+    <li>Phone: {{{phone}}}</li>
+    <li>Email: {{{email}}}</li>
     <li>Wild Apricot ID: {{{wa_id}}}</li>
+    <li>RFID: <input id="rfid" type="text" name="rfid"></li>
 </ul>
+
+<h2>Actions</h2>
+
+
+<p><input id="activate_btn" type="button" value="Activate Member"></p>
+<ul class="actions">
+    <li id="create_member" class="action">
+        <span id="create_member_bullet">►</span>
+        Create Member in Local Database</li>
+    <li id="wa_create" class="action">
+        <span id="wa_create_bullet">►</span>
+        Set Wild Apricot ID in Local Database</li>
+    <li id="rfid_activate" class="action">
+        <span id="rfid_activate_bullet">►</span>
+        Save RFID</li>
+    <li id="member_activate" class="action">
+        <span id="member_activate_bullet">►</span>
+        Activate Member in Wild Apricot</li>
+    <li id="upload_photo" class="action">
+        <span id="upload_photo_bullet">►</span>
+        Upload Photo</li>
+    <li id="google_activate" class="action">
+        <span id="google_activate_bullet">►</span>
+        Add to Google Groups</li>
+    <li id="email_indiv_activate" class="action">
+        <span id="email_indiv_activate_bullet">►</span>
+        Send new member email to individual</li>
+    <li id="email_group_activate" class="action">
+        <span id="email_group_activate_bullet">►</span>
+        Send new member email to group</li>
+</ul>
+
+</form>

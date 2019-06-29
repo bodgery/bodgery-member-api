@@ -4,6 +4,9 @@ import * as server from "../app";
 import * as funcs from "../src/request_funcs";
 import * as mock_db from "../src/db-mock";
 
+const uuid1 = "0662df8c-e43a-4e90-8b03-3849afbb533e";
+const uuid2 = "c28ec74e-2459-488e-9aec-f6068e8a08a7";
+
 
 describe( 'RFID management', function () {
     let good_rfid = "0001234567";
@@ -13,15 +16,14 @@ describe( 'RFID management', function () {
 
     before( () => {
         process.env['TEST_RUN'] = "1";
-        let members = {
-            "01": {
-                is_active: true
-                ,rfid: null
-            }
-            ,"02": {
-                is_active: false
-                ,rfid: inactive_rfid
-            }
+        let members = {};
+        members[uuid1] = {
+            is_active: true
+            ,rfid: null
+        };
+        members[uuid2] = {
+            is_active: false
+            ,rfid: inactive_rfid
         };
         let db = new mock_db.MockDB( members, {} );
         server.start( db );
@@ -40,7 +42,7 @@ describe( 'RFID management', function () {
         };
 
         request( server.SERVER )
-            .put( '/api/v1/member/01/rfid' )
+            .put( '/api/v1/member/' + uuid1 + '/rfid' )
             .send({ rfid: good_rfid })
             .expect( 200 )
             .end( function( err, res ) {

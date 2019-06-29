@@ -42,10 +42,12 @@ describe( 'Changes a member\'s RFID', function () {
             db.get_member_rfid(
                 change_rfid
                 ,() => {
-                    assert( true, "RFID was changed" );
+                    throw new Error( "RFID active, when it shouldn't be" );
                     check_old_rfid( member_id );
                 }
-                ,() => { throw new Error( "RFID inactive, when it should be" );}
+                ,() => { 
+                    assert( true, "RFID was changed" );
+                }
                 ,() => {
                     throw new Error( "RFID was not found, when it should be" )
                 }
@@ -71,11 +73,11 @@ describe( 'Changes a member\'s RFID', function () {
             db.get_member_rfid(
                 start_rfid
                 ,() => {
-                    assert( true, "RFID is active to start with" );
+                    throw new Error( "RFID " + start_rfid + " was active" );
                     set_new_rfid( member_id );
                 }
                 ,() => {
-                    throw new Error( "RFID " + start_rfid + " was not active" );
+                    assert( true, "RFID is inactive to start with" );
                     done();
                 }
                 ,() => {
