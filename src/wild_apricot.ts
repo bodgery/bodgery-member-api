@@ -122,8 +122,8 @@ export class WildApricot
                     success_callback( members );
                 }
                 else {
-                    let err = new Error( "Error fetching WA contact info"
-                        + ": " + error );
+                    let err = new Error( "Error fetching WA pending members"
+                        + ": " + body );
                     error_callback( err );
                 }
             });
@@ -173,8 +173,8 @@ export class WildApricot
                     success_callback( questions );
                 }
                 else {
-                    let err = new Error( "Error fetching WA contact info: "
-                        + error );
+                    let err = new Error( "Error fetching WA member questions: "
+                        + body );
                     error_callback( err );
                 }
             });
@@ -209,7 +209,7 @@ export class WildApricot
                 }
                 else {
                     let err = new Error( "Error setting WA member to active: "
-                        + error );
+                        + body );
                     error_callback( err );
                 }
             });
@@ -254,8 +254,9 @@ export class WildApricot
                     success_callback( member_data );
                 }
                 else {
-                    let err = new Error( "Error fetching WA contact info: "
-                        + error );
+                    let err = new Error( "Error fetching WA contact info"
+                        + " (status code: " + response.statusCode
+                        + "): " + body );
                     error_callback( err );
                 }
             });
@@ -299,7 +300,7 @@ export class WildApricot
                     error_callback( new Error( "Error fetching OAuth token"
                         + " from Wild Apricot"
                         + " (HTTP status " + response.statusCode + ")"
-                        + ": " + error ) );
+                        + ": " + body ) );
                 }
             });
         }

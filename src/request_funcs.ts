@@ -744,31 +744,39 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
         );
     };
 
-    ctx.wa.fetch_member_answers( member_id
-        ,( member_answers: Array<wa_api.WAMemberAnswers> ) => {
-            db.get_member( member_id
-                ,(member) => {
-                    db.get_member_photo(
-                        member_id
-                        ,(photo_path) => {
-                            send_email(
-                                member.firstName
-                                ,photo_path
-                                ,member_answers
+    // TODO This got out of hand with callbacks. Cleanup.
+    db.get_member_wild_apricot( member_id
+        ,( wild_apricot_id ) => {
+            ctx.wa.fetch_member_answers( wild_apricot_id
+                ,( member_answers: Array<wa_api.WAMemberAnswers> ) => {
+                    db.get_member( member_id
+                        ,(member) => {
+                            db.get_member_photo(
+                                member_id
+                                ,(photo_path) => {
+                                    send_email(
+                                        member.firstName
+                                        ,photo_path
+                                        ,member_answers
+                                    );
+                                }
+                                ,get_member_id_not_found_error(
+                                    logger, res, member_id )
+                                ,get_generic_db_error( logger, res )
                             );
                         }
                         ,get_member_id_not_found_error( logger, res, member_id )
                         ,get_generic_db_error( logger, res )
                     );
                 }
-                ,get_member_id_not_found_error( logger, res, member_id )
-                ,get_generic_db_error( logger, res )
+                ,( err: Error ) => {
+                    logger.error( "Error fetching member answers from"
+                        + " Wild Apricot: " + err.toString() );
+                }
             );
         }
-        ,( err: Error ) => {
-            logger.error( "Error fetching member answers from Wild Apricot: "
-                + err.toString() );
-        }
+        ,get_member_id_not_found_error( logger, res, member_id )
+        ,get_generic_db_error( logger, res )
     );
 }
 
