@@ -259,7 +259,6 @@ $( document ).ready(function () {
 <form id="signup" method="POST">
 
 
-<p>Photo: <input id="photo" type="file" name="photo"></p>
 <ul>
     <li>First Name: {{{first_name}}}</li>
     <li>Last Name: {{{last_name}}}</li>
@@ -267,7 +266,11 @@ $( document ).ready(function () {
     <li>Email: {{{email}}}</li>
     <li>Wild Apricot ID: {{{wa_id}}}</li>
     <li>RFID: <input id="rfid" type="text" name="rfid"></li>
+    <li>Photo: <input id="photo" type="file" name="photo"></li>
 </ul>
+
+<p><img id="member_photo" src="/img/upload_placeholder.png"
+    width="800" height="600" alt="Upload Photo"></p>
 
 <h2>Actions</h2>
 
