@@ -798,11 +798,13 @@ export function put_member_photo( req, res, ctx: c.Context )
 
     let member_id = req.params['member_id'];
     let path = ctx.conf['photo_dir'] + "/" + shortid.generate();
+    logger.info( "Saving photo (" + req.body.length + " bytes)"
+        + " to " + path + " for member ID " + member_id );
 
     let promises = [
         new Promise( (resolve, reject) => fs.writeFile(
             path
-            ,res.body
+            ,req.body
             ,(err) => {
                 if( err ) reject( err );
                 else resolve();
@@ -818,9 +820,10 @@ export function put_member_photo( req, res, ctx: c.Context )
     ];
 
     Promise.all( promises ).then( () => {
-        res
-            .status( 204 )
-            .end();
+        res.sendStatus( 204 );
+    }).catch( (err) => {
+        logger.error( "Error setting photo: " + err );
+        res.sendStatus( 500 );
     });
 }
 

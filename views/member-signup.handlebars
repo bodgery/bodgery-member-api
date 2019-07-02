@@ -127,11 +127,41 @@ function begin_member_activate( member_id )
 
 function begin_upload_photo( member_id )
 {
-    // TODO
     return new Promise( function( resolve, reject ) {
-        $( "#upload_photo_bullet" ).text( "⌛" );
-        $( "#upload_photo_bullet" ).text( "✓" );
-        resolve();
+        $( "#upload_photo_bullet" ).text( waiting_char );
+
+        var input = photo[0];
+        if( input.files && input.files[0] ) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var array_buf = e.target.result;
+                var data = new Uint8Array( array_buf );
+
+                $.ajax( "/api/v1/member/" + member_id + "/photo", {
+                    "type": "PUT",
+                    "contentType": "image/jpeg", // TODO detect actual type
+                    "data": data.join( "" ),
+                    "processData": false,
+                    "error": function (jqXHR, str, exception) {
+                        $( "#upload_photo_bullet" ).text( fail_char );
+                        reject( new Error(
+                            "Error activating member: " + str ) );
+                    },
+                    "success": function (data, str, jqXHR) {
+                        $( "#upload_photo_bullet" ).text( success_char );
+                        resolve();
+                    }
+                });
+
+            };
+
+            reader.readAsArrayBuffer( input.files[0] );
+        }
+        else {
+            $( "#upload_photo_bullet" ).text( success_char );
+            resolve();
+        }
     });
 }
 
@@ -268,7 +298,7 @@ $( document ).ready(function () {
     photo_preview = $( "#member_photo" );
 
     var activate_btn = $( "#activate_btn" );
-    activate_btn.on( "change", begin_activation_process );
+    activate_btn.on( "click", begin_activation_process );
 });
 </script>
 
@@ -284,7 +314,9 @@ $( document ).ready(function () {
     <li>Wild Apricot ID: {{{wa_id}}}</li>
     <li>RFID: <input id="rfid" type="text" name="rfid"></li>
     <li>Photo: <input id="photo" type="file" name="photo"
-        onChange="show_preview_photo( this )"></li>
+        onChange="show_preview_photo( this )"
+        accept=".jpg,.jpeg"
+        ></li>
 </ul>
 
 <p><img id="member_photo" src="/img/upload_placeholder.png"
