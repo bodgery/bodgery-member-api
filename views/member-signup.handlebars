@@ -140,8 +140,10 @@ function begin_upload_photo( member_id )
 
                 $.ajax( "/api/v1/member/" + member_id + "/photo", {
                     "type": "PUT",
-                    "contentType": "image/jpeg", // TODO detect actual type
-                    "data": data.join( "" ),
+                    // We're only doing jpeg right now, but we 
+                    // might not in the future.
+                    "contentType": "image/jpeg",
+                    "data": data,
                     "processData": false,
                     "error": function (jqXHR, str, exception) {
                         $( "#upload_photo_bullet" ).text( fail_char );
