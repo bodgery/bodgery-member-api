@@ -32,11 +32,40 @@ var photo;
 var photo_preview;
 
 
+function set_waiting( element )
+{
+    element
+        .find( ".state-char" )
+        .text( waiting_char );
+    element
+        .find( ".retry-btn" )
+        .hide();
+}
+
+function set_fail( element )
+{
+    element
+        .find( ".state-char" )
+        .text( fail_char );
+    element
+        .find( ".retry-btn" )
+        .show();
+}
+
+function set_success( element )
+{
+    element
+        .find( ".state-char" )
+        .text( success_char );
+    element
+        .find( ".retry-btn" )
+        .hide();
+}
 
 function begin_member_create()
 {
     return new Promise( function( resolve, reject ) {
-        $( "#create_member_bullet" ).text( waiting_char );
+        set_waiting( $( "#create_member_bullet" ) );
 
         $.ajax( "/api/v1/member", {
             "type": "PUT",
@@ -49,11 +78,11 @@ function begin_member_create()
                 ,email: email
             }),
             "error": function (jqXHR, str, exception) {
-                $( "#create_member_bullet" ).text( fail_char );
+                set_fail( $( "#create_member_bullet" ) );
                 reject( new Error( "Error creating member: " + str ) );
             },
             "success": function (data, str, jqXHR) {
-                $( "#create_member_bullet" ).text( success_char );
+                set_success( $( "#create_member_bullet" ) );
                 resolve( data.id );
             }
         });
@@ -63,7 +92,7 @@ function begin_member_create()
 function begin_wa( member_id )
 {
     return new Promise( function( resolve, reject ) {
-        $( "#wa_create_bullet" ).text( waiting_char );
+        set_waiting( $( "#wa_create_bullet" ) );
 
         $.ajax( "/api/v1/member/" + member_id + "/wildapricot", {
             "type": "PUT",
@@ -72,11 +101,11 @@ function begin_wa( member_id )
                 wild_apricot_id: wa_id
             }),
             "error": function (jqXHR, str, exception) {
-                $( "#wa_create_bullet" ).text( fail_char );
+                set_fail( $( "#wa_create_bullet" ) );
                 reject( new Error( "Error activating Wild Apricot: " + str ) );
             },
             "success": function (data, str, jqXHR) {
-                $( "#wa_create_bullet" ).text( success_char );
+                set_success( $( "#wa_create_bullet" ) );
                 resolve();
             }
         });
@@ -86,7 +115,7 @@ function begin_wa( member_id )
 function begin_rfid( member_id )
 {
     return new Promise( function( resolve, reject ) {
-        $( "#rfid_activate_bullet" ).text( waiting_char );
+        set_waiting( $( "#rfid_activate_bullet" ) );
 
         $.ajax( "/api/v1/member/" + member_id + "/rfid", {
             "type": "PUT",
@@ -95,11 +124,11 @@ function begin_rfid( member_id )
                 rfid: rfid.val()
             }),
             "error": function (jqXHR, str, exception) {
-                $( "#rfid_activate_bullet" ).text( fail_char );
+                set_fail( $( "#rfid_activate_bullet" ) );
                 reject( new Error( "Error activating RFID tag: " + str ) );
             },
             "success": function (data, str, jqXHR) {
-                $( "#rfid_activate_bullet" ).text( success_char );
+                set_success( $( "#rfid_activate_bullet" ) );
                 resolve();
             }
         });
@@ -109,16 +138,16 @@ function begin_rfid( member_id )
 function begin_member_activate( member_id )
 {
     return new Promise( function( resolve, reject ) {
-        $( "#member_activate_bullet" ).text( waiting_char );
+        set_waiting( $( "#member_activate_bullet" ) );
 
         $.ajax( "/api/v1/member/" + member_id + "/is_active", {
             "type": "PUT",
             "error": function (jqXHR, str, exception) {
-                $( "#member_activate_bullet" ).text( fail_char );
+                set_fail( $( "#member_activate_bullet" ) );
                 reject( new Error( "Error activating member: " + str ) );
             },
             "success": function (data, str, jqXHR) {
-                $( "#member_activate_bullet" ).text( success_char );
+                set_success( $( "#member_activate_bullet" ) );
                 resolve();
             }
         });
@@ -128,7 +157,7 @@ function begin_member_activate( member_id )
 function begin_upload_photo( member_id )
 {
     return new Promise( function( resolve, reject ) {
-        $( "#upload_photo_bullet" ).text( waiting_char );
+        set_waiting( $( "#upload_photo_bullet" ) );
 
         var input = photo[0];
         if( input.files && input.files[0] ) {
@@ -146,12 +175,12 @@ function begin_upload_photo( member_id )
                     "data": data,
                     "processData": false,
                     "error": function (jqXHR, str, exception) {
-                        $( "#upload_photo_bullet" ).text( fail_char );
+                        set_fail( $( "#upload_photo_bullet" ) );
                         reject( new Error(
                             "Error activating member: " + str ) );
                     },
                     "success": function (data, str, jqXHR) {
-                        $( "#upload_photo_bullet" ).text( success_char );
+                        set_success( $( "#upload_photo_bullet" ) );
                         resolve();
                     }
                 });
@@ -161,7 +190,7 @@ function begin_upload_photo( member_id )
             reader.readAsArrayBuffer( input.files[0] );
         }
         else {
-            $( "#upload_photo_bullet" ).text( success_char );
+            set_success( $( "#upload_photo_bullet" ) );
             resolve();
         }
     });
@@ -169,17 +198,17 @@ function begin_upload_photo( member_id )
 
 function begin_google( member_id )
 {
-    $( "#google_activate_bullet" ).text( waiting_char );
+    set_waiting( $( "#google_activate_bullet" ) );
 
     $.ajax( "/api/v1/member/" + member_id + "/google_group_signup", {
         "type": "PUT",
         "error": function (jqXHR, str, exception) {
-            $( "#google_activate_bullet" ).text( fail_char );
+            set_fail( $( "#google_activate_bullet" ) );
             reject( new Error( "Error signing up for group " + list + ": "
                 + str ) );
         },
         "success": function (data, str, jqXHR) {
-            $( "#google_activate_bullet" ).text( success_char );
+            set_success( $( "#google_activate_bullet" ) );
             resolve();
         }
     });
@@ -188,17 +217,17 @@ function begin_google( member_id )
 function begin_email_indiv( member_id )
 {
     return new Promise( function( resolve, reject ) {
-        $( "#email_indiv_activate_bullet" ).text( waiting_char );
+        set_waiting( $( "#email_indiv_activate_bullet" ) );
 
         $.ajax( "/api/v1/member/" + member_id + "/send_signup_email", {
             "type": "POST",
             "error": function (jqXHR, str, exception) {
-                $( "#email_indiv_activate_bullet" ).text( fail_char );
+                set_fail( $( "#email_indiv_activate_bullet" ) );
                 reject( new Error( "Error sending mail to individual: "
                     + str ) );
             },
             "success": function (data, str, jqXHR) {
-                $( "#email_indiv_activate_bullet" ).text( success_char );
+                set_success( $( "#email_indiv_activate_bullet" ) );
                 resolve();
             }
         });
@@ -208,17 +237,17 @@ function begin_email_indiv( member_id )
 function begin_email_group( member_id )
 {
     return new Promise( function( resolve, reject ) {
-        $( "#email_group_activate_bullet" ).text( waiting_char );
+        set_waiting( $( "#email_group_activate_bullet" ) );
 
         $.ajax( "/api/v1/member/" + member_id + "/send_group_signup_email", {
             "type": "POST",
             "error": function (jqXHR, str, exception) {
-                $( "#email_group_activate_bullet" ).text( fail_char );
+                set_fail( $( "#email_group_activate_bullet" ) );
                 reject( new Error( "Error sending mail to group: "
                     + str ) );
             },
             "success": function (data, str, jqXHR) {
-                $( "#email_group_activate_bullet" ).text( success_char );
+                set_success( $( "#email_group_activate_bullet" ) );
                 resolve();
             }
         });
@@ -330,28 +359,52 @@ $( document ).ready(function () {
 <p><input id="activate_btn" type="button" value="Activate Member"></p>
 <ul class="actions">
     <li id="create_member" class="action">
-        <span id="create_member_bullet">►</span>
+        <span id="create_member_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_member_create()">Retry</span>
+        </span>
         Create Member in Local Database</li>
     <li id="wa_create" class="action">
-        <span id="wa_create_bullet">►</span>
+        <span id="wa_create_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_wa()">Retry</span>
+        </span>
         Set Wild Apricot ID in Local Database</li>
     <li id="rfid_activate" class="action">
-        <span id="rfid_activate_bullet">►</span>
+        <span id="rfid_activate_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_rfid()">Retry</span>
+        </span>
         Save RFID</li>
     <li id="member_activate" class="action">
-        <span id="member_activate_bullet">►</span>
+        <span id="member_activate_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_member_activate()">Retry</span>
+        </span>
         Activate Member in Wild Apricot</li>
     <li id="upload_photo" class="action">
-        <span id="upload_photo_bullet">►</span>
+        <span id="upload_photo_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_upload_photo()">Retry</span>
+        </span>
         Upload Photo</li>
     <li id="google_activate" class="action">
-        <span id="google_activate_bullet">►</span>
+        <span id="google_activate_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_google()">Retry</span>
+        </span>
         Add to Google Groups</li>
     <li id="email_indiv_activate" class="action">
-        <span id="email_indiv_activate_bullet">►</span>
+        <span id="email_indiv_activate_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_email_indiv()">Retry</span>
+        </span>
         Send new member email to individual</li>
     <li id="email_group_activate" class="action">
-        <span id="email_group_activate_bullet">►</span>
+        <span id="email_group_activate_bullet">
+            <span class="state-char">►</span>
+            <span class="retry-btn" onClick="begin_email_group()">Retry</span>
+        </span>
         Send new member email to group</li>
 </ul>
 

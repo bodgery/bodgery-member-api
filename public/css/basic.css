@@ -40,3 +40,14 @@ li.action {
     color: #9DA0AA;
     font-size: 18pt;
 }
+
+.retry-btn {
+    display: none;
+    background-color: #42485C;
+    color: #787C8C;
+    border-color: #787C8C;
+    border-width: 2px;
+    border-style: solid;
+    font-size: 20pt;
+    cursor: pointer;
+}
