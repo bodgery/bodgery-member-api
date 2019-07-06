@@ -242,12 +242,18 @@ export class WildApricot
                 if(! error && response.statusCode == 200 ) {
                     let parsed_users = JSON.parse( body );
 
+                    let phone_field = parsed_users.FieldValues.filter( (_) => {
+                        return _.FieldName === "Phone";
+                    });
+                    let phone = phone_field.length > 0
+                        ? phone_field[0].Value
+                        : "";
+
                     let member_data = {
                         wild_apricot_id: wa_member_id
                         ,first_name: parsed_users['FirstName']
                         ,last_name: parsed_users['LastName']
-                        // TODO figure out how WA sends phone numbers
-                        ,phone: ""
+                        ,phone: phone
                         ,email: parsed_users['Email']
                         ,is_active: parsed_users['MembershipEnabled']
                     };
