@@ -32,6 +32,9 @@ session_length_sec: 3600000
 # Directory for storing photos. For development deployments, this can be 
 # test_data/photos/
 photo_dir: test_data/photos/
+# Size limit on photos. This is the transfer limit, and since the transfer 
+# is in base64, the encoded version is about 33% larger than the actual photo.
+photo_size_limit: 10485760
 
 # Wild Apricot API key. To generate a secret, you will need to setup a 
 # key in the Wild Apricot website. Someone with admin access on WA can 

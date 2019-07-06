@@ -32,6 +32,17 @@ var photo;
 var photo_preview;
 
 
+// From: https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string
+function arrayBufferToBase64( buffer ) {
+    var binary = '';
+    var bytes = new Uint8Array( buffer );
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
+}
+
 function set_waiting( element )
 {
     element
@@ -165,14 +176,14 @@ function begin_upload_photo( member_id )
 
             reader.onload = function (e) {
                 var array_buf = e.target.result;
-                var data = new Uint8Array( array_buf );
+                var base64_str = arrayBufferToBase64( array_buf );
 
                 $.ajax( "/api/v1/member/" + member_id + "/photo", {
                     "type": "PUT",
                     // We're only doing jpeg right now, but we 
                     // might not in the future.
                     "contentType": "image/jpeg",
-                    "data": data,
+                    "data": base64_str,
                     "processData": false,
                     "error": function (jqXHR, str, exception) {
                         set_fail( $( "#upload_photo_bullet" ) );

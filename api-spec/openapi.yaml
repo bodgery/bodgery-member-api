@@ -369,7 +369,7 @@ paths:
     put:
       tags:
         - Members
-      summary: Set a member's photo
+      summary: Set a member's photo. Photo is transfered in Base64 encoding.
       description: ''
       operationId: ''
       responses:

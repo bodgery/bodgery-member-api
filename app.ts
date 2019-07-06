@@ -75,6 +75,8 @@ let make_context_wrap = (
             request_logger.error( "Error running request: ",
                 err.toString() );
             request_logger.error( "Stack trace: ", err.stack );
+
+            res.sendStatus( 500 );
         }
 
         request_logger.info( "Finished setting up", req.method, req.path );

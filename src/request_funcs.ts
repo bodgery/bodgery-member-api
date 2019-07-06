@@ -796,15 +796,16 @@ export function put_member_photo( req, res, ctx: c.Context )
         return;
     }
 
+    let decoded_photo = Buffer.from( req.body.toString(), 'base64' );
     let member_id = req.params['member_id'];
     let path = ctx.conf['photo_dir'] + "/" + shortid.generate();
-    logger.info( "Saving photo (" + req.body.length + " bytes)"
+    logger.info( "Saving photo (" + decoded_photo.length + " bytes)"
         + " to " + path + " for member ID " + member_id );
 
     let promises = [
         new Promise( (resolve, reject) => fs.writeFile(
             path
-            ,req.body
+            ,decoded_photo
             ,(err) => {
                 if( err ) reject( err );
                 else resolve();

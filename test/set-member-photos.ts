@@ -26,6 +26,8 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
     });
 
     it( 'Sets a member photo', function (done) {
+        let expected_length = 0;
+
         let check_photo = () => {
             request( server.SERVER )
                 .get( "/api/v1/member/" + uuid + "/photo" )
@@ -34,6 +36,8 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
                 .expect( function( res ) {
                     let data = res.body;
                     assert( data, "Got something back for photo" );
+                    assert.strictEqual( data.length, expected_length,
+                        "Came back in expected length" );
                 })
                 .end( function( err, res ) {
                     if( err ) done( err );
@@ -44,10 +48,13 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
         fs.readFile( TEST_PHOTO, (err, data) => {
             if( err ) done(err);
             else {
+                expected_length = data.length;
+                let encoded_data = data.toString( 'base64' );
+
                 request( server.SERVER )
                     .put( '/api/v1/member/' + uuid + '/photo' )
                     .set( 'Content-Type', 'image/jpeg' )
-                    .send( data.toString( 'binary' ) )
+                    .send( encoded_data )
                     .expect( 204 )
                     .end( function( err, res ) {
                         if( err ) {
