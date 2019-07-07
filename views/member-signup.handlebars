@@ -10,7 +10,7 @@ var waiting_char = "⌛";
 var success_char = "✓";
 var fail_char = "✗";
 
-var member_id;
+var MEMBER_ID;
 var wa_id = {{{wa_id}}};
 var first_name = "{{{first_name}}}";
 var last_name = "{{{last_name}}}";
@@ -102,6 +102,8 @@ function begin_member_create()
 
 function begin_wa( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     return new Promise( function( resolve, reject ) {
         set_waiting( $( "#wa_create_bullet" ) );
 
@@ -125,6 +127,8 @@ function begin_wa( member_id )
 
 function begin_rfid( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     return new Promise( function( resolve, reject ) {
         set_waiting( $( "#rfid_activate_bullet" ) );
 
@@ -148,6 +152,8 @@ function begin_rfid( member_id )
 
 function begin_member_activate( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     return new Promise( function( resolve, reject ) {
         set_waiting( $( "#member_activate_bullet" ) );
 
@@ -167,6 +173,8 @@ function begin_member_activate( member_id )
 
 function begin_upload_photo( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     return new Promise( function( resolve, reject ) {
         set_waiting( $( "#upload_photo_bullet" ) );
 
@@ -209,6 +217,8 @@ function begin_upload_photo( member_id )
 
 function begin_google( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     set_waiting( $( "#google_activate_bullet" ) );
 
     $.ajax( "/api/v1/member/" + member_id + "/google_group_signup", {
@@ -227,6 +237,8 @@ function begin_google( member_id )
 
 function begin_email_indiv( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     return new Promise( function( resolve, reject ) {
         set_waiting( $( "#email_indiv_activate_bullet" ) );
 
@@ -247,6 +259,8 @@ function begin_email_indiv( member_id )
 
 function begin_email_group( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     return new Promise( function( resolve, reject ) {
         set_waiting( $( "#email_group_activate_bullet" ) );
 
@@ -267,6 +281,8 @@ function begin_email_group( member_id )
 
 function begin_activation_process( member_id )
 {
+    if(! member_id ) member_id = MEMBER_ID;
+
     // RFID must be set before we do anything
     var is_valid = true;
     if(! rfid.val() ) {
@@ -287,19 +303,20 @@ function begin_activation_process( member_id )
     // less critical items run together.
     begin_member_create()
         .then( function( member_id ) {
+            MEMBER_ID = member_id;
             Promise.all([
                 begin_wa( member_id )
                 ,begin_rfid( member_id )
             ]).then(
-                begin_member_activate( member_id )
-            ).then(
-                begin_upload_photo( member_id )
-            ).then(
-                Promise.all([
-                    begin_google( member_id )
-                    ,begin_email_indiv( member_id )
-                    ,begin_email_group( member_id )
-                ])
+                begin_member_activate( member_id ).then(
+                    begin_upload_photo( member_id ).then(
+                        Promise.all([
+                            begin_google( member_id )
+                            ,begin_email_indiv( member_id )
+                            ,begin_email_group( member_id )
+                        ])
+                    )
+                )
             );
         })
         .catch( (err) => {

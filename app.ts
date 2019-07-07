@@ -135,7 +135,7 @@ function authorization( logger )
         // Everything else gets a 403 Forbidden
         else {
             logger.error( "User not allowed to access " + route );
-            res.send(403);
+            res.sendStatus(403);
         }
     };
 }

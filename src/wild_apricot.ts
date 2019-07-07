@@ -194,9 +194,11 @@ export class WildApricot
     {
         // TODO if we get an auth failure, force refetch of oauth token 
         // and try again
+        let uri = this.approve_uri + "?contactId=" + member_id;
+
         let fetch = (oauth_token: string) => {
             request.post( {
-                url: this.approve_uri + "?contactId=" + member_id,
+                url: uri,
                 headers: {
                     Accept: 'application/json'
                 },
@@ -207,9 +209,17 @@ export class WildApricot
                 if(! error && response.statusCode == 200 ) {
                     success_callback();
                 }
+                // There appears to be a bug in Wild Apricot's API, where the 
+                // user is set as activated, but it sends us back a 400 status 
+                // code. Work around this here.
+                else if(! error && response.statusCode == 400 ) {
+                    success_callback();
+                }
+
                 else {
-                    let err = new Error( "Error setting WA member to active: "
-                        + body );
+                    let err = new Error( "Error setting WA member to active"
+                        + " (status code: " + response.statusCode
+                        + ") <" + error + ">: " + body );
                     error_callback( err );
                 }
             });
