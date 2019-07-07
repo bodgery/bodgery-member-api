@@ -15,7 +15,8 @@ describe( '/v1/member/:member_id/is_active', function () {
         process.env['TEST_RUN'] = "1";
         let members = {};
         members[uuid] =  {
-            is_active: false
+            wild_apricot_id: uuid
+            ,is_active: false
         };
         let db = new mock_db.MockDB( members, {} );
 
