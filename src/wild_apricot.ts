@@ -158,18 +158,44 @@ export class WildApricot
 
                     let questions = parsed_users.FieldValues
                         .filter( (_) => {
-                            return 
-                                (_ === "How long have you lived in Madison?")
-                                || (_ === "What do you like to make?")
-                                || (_ === "What would you like to learn?")
-                                || (_ === "Are you able/willing to teach something?")
-                                || (_ === "Other comments about yourself?")
+                            return (
+                                (_['FieldName'] === "How long have you lived in Madison?")
+                                || (_['FieldName'] === "What do you like to make?")
+                                || (_['FieldName'] === "What would you like to learn?")
+                                || (_['FieldName'] === "Are you able/willing to teach something?")
+                                || (_['FieldName'] === "Other comments about yourself?")
+                            ) ? true : false;
                         } ).map( (_) => {
+
                             return {
                                 question: _['FieldName']
                                 ,answer: _['Value']
                             };
                         } );
+                    // Schwartian Transform below. With such an arbitrary sort 
+                    // criteria, this is one of the easist ways to bring it 
+                    // all together.
+                    //
+                    // TODO aleviate the need for such an arbitrary sort 
+                    // criteria. This is all stuck in the way the Bodgery 
+                    // does things right now, and could easily change.
+                    questions = questions
+                        .map( (_) =>  {
+                            let sort_num = 
+                                (_['FieldName'] === "How long have you lived in Madison?" ) ? 0 :
+                                ( _['FieldName'] === "What do you like to make?" ) ? 1 :
+                                ( _['FieldName'] === "What would you like to learn?" ) ? 2 : 
+                                ( _['FieldName'] === "Are you able/willing to teach something?" ) ? 3 : 
+                                ( _['FieldName'] === "Other comments about yourself?" ) ? 4 : 
+                                5;
+                            return [ _, sort_num ];
+                        })
+                        .sort( (a, b) => {
+                            return a[1] > b[1] ? 1 :
+                                a[1] < b[1] ? -1 :
+                                0;
+                        })
+                        .map( (_) => _[0] );
                     success_callback( questions );
                 }
                 else {
