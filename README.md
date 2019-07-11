@@ -26,14 +26,3 @@ Then you can run:
 To start the server. You can run the tests with:
 
     $ npm test
-
-
-# Frontend JavaScript
-
-JavaScript for the frontend is compiled using Babel. Create your JS file 
-in the `public_jsx/` directory. Have this command running in a terminal:
-
-    $ npx babel --watch public_jsx/ --out-dir public/js --presets react-app/prod
-
-This will compile your JS and save it to `public/js/`, where it's 
-accessible to the frontend.
