@@ -182,11 +182,11 @@ export class WildApricot
                     questions = questions
                         .map( (_) =>  {
                             let sort_num = 
-                                (_['FieldName'] === "How long have you lived in Madison?" ) ? 0 :
-                                ( _['FieldName'] === "What do you like to make?" ) ? 1 :
-                                ( _['FieldName'] === "What would you like to learn?" ) ? 2 : 
-                                ( _['FieldName'] === "Are you able/willing to teach something?" ) ? 3 : 
-                                ( _['FieldName'] === "Other comments about yourself?" ) ? 4 : 
+                                (_['question'] === "How long have you lived in Madison?" ) ? 0 :
+                                ( _['question'] === "What do you like to make?" ) ? 1 :
+                                ( _['question'] === "What would you like to learn?" ) ? 2 : 
+                                ( _['question'] === "Are you able/willing to teach something?" ) ? 3 : 
+                                ( _['question'] === "Other comments about yourself?" ) ? 4 : 
                                 5;
                             return [ _, sort_num ];
                         })
