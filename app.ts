@@ -12,6 +12,7 @@ import * as db_impl from "./src/db";
 import * as password_checker from "./src/password";
 import * as pg from "./src/db-pg";
 import * as wa_api from "./src/wild_apricot";
+import * as http from "http";
 
 
 // The routes listed here can be accessed by a user who isn't logged in
@@ -310,6 +311,10 @@ export function start(
     if(! db) db = default_db( conf );
     if(! wa) wa = default_wa( conf );
     logger = require( 'logger' ).createLogger( conf["log_file"] );
+
+    // Fix hanging connections for certain external requests. See:
+    // https://stackoverflow.com/questions/16965582/node-js-http-get-hangs-after-5-requests-to-remote-site
+    http.globalAgent.maxSockets = 1000;
 
     // Init server
     SERVER = init_server( conf, db, logger, wa );

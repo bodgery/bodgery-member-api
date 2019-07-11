@@ -20,7 +20,7 @@ function get_generic_db_error( logger, res )
 {
     return ( err: Error ) => {
         logger.error( "Error writing to database: " + err.toString() );
-        res.sendStatus( 500 );
+        res.sendStatus( 500 ).end();
     };
 }
 
@@ -28,7 +28,7 @@ function get_member_id_not_found_error( logger, res, member_id )
 {
     return () => {
         logger.info( "No member found for RFID " + member_id );
-        res.sendStatus( 404 );
+        res.sendStatus( 404 ).end();
     };
 }
 
@@ -174,7 +174,7 @@ export function put_member_address( req, res, ctx: c.Context )
     db.put_member_address( member_id, body
         ,() => {
             logger.info( "Address set on member successfully" );
-            res.sendStatus( 204 );
+            res.sendStatus( 204 ).end();
         }
         ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )
@@ -244,7 +244,7 @@ export function put_member_is_active( req, res, ctx: c.Context )
                 ( err: Error ) => {
                     logger.error( "Error calling Wild Apricot to set active: "
                         + err.toString() );
-                    res.sendStatus( 500 );
+                    res.sendStatus( 500 ).end();
                 }
             )
         }
@@ -303,7 +303,7 @@ export function put_member_rfid( req, res, ctx: c.Context )
         ,() => {
             // Don't put RFID in log
             logger.info( "Set RFID on member " + member_id );
-            res.sendStatus( 200 );
+            res.sendStatus( 200 ).end();
         }
         ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )
@@ -328,15 +328,15 @@ export function get_member_rfid( req, res, ctx: c.Context )
         ,() => {
             // Don't put RFID tag in log
             logger.info( "RFID check OK" );
-            res.sendStatus( 200 );
+            res.sendStatus( 200 ).end();
         }
         ,() => {
             logger.info( "RFID is inactive for RFID check" );
-            res.sendStatus( 403 );
+            res.sendStatus( 403 ).end();
         }
         ,() => {
             logger.info( "RFID is not found for check" );
-            res.sendStatus( 404 );
+            res.sendStatus( 404 ).end();
         }
         ,get_generic_db_error( logger, res )
     );
@@ -362,7 +362,7 @@ export function post_log_rfid( req, res, ctx: c.Context )
     db.log_rfid_entry( rfid, is_allowed
         ,() => {
             logger.info( "RFID logged" );
-            res.sendStatus( 200 );
+            res.sendStatus( 200 ).end();
         }
         ,get_generic_db_error( logger, res )
     );
@@ -392,7 +392,7 @@ export function put_member_wildapricot( req, res, ctx: c.Context )
     db.put_member_wild_apricot( member_id, wild_apricot_id
         ,() => {
             logger.info( "Wild Apricot ID set on member successfully" );
-            res.sendStatus( 204 );
+            res.sendStatus( 204 ).end();
         }
         ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )
@@ -443,12 +443,12 @@ export function put_member_google_group( req, res, ctx: c.Context )
                         .all( promises )
                         .then( () => {
                             logger.info( "Signed up for Google Groups" );
-                            res.sendStatus( 200 );
+                            res.sendStatus( 200 ).end();
                         })
                         .catch( (err) => {
                             logger.error( "Error signing up for Google Groups:"
                                 + " " + err );
-                            res.sendStatus( 500 );
+                            res.sendStatus( 500 ).end();
                         });
                 }
             );
@@ -606,7 +606,7 @@ export function member_signup( req, res, ctx: c.Context )
         ,(err) => {
             logger.info( "Error fetching WA info for member <" + wa_id + ">: "
                 + err.toString() );
-            res.sendStatus( 500 );
+            res.sendStatus( 500 ).end();
         }
     );
 }
@@ -646,12 +646,12 @@ export function post_member_signup_email( req, res, ctx: c.Context )
                             ,from_email: ctx.conf['email_new_member_signup_from_email']
                             ,success_callback: () => {
                                 logger.info( "New member signup email sent" );
-                                res.sendStatus( 200 );
+                                res.sendStatus( 200 ).end();
                             }
                             ,error_callback: ( err: Error ) => {
                                 logger.error( "Error sending new member email: "
                                     + err.toString() );
-                                res.sendStatus( 500 );
+                                res.sendStatus( 500 ).end();
                             }
                         });
                     });
@@ -700,7 +700,8 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
                         ,photo_path: photo_path
                         ,answers: answers
                         ,success_callback: () => {
-                            logger.info( "New member signup email sent" );
+                            logger.info( "New member group signup email sent" );
+                            res.sendStatus( 200 ).end();
                         }
                         ,error_callback: ( err: Error ) => {
                             throw err;
@@ -726,7 +727,6 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
                                         ,photo_path
                                         ,member_answers
                                     );
-                                    res.sendStatus( 200 );
                                 }
                                 ,get_member_id_not_found_error(
                                     logger, res, member_id )
@@ -740,7 +740,7 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
                 ,( err: Error ) => {
                     logger.error( "Error fetching member answers from"
                         + " Wild Apricot: " + err.toString() );
-                    res.sendStatus( 500 );
+                    res.sendStatus( 500 ).end();
                 }
             );
         }
@@ -790,10 +790,10 @@ export function put_member_photo( req, res, ctx: c.Context )
     ];
 
     Promise.all( promises ).then( () => {
-        res.sendStatus( 204 );
+        res.sendStatus( 204 ).end();
     }).catch( (err) => {
         logger.error( "Error setting photo: " + err );
-        res.sendStatus( 500 );
+        res.sendStatus( 500 ).end();
     });
 }
 

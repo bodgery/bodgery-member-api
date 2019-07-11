@@ -754,8 +754,10 @@ export class PG
         ,client?
     ): void
     {
-        let main_callback = (client) => {
+        let main_callback = (client, done) => {
             client.query( query, (err, res) => {
+                done();
+
                 if( err ) {
                     error_callback( err );
                 }
@@ -769,12 +771,12 @@ export class PG
         };
 
         if( client ) {
-            main_callback( client );
+            main_callback( client, () => {} );
         }
         else {
             this.pool.connect( (err, client, done) => {
                 if( err ) throw err;
-                main_callback( client );
+                main_callback( client, done );
             });
         }
     }
