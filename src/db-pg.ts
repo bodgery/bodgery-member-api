@@ -618,60 +618,39 @@ export class PG
         });
         return full_session;
     }
-/*
+
     get_members(
-        success_callback: ( members: Array<db_impl.SimpleMember> ) => void
+        offset: number
+        ,per_page: number
+        ,success_callback: ( members: Array<db_impl.Member> ) => void
         ,error_callback: ( err: Error ) => void
-        ,id: string = null
-        ,limit: number = null
-        ,skip: number = null
-        ,sort: string = null
     ): boolean
     {
         let placeholder = this.placeholder_generator();
 
-        // TODO fetch address, approved tools, and profile questions
         let query_text = [
             "SELECT"
-                ,"id"
-                ,"keyfob_id"
-                ,",first_name AS firstName"
-                ,",last_name AS lastName"
-                ,",full_name AS name"
+                ,"member_id"
+                ,",rfid"
+                ,",first_name"
+                ,",last_name"
                 ,",phone"
-                ,",address1"
-                ,",address2"
-                ,",city"
-                ,",state"
-                ,",zip"
-                ,",county"
-                ,",country"
+                ,",email"
             ,"FROM members"
-            ,"JOIN us_address ON (members.address_id = us_address.id)"
+            ,"ORDER BY last_name, first_name"
         ];
         let name = "get-member";
         let values = [];
 
-        if( id != null ) {
-            name += "-by-id";
-            query_text.push( "WHERE keyfob_id = " + placeholder() );
-            values.push( id );
-        }
-        if( sort != null ) {
-            name += "-order-by";
-            // We can't use placeholders on column names, so escape 
-            // it safely here
-            query_text.push( pg_escape( "ORDER BY %I", sort ) );
-        }
-        if( limit != null ) {
+        if( per_page != null ) {
             name += "-limit";
             query_text.push( "LIMIT " + placeholder() );
-            values.push( limit );
+            values.push( per_page );
         }
-        if( skip != null ) {
+        if( offset != null ) {
             name += "-offset";
             query_text.push( "OFFSET " + placeholder() );
-            values.push( skip );
+            values.push( offset );
         }
 
         let query = {
@@ -679,40 +658,27 @@ export class PG
             ,text: query_text.join( " " )
             ,values: values
         };
-        this.client.query( query, (err, res) => {
-            if( err ) {
-                error_callback( err );
-            }
-            else {
-                let results = res.rows.map( (row) => {
+        this.call_query( query
+            ,( rows ) => {
+                let results = rows.map( (row) => {
                     return {
-                        id: row.id
-                        ,keyfob_id: row.keyfob_id
-                        ,name: row.name
-                        ,firstName: row.firstName
-                        ,lastName: row.lastName
-                        ,photo: row.photo
+                        member_id: row.member_id
+                        ,rfid: row.rfid
+                        ,firstName: row.first_name
+                        ,lastName: row.last_name
                         ,phone: row.phone
-                        ,address: {
-                            address1: row.address1
-                            ,address2: row.address2
-                            ,city: row.city
-                            ,state: row.state
-                            ,zip: row.zip
-                            ,county: row.county
-                            ,country: row.country
-                        }
-                        ,approvedTools: []
+                        ,email: row.email
                     };
                 });
-                this.gather_approved_tools( results, (res) => {
-                    success_callback( res );
-                }, error_callback );
+                success_callback( results );
             }
-        });
+            ,() => {
+                success_callback( [] );
+            }
+            ,error_callback
+        );
         return true;
     }
-*/
 
     end(): void
     {

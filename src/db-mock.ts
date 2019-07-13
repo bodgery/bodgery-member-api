@@ -364,43 +364,30 @@ export class MockDB
         return null;
     }
 
-/*
     get_members(
-        success_callback: ( members: Array<db_impl.Member> ) => void
+        offset: number
+        ,per_page: number
+        ,success_callback: ( members: Array<db_impl.Member> ) => void
         ,error_callback: ( err: Error ) => void
-        ,id: string = null
-        ,limit: number = null
-        ,skip: number = null
-        ,sort: string = null
     ): boolean
     {
-        let members = this.members;
+        let members = Object.values( this.members )
+            .map( (_) => _.simple_data );
 
-        if( id ) {
-            members = members.filter( function (member) {
-                return member.id == id;
-            });
-        }
-        if( sort ) {
-            members = members.sort( function ( a, b ) {
-                return a[sort].localeCompare( b[sort] );
-            });
-        }
-        if( skip ) {
+        if( offset ) {
             members = members.filter( function (member, index) {
-                return index >= skip;
+                return index >= offset;
             });
         }
-        if( limit ) {
+        if( per_page ) {
             members = members.filter( function (member, index) {
-                return index < limit;
+                return index < per_page;
             });
         }
 
         success_callback( members );
         return true;
     }
- */
 
     end(): void
     {

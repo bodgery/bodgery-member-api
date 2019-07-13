@@ -36,3 +36,9 @@ CREATE TABLE "rfid_log" (
     is_active BOOLEAN NOT NULL,
     log_timestamp TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+
+CREATE INDEX member_name ON members (
+    last_name
+    ,first_name
+);

@@ -1,0 +1,18 @@
+<h1>Active Members</h1>
+
+<p>
+{{#if next}}
+<a href="/members/active?offset={{next_offset}}&per_page={{per_page}}"
+        class="btn">Next</a>
+{{/if}}
+{{#if prev}}
+    <a href="/members/active?offset={{prev_offset}}&per_page={{per_page}}"
+        class="btn">Prev</a>
+{{/if}}
+</p>
+
+<ul id="active-members" class="nobullet">
+    {{#members}}
+    <li><a href="/member/{{member_id}}">{{first_name}} {{last_name}}</a></li>
+    {{/members}}
+</ul>

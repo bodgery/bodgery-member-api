@@ -625,6 +625,65 @@ export function member_signup( req, res, ctx: c.Context )
     );
 }
 
+export function members_active( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let query = req.query;
+    if(! query['offset'] ) query['offset'] = 0;
+    if(! query['per_page'] ) query['per_page'] = 20;
+
+    try {
+        valid.validate( query, [
+            valid.isInteger( 'offset' )
+            ,valid.isInteger( 'per_page' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    let offset: number = parseInt( query['offset'] );
+    let per_page: number = parseInt( query['per_page'] );
+
+    db.get_members( offset, per_page
+        ,( members ) => {
+            logger.info( "Fetched " + members.length
+                + " members starting at " + offset );
+
+            let prev_offset: number = offset - per_page;
+            let render_args = {
+                next_offset: offset + per_page
+                ,prev_offset: prev_offset
+                // TODO detect if there are any left and set next as needed
+                ,next: true
+                ,prev: (prev_offset >= 0)
+                ,per_page: per_page
+                ,members: members.map( (_) => {
+                    let member = {
+                        member_id: _.member_id
+                        ,first_name: _.firstName
+                        ,last_name: _.lastName
+                    };
+                    return member;
+                })
+            };
+
+            let render = tmpl_view( "members-active"
+                ,render_args
+                ,[]
+                ,200
+            );
+            render( req, res, ctx );
+        }
+        ,get_generic_db_error( logger, res )
+    );
+}
+
+export function member_info( req, res, ctx: c.Context )
+{
+}
+
 export function post_member_signup_email( req, res, ctx: c.Context )
 {
     let logger = ctx.logger;

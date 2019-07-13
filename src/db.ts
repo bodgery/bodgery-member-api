@@ -42,6 +42,16 @@ export interface SimpleMember
     email: string;
 }
 
+export interface Member
+{
+    member_id: string;
+    rfid: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+}
+
 export interface DB
 {
     add_member(
@@ -176,16 +186,13 @@ export interface DB
     ): void;
 
     session_store( express_session );
-/*
+
     get_members(
-        success_callback: ( members: Array<SimpleMember> ) => void
+        offset: number
+        ,per_page: number
+        ,success_callback: ( members: Array<Member> ) => void
         ,error_callback: ( err: Error ) => void
-        ,id: string
-        ,limit: number
-        ,skip: number
-        ,sort: string
     ): boolean;
-*/
 
     end(): void;
 }

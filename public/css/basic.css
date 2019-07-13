@@ -51,3 +51,13 @@ li.action {
     font-size: 20pt;
     cursor: pointer;
 }
+
+.btn {
+    background-color: #42485C;
+    color: #787C8C;
+    border-color: #787C8C;
+    border-width: 2px;
+    border-style: solid;
+    font-size: 20pt;
+    cursor: pointer;
+}
