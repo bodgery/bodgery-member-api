@@ -316,6 +316,22 @@ paths:
           description: Server error
         '200':
           description: Set the RFID
+  '/v1/rfids':
+    get:
+      tags:
+        - Members
+      summary: Dump the RFID database
+      description: ''
+      operationId: ''
+      responses:
+        '200':
+          description: Success
+          content:
+              application/json:
+                  schema:
+                      $ref: '#/components/schemas/RFIDDatabase'
+        '500':
+          description: Server error
   '/v1/rfid/:rfid':
     get:
       tags:
@@ -615,6 +631,10 @@ components:
           type: array
           items:
             type: string
+    RFIDDatabase:
+      type: object
+      additionalProperties:
+          type: boolean
     taskList:
       type: array
       items:

@@ -275,6 +275,22 @@ export class MockDB
         return true;
     }
 
+    rfid_dump(
+        success_callback: ( dump: any ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let rfids = {};
+
+        Object.values( this.members ).forEach( (item) => {
+            let rfid_tag = item.simple_data.rfid;
+            rfids[rfid_tag] = true;
+        });
+
+        success_callback( rfids );
+        return true;
+    }
+
     log_rfid_entry(
         rfid: string
         ,is_active: boolean

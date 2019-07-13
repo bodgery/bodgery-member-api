@@ -228,6 +228,8 @@ function setup_server_routes(
         context_wrap( request_funcs.get_member_photo ) );
     server.get( '/api/v1/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
+    server.get( '/api/v1/rfids',
+        context_wrap( request_funcs.get_rfid_dump ) );
     server.post( '/api/v1/rfid/log_entry/:rfid/:is_allowed',
         context_wrap( request_funcs.post_log_rfid ) );
 

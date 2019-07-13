@@ -441,6 +441,38 @@ export class PG
         return true;
     }
 
+    rfid_dump(
+        success_callback: ( dump: any ) => void
+        ,error_callback: ( err: Error ) => void
+    ): boolean
+    {
+        let query = {
+            name: "dump-rfid"
+            ,text: [
+                "SELECT rfid"
+                ,"FROM members"
+                ,"WHERE status = true"
+            ].join( " " )
+            ,values: [ ]
+        };
+
+        this.call_query(
+            query
+            ,(rows) => {
+                let rfid = {};
+                rows.forEach( (_) => {
+                    let tag = _['rfid'];
+                    rfid[tag] = true;
+                });
+                success_callback( rfid );
+            }
+            ,() => { success_callback( {} ) }
+            ,error_callback
+        );
+
+        return true;
+    }
+
     log_rfid_entry(
         rfid: string
         ,is_active: boolean

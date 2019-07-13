@@ -342,6 +342,20 @@ export function get_member_rfid( req, res, ctx: c.Context )
     );
 }
 
+export function get_rfid_dump( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    db.rfid_dump(
+        (dump) => {
+            res
+                .status(200)
+                .json( dump )
+                .end();
+        }
+        ,get_generic_db_error( logger, res )
+    );
+}
+
 export function post_log_rfid( req, res, ctx: c.Context )
 {
     let logger = ctx.logger;
