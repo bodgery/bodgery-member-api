@@ -159,6 +159,10 @@ function begin_member_activate( member_id )
 
         $.ajax( "/api/v1/member/" + member_id + "/is_active", {
             "type": "PUT",
+            "contentType": "application/json",
+            "data": JSON.stringify({
+                is_active: true
+            }),
             "error": function (jqXHR, str, exception) {
                 set_fail( $( "#member_activate_bullet" ) );
                 reject( new Error( "Error activating member: " + str ) );

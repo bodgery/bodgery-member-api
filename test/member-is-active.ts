@@ -32,7 +32,9 @@ describe( '/v1/member/:member_id/is_active', function () {
     });
 
     it( 'Sets member status', function (done) {
-        let fetch_status = () => {
+        let fetch_status = (
+            callback: ( res ) => void
+        ) => {
             request( server.SERVER )
                 .get( '/api/v1/member/' + uuid + '/is_active' )
                 .send()
@@ -40,22 +42,49 @@ describe( '/v1/member/:member_id/is_active', function () {
                 .end( function( err, res ) {
                     if( err ) done(err);
                     else {
-                        assert( res.body, "Returned true" );
-                        assert( wa_mock.members[uuid].is_active,
-                            "Set is_active on WA" );
-                        done();
+                        callback( res );
                     }
                 });
         };
 
-        request( server.SERVER )
-            .put( '/api/v1/member/' + uuid + '/is_active' )
-            .send({ is_active: true })
-            .expect( 200 )
-            .end( function( err, res ) {
-                if( err ) done(err);
-                else fetch_status();
+        let check_is_active = ( res ) => {
+            assert( res.body, "Returned true" );
+            assert( wa_mock.members[uuid].is_active,
+                "Set is_active on WA" );
+        };
+
+        let check_is_not_active = ( res ) => {
+            assert(! res.body, "Returned false" );
+            assert(! wa_mock.members[uuid].is_active,
+                "Set is_active on WA to false" );
+        };
+
+        let set_status = (
+            status: boolean
+            ,callback: ( res ) => void
+        ) => {
+            request( server.SERVER )
+                .put( '/api/v1/member/' + uuid + '/is_active' )
+                .send({ is_active: status })
+                .expect( 200 )
+                .end( function( err, res ) {
+                    if( err ) done(err);
+                    else callback( res );
+                });
+        };
+
+        set_status( true, (res) => {
+            fetch_status( (res) => {
+                check_is_active( res );
+
+                set_status( false, (res) => {
+                    fetch_status( (res) => {
+                        check_is_not_active( res );
+                        done();
+                    });
+                });
             });
+        });
     });
 
     after( () => {

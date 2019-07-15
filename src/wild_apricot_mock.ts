@@ -66,6 +66,16 @@ export class MockWA
         success_callback();
     }
 
+    public set_member_inactive(
+        member_id: string
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        this.members[member_id].is_active = false;
+        success_callback();
+    }
+
     public fetch_member_data(
         wa_member_id: number
         ,success_callback: (member: wa_api.WAMember) => void

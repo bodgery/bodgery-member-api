@@ -246,7 +246,7 @@ function setup_server_routes(
         context_wrap( request_funcs.member_signup ) );
     server.get( '/members/active',
         context_wrap( request_funcs.members_active ) );
-    server.get( '/member/:member_id',
+    server.get( '/member/show/:member_id',
         context_wrap( request_funcs.member_info ) );
     server.get( '/user/is-logged-in',
         context_wrap( request_funcs.is_user_logged_in ) );

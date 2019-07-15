@@ -45,6 +45,12 @@ export interface WA
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): void;
+
+    set_member_inactive(
+        member_id: string
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
 }
 
 
@@ -308,6 +314,69 @@ export class WildApricot
             fetch
             ,error_callback
         );
+    }
+
+    public set_member_inactive(
+        member_id: string
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO if we get an auth failure, force refetch of oauth token 
+        // and try again
+        let uri = this.account_uri + "/" + member_id;
+
+        let fetch = (oauth_token: string) => {
+            request.put( {
+                url: uri,
+                headers: {
+                    Accept: 'application/json'
+                },
+                auth: {
+                    bearer: oauth_token
+                },
+                json: {
+                    "MembershipEnabled": false
+                    ,"FieldValues": [
+                        {
+                            "FieldName": "Member"
+                            ,"Value": false
+                            ,"SystemCode": "IsMember"
+                        }
+                        ,{
+                            "FieldName": "Suspended member",
+                            "Value": true,
+                            "SystemCode": "IsSuspendedMember"
+                        }
+                        ,{
+                            "FieldName": "Membership enabled",
+                            "Value": false,
+                            "SystemCode": "MembershipEnabled"
+                        }
+                    ]
+                }
+            }, (error, response, body) => {
+                if(! error && response.statusCode == 200 ) {
+                    success_callback();
+                }
+                else {
+                    let err = new Error( "Error setting WA member to inactive"
+                        + " (status code: " + response.statusCode
+                        + ") <" + error + ">: " + body );
+                    error_callback( err );
+                }
+            });
+        };
+
+        // TODO Wild Apricot doesn't seem to let you deactive a member 
+        // through the API. If this can be resolved, reimplement this method.
+        /*
+        this.fetch_oauth_token(
+            fetch
+            ,error_callback
+        );
+         */
+        success_callback();
     }
 
 

@@ -164,4 +164,4 @@ export let byteLengthLimit = (limit) => function (param) {
 // Taken from:
 // https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid
 export let isUUID = (field, allowNull = false) => matchSingleField(
-     field, /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, "email", allowNull );
+     field, /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, "uuid", allowNull );

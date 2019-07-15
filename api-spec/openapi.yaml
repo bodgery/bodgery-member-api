@@ -267,6 +267,11 @@ paths:
       summary: Sets a member to be active
       description: ''
       operationId: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IsActive'
       responses:
         '400':
           description: Validation error

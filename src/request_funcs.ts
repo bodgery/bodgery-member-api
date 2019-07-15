@@ -216,6 +216,9 @@ export function put_member_is_active( req, res, ctx: c.Context )
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
         ]);
+        valid.validate( req.body, [
+            valid.isBoolean( 'is_active' )
+        ]);
     }
     catch (err) {
         handle_generic_validation_error( logger, res, err );
@@ -224,29 +227,48 @@ export function put_member_is_active( req, res, ctx: c.Context )
 
 
     let member_id = req.params.member_id;
-    logger.info( "Setting member to active in Wild Apricot: " + member_id );
+    let status = req.body.is_active;
+
+    logger.info( "Setting member status to "
+        + status + " in Wild Apricot: " + member_id );
+    let wa_active_call = status
+        ? ctx.wa.set_member_active
+        : ctx.wa.set_member_inactive;
     db.get_member_wild_apricot( member_id
         ,( wa_id ) => {
-            ctx.wa.set_member_active(
-                wa_id
-                ,() => {
-                    logger.info( "Setting member to active in database: "
-                        + member_id );
-                    db.set_member_is_active( member_id, true
-                        ,() => {
-                            logger.info( "Member now active: " + member_id );
-                            res.sendStatus( 200 );
-                        }
-                        ,get_member_id_not_found_error( logger, res, member_id )
-                        ,get_generic_db_error( logger, res )
-                    );
-                },
-                ( err: Error ) => {
-                    logger.error( "Error calling Wild Apricot to set active: "
-                        + err.toString() );
-                    res.sendStatus( 500 ).end();
-                }
-            )
+            let success_callback = () => {
+                logger.info( "Setting member status to "
+                    + status + " in database: " + member_id );
+                db.set_member_is_active( member_id, status
+                    ,() => {
+                        logger.info( "Member status now "
+                            + status + ": " + member_id );
+                        res.sendStatus( 200 );
+                    }
+                    ,get_member_id_not_found_error( logger, res, member_id )
+                    ,get_generic_db_error( logger, res )
+                );
+            };
+            let error_callback = ( err: Error ) => {
+                logger.error( "Error calling Wild Apricot to set active: "
+                    + err.toString() );
+                res.sendStatus( 500 ).end();
+            };
+
+            if( status ) {
+                ctx.wa.set_member_active(
+                    wa_id
+                    ,success_callback
+                    ,error_callback
+                );
+            }
+            else {
+                ctx.wa.set_member_inactive(
+                    wa_id
+                    ,success_callback
+                    ,error_callback
+                );
+            }
         }
         ,get_member_id_not_found_error( logger, res, member_id )
         ,get_generic_db_error( logger, res )
@@ -682,6 +704,40 @@ export function members_active( req, res, ctx: c.Context )
 
 export function member_info( req, res, ctx: c.Context )
 {
+    let logger = ctx.logger;
+    let params = req.params;
+
+    try {
+        valid.validate( params, [
+            valid.isUUID( 'member_id' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+
+    db.get_member( params['member_id']
+        ,( member ) => {
+            logger.info( "Fetched member" );
+
+            let render_args = {
+                member_id: member.member_id
+                ,rfid: member.rfid
+                ,first_name: member.firstName
+                ,last_name: member.lastName
+                ,status: "Active"
+            };
+            let render = tmpl_view( "member"
+                ,render_args
+                ,[]
+                ,200
+            );
+            render( req, res, ctx );
+        }
+        ,get_member_id_not_found_error( logger, res, params['member_id'] )
+        ,get_generic_db_error( logger, res )
+    );
 }
 
 export function post_member_signup_email( req, res, ctx: c.Context )

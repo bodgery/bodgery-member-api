@@ -53,6 +53,7 @@ li.action {
 }
 
 .btn {
+    display: inline;
     background-color: #42485C;
     color: #787C8C;
     border-color: #787C8C;

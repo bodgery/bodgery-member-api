@@ -35,7 +35,7 @@ export class MockDB
 
     get_member(
         member_id: string
-        ,success_callback: ( member: db_impl.SimpleMember ) => void
+        ,success_callback: ( member: db_impl.Member ) => void
         ,no_member_found_callback: ( err: Error ) => void
         ,error_callback: ( err: Error ) => void
     ): boolean

@@ -1,0 +1,60 @@
+<h1>{{first_name}} {{last_name}}</h1>
+
+<script>
+'use strict';
+
+var waiting_char = "⌛";
+var success_char = "✓";
+var fail_char = "✗";
+
+
+function set_waiting( element )
+{
+    element.text( waiting_char );
+}
+
+function set_fail( element )
+{
+    element.text( fail_char );
+}
+
+function set_success( element )
+{
+    element.text( success_char );
+}
+
+function deactivate( member_id )
+{
+    return new Promise( function( resolve, reject ) {
+        set_waiting( $( "#member_activate_bullet" ) );
+
+        $.ajax( "/api/v1/member/" + member_id + "/is_active", {
+            "type": "PUT",
+            "contentType": "application/json",
+            "data": JSON.stringify({
+                is_active: false
+            }),
+            "error": function (jqXHR, str, exception) {
+                set_fail( $( "#member_activate_bullet" ) );
+                reject( new Error( "Error activating member: " + str ) );
+            },
+            "success": function (data, str, jqXHR) {
+                set_success( $( "#member_activate_bullet" ) );
+                resolve();
+            }
+        });
+    });
+}
+</script>
+
+<ul>
+    <li>ID: {{member_id}}</li>
+    <li>RFID: {{rfid}}</li>
+    <li>Status: {{status}}</li>
+</ul>
+
+
+<div class="btn" onClick="deactivate('{{member_id}}')">
+    <span id="member_activate_bullet"></span>
+    Deactivate
+</div>
