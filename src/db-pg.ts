@@ -485,8 +485,10 @@ export class PG
             name: "insert-rfid-log"
             ,text: [
                 "INSERT INTO rfid_log"
-                ,"(rfid, is_active)"
-                ,"VALUES ($1, $2)"
+                ,"(rfid, is_active, member_id)"
+                ,"VALUES ($1, $2,"
+                    ,"(SELECT id FROM members WHERE rfid = $1 LIMIT 1)"
+                ,")"
             ].join( " " )
             ,values: [
                 rfid
@@ -501,7 +503,6 @@ export class PG
             ,error_callback
         );
         return true;
-
     }
 
     add_user(

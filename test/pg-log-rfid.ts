@@ -15,18 +15,26 @@ describe( 'Logs an RFID entry', function () {
         db = get_pg_connection();
     });
 
-    it( 'Loggs an RFID entry', function (done) {
+    it( 'Logs an RFID entry', function (done) {
         let rfid = shortid.generate();
 
-        db.log_rfid_entry(
-            rfid
-            ,true
-            ,() => {
-                assert( true, "Logged entry" );
-                done();
+        db.add_member(
+            test_member_data( rfid )
+            ,(member_id) => {
+                db.log_rfid_entry(
+                    rfid
+                    ,true
+                    ,() => {
+                        assert( true, "Logged entry" );
+                        done();
+                    }
+                    ,error_handler
+                );
+
             }
             ,error_handler
         );
+
     });
 
     after( () => {

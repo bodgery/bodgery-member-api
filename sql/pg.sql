@@ -34,6 +34,9 @@ CREATE TABLE "rfid_log" (
     id SERIAL PRIMARY KEY,
     rfid TEXT NOT NULL,
     is_active BOOLEAN NOT NULL,
+    -- member_id could be null if the RFID tag doesn't match a member at the 
+    -- time of scanning
+    member_id INT REFERENCES members (id),
     log_timestamp TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
