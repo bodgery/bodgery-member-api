@@ -62,3 +62,17 @@ li.action {
     font-size: 20pt;
     cursor: pointer;
 }
+
+.rfid_log {
+    border: 1px solid #787C8C;
+    border-collapse: collapse;
+}
+
+.rfid_log > th, td {
+    border-bottom: 1px solid #787C8C;
+}
+
+a {
+    font-weight: bold;
+    text-decoration: underline;
+}

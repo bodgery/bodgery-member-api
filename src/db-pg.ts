@@ -505,6 +505,67 @@ export class PG
         return true;
     }
 
+    get_rfid_log(
+        offset: number
+        ,per_page: number
+        ,success_callback: ( logs: Array<db_impl.RFIDLog> ) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let placeholder = this.placeholder_generator();
+
+        let query_text = [
+            "SELECT"
+                ,"rfid_log.rfid rfid"
+                ,",rfid_log.is_active is_active"
+                ,",rfid_log.log_timestamp date"
+                ,",members.first_name first_name"
+                ,",members.last_name last_name"
+                ,",members.member_id member_id"
+            ,"FROM rfid_log"
+            ,"LEFT JOIN members ON members.id = rfid_log.member_id"
+            ,"ORDER BY rfid_log.log_timestamp"
+        ];
+        let name = "get-rfid-log";
+        let values = [];
+
+        if( per_page != null ) {
+            name += "-limit";
+            query_text.push( "LIMIT " + placeholder() );
+            values.push( per_page );
+        }
+        if( offset != null ) {
+            name += "-offset";
+            query_text.push( "OFFSET " + placeholder() );
+            values.push( offset );
+        }
+
+        let query = {
+            name: name
+            ,text: query_text.join( " " )
+            ,values: values
+        };
+        this.call_query( query
+            ,( rows ) => {
+                let results = rows.map( (row) => {
+                    return {
+                        rfid: row.rfid
+                        ,firstName: row.first_name
+                        ,lastName: row.last_name
+                        ,memberID: row.member_id
+                        ,isAllowed: row.is_active
+                        ,date: row.date
+                    };
+                });
+                success_callback( results );
+            }
+            ,() => {
+                success_callback( [] );
+            }
+            ,error_callback
+        );
+    }
+
     add_user(
         username: string
         ,password: string

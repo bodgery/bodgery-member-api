@@ -52,6 +52,16 @@ export interface Member
     email: string;
 }
 
+export interface RFIDLog
+{
+    memberID: string;
+    rfid: string;
+    firstName: string;
+    lastName: string;
+    isAllowed: boolean;
+    date: string;
+}
+
 export interface DB
 {
     add_member(
@@ -154,6 +164,13 @@ export interface DB
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): boolean;
+
+    get_rfid_log(
+        offset: number
+        ,per_page: number
+        ,success_callback: ( logs: Array<RFIDLog> ) => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
 
     add_user(
         username: string

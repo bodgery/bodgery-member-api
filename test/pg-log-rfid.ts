@@ -37,6 +37,17 @@ describe( 'Logs an RFID entry', function () {
 
     });
 
+    it( 'Fetches RFID logs', function (done) {
+        db.get_rfid_log( 0, 10
+            ,(logs) => {
+                assert( logs.length, "Fetched RFID log" );
+                assert( logs.length <= 10, "Didn't get too many" );
+                done();
+            }
+            ,error_handler
+        );
+    });
+
     after( () => {
         db.end();
     });

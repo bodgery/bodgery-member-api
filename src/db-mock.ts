@@ -303,6 +303,19 @@ export class MockDB
         return true;
     }
 
+    get_rfid_log(
+        offset: number
+        ,per_page: number
+        ,success_callback: ( logs: Array<db_impl.RFIDLog> ) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO as this is currently only for the frontend, and we 
+        // connect to a real database when we run that, this isn't 
+        // implemented.
+        success_callback([]);
+    }
+
     add_user(
         username: string
         ,password: string

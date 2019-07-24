@@ -1,0 +1,34 @@
+<h1>RFID Entry Log</h1>
+
+
+<p>
+{{#if next}}
+<a href="/rfid/log?offset={{next_offset}}&per_page={{per_page}}"
+        class="btn">Next</a>
+{{/if}}
+{{#if prev}}
+    <a href="/rfid/log?offset={{prev_offset}}&per_page={{per_page}}"
+        class="btn">Prev</a>
+{{/if}}
+</p>
+
+<table class="rfid_log">
+    <tr>
+        <th>RFID</th>
+        <th>Member Name</th>
+        <th>Allowed?</th>
+        <th>Date</th>
+    </tr>
+    {{#logs}}
+    <tr>
+        <td>{{rfid}}</td>
+        <td>{{#member_uuid}}<a href="/member/show/{{uuid}}">{{/member_uuid}}
+            {{name}}
+            {{#member_uuid}}</a>{{/member_uuid}}
+        </td>
+        <td>{{#is_allowed}}Yes{{/is_allowed}}
+            {{^is_allowed}}No{{/is_allowed}}</td>
+        <td>{{date}}</td>
+    </tr>
+    {{/logs}}
+</table>

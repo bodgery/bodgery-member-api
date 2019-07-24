@@ -254,6 +254,8 @@ function setup_server_routes(
         context_wrap( request_funcs.login_user ) );
     server.post( '/user/logout',
         context_wrap( request_funcs.logout_user ) );
+    server.get( '/rfid/log',
+        context_wrap( request_funcs.rfid_log ) );
 
     // 404 handler, must be last in the list
     server.use( (req, res, next) => {
