@@ -6,6 +6,7 @@ import * as fs from "fs";
 import * as google from 'googleapis';
 import * as google_auth from 'google-auth-library';
 import * as shortid from "shortid";
+import * as sprintf from "sprintf-js";
 import * as valid from "./validation";
 import * as wa_api from "./wild_apricot";
 
@@ -691,12 +692,17 @@ export function member_signup( req, res, ctx: c.Context )
     wa.fetch_member_data(
         wa_id
         ,(member) => {
+            let size_limit = ctx.conf['photo_size_limit'];
+            size_limit = sprintf.sprintf( "%0.1f MB",
+                size_limit / 1024 / 1024);
+
             let render = tmpl_view( "member-signup", {
                 first_name: member['first_name']
                 ,last_name: member['last_name']
                 ,phone: member['phone']
                 ,email: member['email']
                 ,wa_id: wa_id
+                ,photo_size_limit: size_limit
             }, [], 200 );
             render( req, res, ctx );
         }
