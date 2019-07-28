@@ -136,6 +136,31 @@ export class Checker
         );
     }
 
+    public addNewUser(
+        user: string
+        ,pass: string
+        ,callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        let salt = make_salt();
+
+        this.preferred_method.crypt(
+            pass
+            ,salt
+            ,(crypted_pass) => {
+                this.db.add_user(
+                    user
+                    ,crypted_pass
+                    ,salt.toString( 'hex' )
+                    ,this.preferred_method_str
+                    ,callback
+                    ,error_callback
+                );
+            }
+        );
+    }
+
     private _parseCryptType( crypt_string: string ): Crypter
     {
         let parts = crypt_string.split( '_' );

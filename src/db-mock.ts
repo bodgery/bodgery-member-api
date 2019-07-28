@@ -325,7 +325,12 @@ export class MockDB
         ,error_callback: ( err: Error ) => void
     ): void
     {
-        // TODO
+        this.users[username] = {
+            password: password
+            ,crypt_type: crypt_type
+            ,salt: salt
+        };
+        success_callback();
     }
 
     get_password_data_for_user(
