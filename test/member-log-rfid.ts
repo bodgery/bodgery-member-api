@@ -9,7 +9,6 @@ describe( 'Log RFID', function () {
     let db;
 
     before( () => {
-        process.env['TEST_RUN'] = "1";
         db = new mock_db.MockDB( {}, {} );
         server.start( db );
     });
@@ -33,6 +32,5 @@ describe( 'Log RFID', function () {
 
     after( () => {
         server.stop();
-        delete process.env['TEST_RUN'];
     });
 });

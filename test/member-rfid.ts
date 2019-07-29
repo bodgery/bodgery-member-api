@@ -15,7 +15,6 @@ describe( 'RFID management', function () {
 
 
     before( () => {
-        process.env['TEST_RUN'] = "1";
         let members = {};
         members[uuid1] = {
             is_active: true
@@ -41,11 +40,13 @@ describe( 'RFID management', function () {
                 });
         };
 
+        process.env['TEST_RUN'] = "1";
         request( server.SERVER )
             .put( '/api/v1/member/' + uuid1 + '/rfid' )
             .send({ rfid: good_rfid })
             .expect( 200 )
             .end( function( err, res ) {
+                process.env['TEST_RUN'] = "0";
                 if( err ) done(err);
                 else fetch_status();
             });
@@ -75,6 +76,5 @@ describe( 'RFID management', function () {
 
     after( () => {
         server.stop();
-        delete process.env['TEST_RUN'];
     });
 });
