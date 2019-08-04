@@ -41,7 +41,8 @@
     "short-uuid": "^3.1.0",
     "shortid": "^2.2.14",
     "sprintf-js": "^1.1.2",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.3.3333",
+    "yargs": "^13.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",

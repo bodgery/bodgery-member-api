@@ -12,6 +12,7 @@ import * as db_impl from "./src/db";
 import * as password_checker from "./src/password";
 import * as pg from "./src/db-pg";
 import * as wa_api from "./src/wild_apricot";
+import * as yargs from "yargs";
 import * as http from "http";
 
 
@@ -293,6 +294,19 @@ export function default_conf(): Object
             filename: "config.yaml"
         }
     );
+
+    let argv = yargs.command(
+        "port"
+        ,"Port to listen on"
+        ,{
+            description: "Port to listen on"
+            ,alias: "p"
+            ,type: "number"
+        }
+    ).argv;
+    if( argv.port ) {
+        conf.port = argv.port;
+    }
 
     return conf;
 }
