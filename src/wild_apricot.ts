@@ -51,6 +51,11 @@ export interface WA
         ,success_callback: () => void
         ,error_callback: ( err: Error ) => void
     ): void;
+
+    fetch_all_members(
+        success_callback: (members: Array<WAMember>) => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
 }
 
 
@@ -377,6 +382,53 @@ export class WildApricot
         );
          */
         success_callback();
+    }
+
+    public fetch_all_members(
+        success_callback: (members: Array<WAMember>) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        // TODO if we get an auth failure, force refetch of oauth token 
+        // and try again
+        let fetch = (oauth_token: string) => {
+            request.get( {
+                url: this.account_uri,
+                headers: {
+                    Accept: 'application/json'
+                },
+                auth: {
+                    bearer: oauth_token
+                }
+            }, (error, response, body) => {
+                if(! error && response.statusCode == 200 ) {
+                    let parsed_users = JSON.parse( body );
+                    let member_data = parsed_users['Contacts'].map( (_) => {
+                        const member = {
+                            wild_apricot_id: _.Id
+                            ,first_name: _.FirstName
+                            ,last_name: _.LastName
+                            ,phone: _.phone
+                            ,email: _.Email
+                            ,is_active: _.MembershipEnabled
+                        };
+                        return member;
+                    });
+                    success_callback( member_data );
+                }
+                else {
+                    let err = new Error( "Error fetching WA contact info"
+                        + " (status code: " + response.statusCode
+                        + "): " + body );
+                    error_callback( err );
+                }
+            });
+        };
+
+        this.fetch_oauth_token(
+            fetch
+            ,error_callback
+        );
     }
 
 

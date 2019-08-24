@@ -699,6 +699,8 @@ export class PG
                 ,",last_name"
                 ,",phone"
                 ,",email"
+                ,",wildapricot_id"
+                ,",status"
             ,"FROM members"
             ,"ORDER BY last_name, first_name"
         ];

@@ -92,4 +92,14 @@ export class MockWA
             ,is_active: member.is_active
         });
     }
+
+    public fetch_all_members(
+        success_callback: (members: Array<wa_api.WAMember>) => void
+        ,error_callback: ( err: Error ) => void
+    ): void
+    {
+        success_callback(
+            this.pending_members
+        );
+    }
 }
