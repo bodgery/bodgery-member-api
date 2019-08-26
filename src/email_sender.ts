@@ -151,6 +151,69 @@ export class Email
         );
     }
 
+    public send_reconciliation( args: {
+        to_name: string
+        ,to_email: string
+        ,from_name: string
+        ,from_email: string
+        ,active_in_local_not_wa: Array<any>
+        ,active_in_wa_not_local: Array<any>
+        ,total_active_members: number
+        ,success_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    }): void
+    {
+        if(! email_tmpls ) {
+            let err = new Error( "Need to call init() before sending email" );
+            args.error_callback( err );
+            return;
+        }
+
+        const gmail = new google.gmail_v1.Gmail({
+            auth: this.auth
+        });
+
+        const today = new Date();
+        const message = email_tmpls.execute( 'reconciliation', {
+            from_name: args.from_name
+            ,from_email: args.from_email
+            ,to_name: args.to_name
+            ,to_email: args.to_email
+            ,subject: "Bodgery Reconciliation Report ["
+                + [
+                    today.getFullYear()
+                    ,today.getMonth() + 1
+                    ,today.getDate()
+                ].join( "-" )
+            ,total_wa: args.total_active_members
+            ,active_in_wa_not_local: args.active_in_wa_not_local
+            ,active_in_local_not_wa: args.active_in_local_not_wa
+        });
+        // TODO below should be wrapped into send() private method
+        const encoded_message = Buffer.from( message )
+            .toString( 'base64' )
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+        gmail.users.messages.send(
+            {
+                userId: 'me'
+                ,requestBody: {
+                    raw: encoded_message
+                }
+            }
+            ,(err) => {
+                if( err ) {
+                    args.error_callback( err );
+                }
+                else {
+                    args.success_callback();
+                }
+            }
+        );
+    }
+
 
     private encode_file_attachment(
         photo_path: string

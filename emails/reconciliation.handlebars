@@ -1,0 +1,22 @@
+{{>basic_email_headers}}
+
+Total members (Wild Apricot): {{total_wa}}
+
+Members Active in WA, but Inactive in Local DB
+==============================================
+{{#active_in_local_not_wa}}
+* {{first_name}} {{last_name}} <{{email}}> [https://thebodgery.wildapricot.org/admin/contacts/details/?contactId={{wa_id}}]
+{{/active_in_local_not_wa}}
+{{^active_in_local_not_wa}}
+None! All sync'd up.
+{{/active_in_local_not_wa}}
+
+
+Members Active in Local DB, but Inactive in WA
+==============================================
+{{#active_in_local_not_wa}}
+* {{first_name}} {{last_name}} <{{email}}> [https://thebodgery.wildapricot.org/admin/contacts/details/?contactId={{wa_id}}]
+{{/active_in_local_not_wa}}
+{{^active_in_local_not_wa}}
+None! All sync'd up.
+{{/active_in_local_not_wa}}

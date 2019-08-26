@@ -1,10 +1,12 @@
+import * as App from '../src/request_funcs';
 import * as Email from '../src/email_sender';
 import * as fs from 'fs';
 import * as PG from '../src/db-pg';
 import * as WA from '../src/wild_apricot';
 import * as Yaml from 'js-yaml';
 
-const TO_EMAIL = 'board@thebodgery.org';
+//const TO_EMAIL = 'board@thebodgery.org';
+const TO_EMAIL = 'tmurray@wumpus-cave.net';
 
 
 const conf = Yaml.safeLoad(
@@ -122,21 +124,23 @@ function send_email( args: {
         // are private to src/request_funcs. Make them more generally 
         // accessible.
         // TODO create sender.send_reconciliation()
-        /*
-        fetch_google_auth(
+        App.fetch_google_auth(
             conf
-            ,fetch_google_email_scopes()
+            ,App.fetch_google_email_scopes()
             ,( client ) => {
                 const sender = new Email.Email({
                     auth: client
                 });
                 sender.init( () => {
                     sender.send_reconciliation({
-                        to_email: TO_EMAIL
+                        to_name: TO_EMAIL
+                        ,to_email: TO_EMAIL
                         ,from_name: conf['email_new_member_signup_from_name']
                         ,from_email: conf['email_new_member_signup_from_email']
+                        ,active_in_local_not_wa: args.active_in_local_not_wa
+                        ,active_in_wa_not_local: args.active_in_wa_not_local
+                        ,total_active_members: args.total_active_members
                         ,success_callback: () => {
-                            console.log( "Email sent" );
                             resolve();
                         }
                         ,error_callback: ( err: Error ) => {
@@ -147,10 +151,8 @@ function send_email( args: {
                     });
                 });
             }
-        )
-         */
+        );
 
-        console.log( "Total active members: " + args.total_active_members );
         resolve();
     });
 

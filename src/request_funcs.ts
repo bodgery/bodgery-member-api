@@ -43,7 +43,7 @@ function handle_generic_validation_error( logger, res, err ): void
         });
 }
 
-function fetch_google_auth(
+export function fetch_google_auth(
     conf
     ,scopes: Array<string>
     ,callback: ( client ) => void
@@ -68,7 +68,7 @@ function fetch_google_auth(
     });
 }
 
-function fetch_google_email_scopes(): Array<string>
+export function fetch_google_email_scopes(): Array<string>
 {
     return [
         'https://mail.google.com/'
