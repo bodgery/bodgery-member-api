@@ -393,7 +393,7 @@ export class WildApricot
         // and try again
         let fetch = (oauth_token: string) => {
             request.get( {
-                url: this.account_uri,
+                url: this.account_uri + '?$async=false',
                 headers: {
                     Accept: 'application/json'
                 },
@@ -460,10 +460,15 @@ export class WildApricot
                     success_callback( this.oauth_token );
                 }
                 else {
-                    error_callback( new Error( "Error fetching OAuth token"
-                        + " from Wild Apricot"
-                        + " (HTTP status " + response.statusCode + ")"
-                        + ": " + body ) );
+                    if( response ) {
+                        error_callback( new Error( "Error fetching OAuth token"
+                            + " from Wild Apricot"
+                            + " (HTTP status " + response.statusCode + ")"
+                            + ": " + body ) );
+                    }
+                    else {
+                        error_callback( new Error( error ) );
+                    }
                 }
             });
         }

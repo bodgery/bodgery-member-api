@@ -1,4 +1,5 @@
 import * as Email from '../src/email_sender';
+import * as fs from 'fs';
 import * as PG from '../src/db-pg';
 import * as WA from '../src/wild_apricot';
 import * as Yaml from 'js-yaml';
@@ -19,7 +20,7 @@ const db = new PG.PG(
     ,conf.db_user
     ,conf.db_password
 );
-const wa = new wa_api.WildApricot(
+const wa = new WA.WildApricot(
     conf.wa_api_client
     ,conf.wa_api_secret
     ,conf.wa_account_id
@@ -29,9 +30,9 @@ const wa = new wa_api.WildApricot(
 function get_members_db( db ): Promise<any>
 {
     const promise = new Promise( (resolve, reject) => {
-        db.get_members({
-            offset: 0
-            ,per_page: null
+        db.get_members(
+            0
+            ,null
             ,(members) => {
                 const formatted_members = {};
 
@@ -51,7 +52,7 @@ function get_members_db( db ): Promise<any>
             ,(err) => {
                 reject( err );
             }
-        });
+        );
     });
 
     return promise;
@@ -64,7 +65,7 @@ function get_members_wa( wa ): Promise<any>
             (wa_members) => {
                 const formatted_members = {};
 
-                members.forEach( (_) => {
+                wa_members.forEach( (_) => {
                     const member = {
                         wa_id: _.wild_apricot_id
                         ,status: _.is_active
@@ -89,9 +90,12 @@ function get_members_wa( wa ): Promise<any>
 function compare( members1, members2 )
 {
     let mismatch_results = {};
-    members1.forEach( (_) => {
-        let wa_id = _.wa_id;
-        if( _.status && ! members2[wa_id].status ) {
+    Object.values( members1 ).forEach( (_) => {
+        let wa_id = _['wa_id'];
+        if(! members2[wa_id]) {
+            mismatch_results[wa_id] = _;
+        }
+        else if( _['status'] && (! members2[wa_id]['status']) ) {
             mismatch_results[wa_id] = _;
         }
     });
@@ -101,15 +105,15 @@ function compare( members1, members2 )
 
 function total_active_members( members ): number
 {
-    let active_members = members.filter( (_) => {
-        return _.status;
+    let active_members = Object.values( members ).filter( (_) => {
+        return _['status'];
     });
     return active_members.length;
 }
 
 function send_email( args: {
-    active_in_local_not_wa: Array
-    ,active_in_wa_not_local: Array
+    active_in_local_not_wa: Array<any>
+    ,active_in_wa_not_local: Array<any>
     ,total_active_members: number
 }): Promise<any>
 {
@@ -118,6 +122,7 @@ function send_email( args: {
         // are private to src/request_funcs. Make them more generally 
         // accessible.
         // TODO create sender.send_reconciliation()
+        /*
         fetch_google_auth(
             conf
             ,fetch_google_email_scopes()
@@ -143,6 +148,10 @@ function send_email( args: {
                 });
             }
         )
+         */
+
+        console.log( "Total active members: " + args.total_active_members );
+        resolve();
     });
 
     return promise;
@@ -158,14 +167,12 @@ Promise.all([
 
     const active_in_local_not_wa = compare( db_members, wa_members );
     const active_in_wa_not_local = compare( wa_members, db_members );
-    const total_active_members = total_active_members( wa_members );
+    const total = total_active_members( wa_members );
 
     const email_promise = send_email({
-        active_in_local_not_wa: active_in_local_not_wa
-        ,active_in_wa_not_local: active_in_wa_not_local
-        ,total_active_members: total_active_mmebers
+        active_in_local_not_wa: Object.values( active_in_local_not_wa )
+        ,active_in_wa_not_local: Object.values( active_in_wa_not_local )
+        ,"total_active_members": total
     });
     return email_promise;
-}).then( () => {
-    return;
-});
+}).then( () => {});
