@@ -9,6 +9,8 @@ const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 
 describe( 'GET /v1/rfids', function () {
     before( () => {
+        process.env['TEST_RUN'] = "1";
+
         let members = {}
         members["01"] = {
             simple_data: {
@@ -53,5 +55,6 @@ describe( 'GET /v1/rfids', function () {
 
     after( () => {
         server.stop();
+        delete process.env['TEST_RUN'];
     });
 });

@@ -18,10 +18,7 @@ import * as http from "http";
 
 // The routes listed here can be accessed by a user who isn't logged in
 const ALLOW_UNKNOWN_USER_ROUTES = [
-    '/api/v1/rfid/.*'
-    ,'/api/v1/rfid/log_entry/.*'
-    ,'/api/v1/rfids'
-    ,'/'
+    '/'
     ,'/user/login'
     ,'/user/is-logged-in'
     ,'/js/.*'
