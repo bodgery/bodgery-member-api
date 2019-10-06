@@ -6,17 +6,20 @@ export class MockDB
     members: Object = {};
     users: Object = {};
     rfid_log: Array<[ string, boolean ]>;
+    tokens: Object = {};
 
 
     constructor(
         members: Object
         ,users: Object
         ,rfid_log?: Array<[ string, boolean ]>
+        ,tokens?: Object
     )
     {
         this.members = members;
         this.users = users;
         this.rfid_log = rfid_log || [];
+        this.tokens = tokens || {};
     }
 
 
@@ -380,6 +383,13 @@ export class MockDB
     session_store( express_session )
     {
         return null;
+    }
+
+    is_token_allowed(
+        token: string
+    ): boolean
+    {
+        return token in this.tokens;
     }
 
     get_members(

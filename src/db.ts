@@ -204,6 +204,10 @@ export interface DB
 
     session_store( express_session );
 
+    is_token_allowed(
+        token: string
+    ): boolean;
+
     get_members(
         offset: number
         ,per_page: number

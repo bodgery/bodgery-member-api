@@ -37,7 +37,7 @@ describe( "User authorization", function () {
         request( server.SERVER )
             .get( '/members/pending' )
             .set( trust_header_name, trust_header_value )
-            .expect( 403 )
+            .expect( 401 )
             .end( (err, res) => {
                 if(err) done(err);
                 else done();

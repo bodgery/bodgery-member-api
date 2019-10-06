@@ -109,10 +109,19 @@ function init_server(
     return server;
 }
 
-function authorization( logger )
+function get_token( req )
+{
+    let auth_header = req.header( 'Authorization' ) || "";
+    let tokens = auth_header.split( ' ' );
+    let token = tokens[1];
+    return token;
+}
+
+function authorization( logger, db )
 {
     return (req, res, next ) => {
         let route = req.path;
+        let token = get_token( req );
 
         logger.info( "Checking user authorization" );
         // Eventually, we'll have more sophisticated checking for users 
@@ -120,6 +129,14 @@ function authorization( logger )
         // access anything
         if( req.session.is_logged_in ) {
             logger.info( "User is logged in, allowing" );
+            next();
+        }
+        // Allow bearer tokens
+        else if(
+            (token != undefined)
+            && db.is_token_allowed( token )
+        ) {
+            logger.info( "Bearer token is allowed" );
             next();
         }
         // Allow through the whitelisted routes
@@ -130,14 +147,15 @@ function authorization( logger )
             next();
         }
         // Tests can set an env var to bypass this check
+        // TODO remove
         else if( process.env['TEST_RUN'] ) {
             logger.info( "Server in test run mode, allowing" );
             next();
         }
-        // Everything else gets a 403 Forbidden
+        // Everything else gets a 401 Unauthorized
         else {
             logger.error( "User not allowed to access " + route );
-            res.sendStatus(403);
+            res.sendStatus(401);
         }
     };
 }
@@ -161,7 +179,7 @@ function setup_server_params( conf, db, logger )
 
     let server = express();
     server.use( session( session_options ) );
-    server.use( authorization( logger ) );
+    server.use( authorization( logger, db ) );
     server.use( bodyParser.json() );
     server.use( bodyParser.raw({
         type: "image/*"

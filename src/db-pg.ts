@@ -682,6 +682,14 @@ export class PG
         return full_session;
     }
 
+    is_token_allowed(
+        token: string
+    ): boolean
+    {
+        // TODO
+        return true;
+    }
+
     get_members(
         offset: number
         ,per_page: number
