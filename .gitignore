@@ -4,3 +4,4 @@ built
 *.log
 google-credentials*
 test_data/photos/*
+src/typeorm

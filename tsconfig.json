@@ -8,6 +8,8 @@
         "outDir": "./built",
         "allowJs": true,
         "target": "es6",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
         "types": [
             "node"
             ,"mocha"
