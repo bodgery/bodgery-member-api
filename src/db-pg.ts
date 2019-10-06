@@ -684,10 +684,86 @@ export class PG
 
     is_token_allowed(
         token: string
-    ): boolean
+        ,success_callback: () => void
+        ,no_token_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
     {
-        // TODO
-        return true;
+        let query = {
+            name: "is-token-allowed"
+            ,text: [
+                "SELECT"
+                    ,"id"
+                ,"FROM access_token"
+                ,"WHERE token = $1"
+            ].join( " " )
+            ,values: [ token ]
+        };
+
+        this.call_query(
+            query
+            ,(rows) => success_callback()
+            ,no_token_found_callback
+            ,error_callback
+        );
+    }
+
+    add_token(
+        username: string
+        ,token: string
+        ,name: string
+        ,notes: string
+        ,success_handler: () => void
+        ,no_user_found_callback: () => void
+        ,error_handler: ( err: Error ) => void
+    ): void
+    {
+        let user_id_query = {
+            name: "user-id-lookup"
+            ,text: [
+                "SELECT"
+                    ,"id"
+                ,"FROM users"
+                ,"WHERE email = $1 LIMIT 1"
+            ].join( " " )
+            ,values: [
+                username
+            ]
+        };
+        let query = {
+            name: "add-token"
+            ,text: [
+                "INSERT INTO access_token ("
+                    ,"user_id"
+                    ,",token"
+                    ,",name"
+                    ,",notes"
+                ,") VALUES ($1, $2, $3, $4)"
+            ].join( " " )
+            ,values: [
+                null
+                ,token
+                ,name
+                ,notes
+            ]
+        };
+
+        this.call_query(
+            user_id_query
+            ,( rows ) => {
+                query.values[0] = rows[0].id;
+
+                this.call_query(
+                    query
+                    ,success_no_rows_callback_builder( success_handler )
+                    ,null
+                    ,error_handler
+                );
+            }
+            ,no_user_found_callback
+            ,error_handler
+        );
+
     }
 
     get_members(

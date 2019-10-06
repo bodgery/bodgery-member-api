@@ -40,6 +40,14 @@ CREATE TABLE "rfid_log" (
     log_timestamp TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE "access_token" (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users (id),
+    token TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    notes TEXT NOT NULL DEFAULT ''
+);
+
 
 CREATE INDEX member_name ON members (
     last_name

@@ -385,11 +385,33 @@ export class MockDB
         return null;
     }
 
+    add_token(
+        username: string
+        ,token: string
+        ,name: string
+        ,notes: string
+        ,success_handler: () => void
+        ,no_user_found_callback: () => void
+        ,error_handler: ( err: Error ) => void
+    ): void
+    {
+        this.tokens[token] = true;
+        success_handler();
+    }
+
     is_token_allowed(
         token: string
-    ): boolean
+        ,success_callback: () => void
+        ,no_token_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void
     {
-        return token in this.tokens;
+        if( token in this.tokens ) {
+            success_callback();
+        }
+        else {
+            no_token_found_callback();
+        }
     }
 
     get_members(

@@ -1,10 +1,13 @@
 import * as db from "./db";
 import * as fs from "fs";
 import * as pg from "./db-pg";
+import * as rnd_str from "crypto-random-string";
 import * as shortid from "shortid";
 import * as yaml from "js-yaml";
 
 const CONF_FILE = "./config.yaml";
+// Base64 gives you 6 bits per character. A length of 40 gives us 240-bits.
+const TOKEN_LEN_BASE64 = 40;
 
 
 export function error_handler (err)
@@ -53,4 +56,13 @@ export function test_member_data (
         ,email: email
     };
     return member_data;
+}
+
+export function make_secure_token(): string
+{
+    let token = rnd_str({
+        length: TOKEN_LEN_BASE64
+        ,type: 'url-safe'
+    });
+    return token;
 }

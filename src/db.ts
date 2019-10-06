@@ -206,7 +206,20 @@ export interface DB
 
     is_token_allowed(
         token: string
-    ): boolean;
+        ,success_callback: () => void
+        ,no_token_found_callback: () => void
+        ,error_callback: ( err: Error ) => void
+    ): void;
+
+    add_token(
+        username: string
+        ,token: string
+        ,name: string
+        ,notes: string
+        ,success_handler: () => void
+        ,no_user_found_callback: () => void
+        ,error_handler: ( err: Error ) => void
+    ): void;
 
     get_members(
         offset: number

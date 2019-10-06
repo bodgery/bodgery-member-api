@@ -123,6 +123,11 @@ function authorization( logger, db )
         let route = req.path;
         let token = get_token( req );
 
+        let not_allowed = () => {
+            logger.error( "User not allowed to access " + route );
+            res.sendStatus(401);
+        };
+
         logger.info( "Checking user authorization" );
         // Eventually, we'll have more sophisticated checking for users 
         // accessing individual routes, but for now, any logged in user can 
@@ -131,13 +136,21 @@ function authorization( logger, db )
             logger.info( "User is logged in, allowing" );
             next();
         }
-        // Allow bearer tokens
-        else if(
-            (token != undefined)
-            && db.is_token_allowed( token )
-        ) {
-            logger.info( "Bearer token is allowed" );
-            next();
+        // Bearer tokens
+        else if( token != undefined ) {
+            db.is_token_allowed( token
+                ,() => {
+                    logger.info( "Bearer token is allowed" );
+                    next();
+                }
+                ,() => {
+                    logger.info( "Bearer token is NOT allowed" );
+                    not_allowed();
+                }
+                ,( err: Error ) => {
+                    throw err;
+                }
+            );
         }
         // Allow through the whitelisted routes
         else if( 0 < ALLOW_UNKNOWN_USER_ROUTES.filter(
@@ -152,10 +165,9 @@ function authorization( logger, db )
             logger.info( "Server in test run mode, allowing" );
             next();
         }
-        // Everything else gets a 401 Unauthorized
+        // Everything else is not allowed
         else {
-            logger.error( "User not allowed to access " + route );
-            res.sendStatus(401);
+            not_allowed();
         }
     };
 }
