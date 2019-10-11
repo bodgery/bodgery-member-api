@@ -15,7 +15,7 @@ describe( "User authorization with OAuth2", function () {
         tokens[token] = true;
         db = new mock_db.MockDB( {}, {}, null, tokens );
 
-        server.start( db );
+        return server.start( db );
     });
 
 
@@ -31,6 +31,6 @@ describe( "User authorization with OAuth2", function () {
     });
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

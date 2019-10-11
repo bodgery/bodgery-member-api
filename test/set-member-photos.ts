@@ -22,7 +22,7 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
         conf['photo_dir'] = PHOTO_DIR;
 
         let db = new mock_db.MockDB( [], members );
-        server.start( db, conf );
+        return server.start( db, conf );
     });
 
     it( 'Sets a member photo', function (done) {
@@ -68,26 +68,34 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
         });
     });
 
-    after( (done) => {
-        server.stop();
+    after( () => {
+        let server_promise = server.stop();
         delete process.env['TEST_RUN'];
 
         // Just delete everything in the test photo dir
-        fs.readdir( PHOTO_DIR, (err, files) => {
-            let promises = files.map( (_) => new Promise( (resolve, reject) => {
-                if( _.match( /^\./ ) ) {
-                    // Ignore files beginning with a dot
-                    resolve();
-                }
-                else {
-                    fs.unlink( PHOTO_DIR + "/" + _, (err) => {
-                        if( err ) reject( err );
-                        else resolve();
-                    });
-                }
-            }) );
+        let cleanup_promise = new Promise( (resolve, reject) => {
+            fs.readdir( PHOTO_DIR, (err, files) => {
+                let promises = files.map( (_) => new Promise(
+                    (resolve, reject) => {
+                    if( _.match( /^\./ ) ) {
+                        // Ignore files beginning with a dot
+                        resolve();
+                    }
+                    else {
+                        fs.unlink( PHOTO_DIR + "/" + _, (err) => {
+                            if( err ) reject( err );
+                            else resolve();
+                        });
+                    }
+                }) );
 
-            Promise.all( promises ).then( () => done() );
+                Promise.all( promises ).then( () => resolve() );
+            });
         });
+
+        return Promise.all([
+            server_promise
+            ,cleanup_promise
+        ]);
     });
 });

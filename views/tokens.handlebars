@@ -1,0 +1,36 @@
+<h1>API Tokens</h1>
+
+<table class="tokens">
+    <tr>
+        <th>&nbsp;</th>
+        <th>Value</th>
+        <th>Name</th>
+        <th>Notes</th>
+    </tr>
+{{#tokens}}
+    <tr>
+        <td>
+            <form action="/tokens/delete" method="POST">
+                <input type="hidden" name="token" value="{{token}}">
+                <input type="submit" value="Delete">
+            </form>
+        </td>
+        <td>{{token}}</td>
+        <td>{{name}}</td>
+        <td>{{notes}}</td>
+    </tr>
+{{/tokens}}
+</table>
+
+<hr>
+
+<h2>Add New Token</h2>
+<form action="/tokens/add" method="POST">
+    <ul class="nobullet">
+        <li>Token Value: <input type="text" name="token"
+            value="{{suggested_token_value}}"></li>
+        <li>Name: <input type="text" name="name"></li>
+        <li>Notes: <input type="text" name="notes"></li>
+    </ul>
+    <p><input type="submit" value="Submit"></p>
+</form>

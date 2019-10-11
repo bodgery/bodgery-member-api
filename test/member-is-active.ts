@@ -28,7 +28,7 @@ describe( '/v1/member/:member_id/is_active', function () {
             members: wa_members
         });
 
-        server.start( db, null, wa_mock );
+        return server.start( db, null, wa_mock );
     });
 
     it( 'Sets member status', function (done) {
@@ -88,7 +88,7 @@ describe( '/v1/member/:member_id/is_active', function () {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

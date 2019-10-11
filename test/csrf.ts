@@ -9,7 +9,7 @@ describe(
     function () {
     before( () => {
         let db = new mock_db.MockDB([], {});
-        server.start( db );
+        return server.start( db );
     });
 
 /*
@@ -33,6 +33,6 @@ describe(
  */
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

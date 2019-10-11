@@ -29,7 +29,7 @@ describe( "User authorization", function () {
 
         db = new mock_db.MockDB( null, user_data );
 
-        server.start( db, conf );
+        return server.start( db, conf );
     });
 
 
@@ -121,6 +121,6 @@ describe( "User authorization", function () {
     });
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

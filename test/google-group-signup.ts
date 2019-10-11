@@ -21,7 +21,7 @@ describe( 'PUT /v1/member/:member_id/google_group_signup', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Adds member to the Google Group list', function (done) {
@@ -42,6 +42,6 @@ describe( 'PUT /v1/member/:member_id/google_group_signup', function () {
     });
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

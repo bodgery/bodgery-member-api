@@ -21,7 +21,7 @@ describe( 'POST /v1/member/:member_id/send_signup_email', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Sends the new member signup email', function (done) {
@@ -42,6 +42,6 @@ describe( 'POST /v1/member/:member_id/send_signup_email', function () {
     });
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

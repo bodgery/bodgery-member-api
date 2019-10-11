@@ -72,6 +72,15 @@ li.action {
     border-bottom: 1px solid #787C8C;
 }
 
+.tokens {
+    border: 1px solid #787C8C;
+    border-collapse: collapse;
+}
+
+.tokens > th, td {
+    border-bottom: 1px solid #787C8C;
+}
+
 a {
     font-weight: bold;
     text-decoration: underline;

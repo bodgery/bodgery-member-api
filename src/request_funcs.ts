@@ -1,3 +1,5 @@
+import * as db_access_token from "./typeorm/entities/access_token";
+import * as db_user from "./typeorm/entities/users";
 import * as c from "./context";
 import * as email_sender from "./email_sender";
 import * as Tokens from "csrf";
@@ -7,14 +9,20 @@ import * as google from 'googleapis';
 import * as google_auth from 'google-auth-library';
 import * as shortid from "shortid";
 import * as sprintf from "sprintf-js";
+import * as util from "./util";
 import * as valid from "./validation";
 import * as wa_api from "./wild_apricot";
 
 
 let db : db_impl.DB;
-export function set_db (new_db: db_impl.DB)
+let typeorm_connection;
+export function set_db (
+    new_db: db_impl.DB
+    ,new_typeorm_connection
+)
 {
     db = new_db;
+    typeorm_connection = new_typeorm_connection;
 }
 
 function get_generic_db_error( logger, res )
@@ -626,6 +634,112 @@ export function rfid_log( req, res, ctx: c.Context )
         }
         ,get_generic_db_error( logger, res )
     );
+}
+
+function render_tokens( req, res, ctx: c.Context )
+{
+    let username = req.session.username;
+    let db_manager = typeorm_connection.manager;
+    let logger = ctx.logger;
+
+    db_manager
+        .getRepository( db_user.users )
+        .findOne({
+            email: username
+        })
+        .then( (db_user) => {
+            return db_manager
+                .getRepository( db_access_token.access_token )
+                .find({
+                    user: db_user
+                });
+        })
+        .then( (tokens) => {
+            let render = tmpl_view( "tokens", {
+                tokens: tokens
+                ,suggested_token_value: util.make_secure_token()
+            }, [], 200 );
+            render( req, res, ctx );
+        })
+        .catch( get_generic_db_error( logger, res ) );
+}
+
+export function tokens( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+
+    logger.info( "Showing tokens view" );
+    render_tokens( req, res, ctx );
+}
+
+export function add_token( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    try {
+        valid.validate( req.body, [
+            valid.isWords( 'name' )
+        ]);
+    }
+    catch (err) {
+        handle_generic_validation_error( logger, res, err );
+        return;
+    }
+    let token = req.body.token;
+    let name = req.body.name;
+    let notes = req.body.notes;
+    let user = req.session.username;
+
+    logger.info( "Adding token" );
+
+    let db_manager = typeorm_connection.manager;
+    db_manager
+        .getRepository( db_user.users )
+        .findOne({
+            email: user
+        })
+        .then( (db_user) => {
+            let db_token = new db_access_token.access_token();
+            db_token.user = db_user;
+            db_token.token = token;
+            db_token.name = name;
+            db_token.notes = notes;
+
+            return db_manager.save( db_token );
+        })
+        .then( () => {
+            logger.info( "New API token added for user: " + user );
+            render_tokens( req, res, ctx );
+        })
+        .catch( get_generic_db_error( logger, res ) );
+}
+
+export function delete_token( req, res, ctx: c.Context )
+{
+    let logger = ctx.logger;
+    let token = req.body.token;
+    let username = req.session.username;
+    let db_manager = typeorm_connection.manager;
+
+    logger.info( "Deleting token" );
+    db_manager
+        .getRepository( db_user.users )
+        .findOne({
+            email: username
+        })
+        .then( (got_user) => {
+            logger.info( "API token deleted for user: " + username );
+            return db_manager
+                .getRepository( db_access_token.access_token )
+                .delete({
+                    token: token
+                    ,user: got_user
+                });
+        })
+        .then( () => {
+            logger.info( "API token deleted for user: " + username );
+            render_tokens( req, res, ctx );
+        })
+        .catch( get_generic_db_error( logger, res ) );
 }
 
 export function is_user_logged_in( req, res, ctx: c.Context )

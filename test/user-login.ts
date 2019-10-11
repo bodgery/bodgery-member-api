@@ -32,7 +32,7 @@ describe( "User login", function () {
 
         db = new mock_db.MockDB( null, user_data );
 
-        server.start( db, conf );
+        return server.start( db, conf );
     });
 
     it( "Logs a user in", function (done) {
@@ -143,6 +143,6 @@ describe( "User login", function () {
 
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

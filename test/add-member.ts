@@ -9,7 +9,7 @@ describe( 'PUT /v1/member', function () {
     before( () => {
         process.env['TEST_RUN'] = "1";
         let db = new mock_db.MockDB([], {});
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Adds a member', function (done) {
@@ -34,7 +34,7 @@ describe( 'PUT /v1/member', function () {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

@@ -56,7 +56,7 @@ describe( 'POST /v1/member/:member_id/send_group_signup_email', function () {
             }
         });
 
-        server.start( db, conf, wa_mock );
+        return server.start( db, conf, wa_mock );
     });
 
     it( 'Sends the new member signup email for the group', function (done) {
@@ -77,6 +77,6 @@ describe( 'POST /v1/member/:member_id/send_group_signup_email', function () {
     });
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

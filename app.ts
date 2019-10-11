@@ -1,5 +1,6 @@
 import * as bodyParser from "body-parser";
 import * as c from "./src/context";
+import {createConnection} from "typeorm";
 import * as Tokens from "csrf";
 import * as express from "express";
 import * as handlebars from "express-handlebars";
@@ -86,6 +87,8 @@ let make_context_wrap = (
     }
 };
 
+let typeorm;
+
 
 function error_handler_builder( logger ) {
     return ( err, req, res, next ) => {
@@ -100,11 +103,14 @@ function error_handler_builder( logger ) {
 function init_server(
     conf
     ,db
+    ,typeorm_connection
     ,logger
     ,wa: wa_api.WA
 )
 {
-    let server = setup_server_params( conf, db, logger );
+    typeorm = typeorm_connection;
+
+    let server = setup_server_params( conf, db, typeorm_connection, logger );
     setup_server_routes( conf, db, logger, server, wa );
     return server;
 }
@@ -172,7 +178,7 @@ function authorization( logger, db )
     };
 }
 
-function setup_server_params( conf, db, logger )
+function setup_server_params( conf, db, typeorm_connection, logger )
 {
     let use_secure_cookie = (conf['deployment_type'] == "prod");
     let session_options = {
@@ -212,7 +218,7 @@ function setup_server_params( conf, db, logger )
     logger.format = ( level, date, message ) => message;
     server.use( error_handler_builder( logger ) );
 
-    request_funcs.set_db( db );
+    request_funcs.set_db( db, typeorm_connection );
 
     return server;
 }
@@ -287,6 +293,12 @@ function setup_server_routes(
         context_wrap( request_funcs.logout_user ) );
     server.get( '/rfid/log',
         context_wrap( request_funcs.rfid_log ) );
+    server.get( '/tokens',
+        context_wrap( request_funcs.tokens ) );
+    server.post( '/tokens/add',
+        context_wrap( request_funcs.add_token ) );
+    server.post( '/tokens/delete',
+        context_wrap( request_funcs.delete_token ) );
 
     // 404 handler, must be last in the list
     server.use( (req, res, next) => {
@@ -348,6 +360,24 @@ function default_wa(conf): wa_api.WA
     return wa;
 }
 
+function typeorm_args( conf )
+{
+    return {
+        "name": "default"
+        ,"type": "postgres" as 'postgres'
+        ,"host": <string> conf.db_host
+        ,"port": <number> conf.db_port
+        ,"username": <string> conf.db_user
+        ,"password": <string> conf.db_password
+        ,"database": <string> conf.db_name
+        ,"schema": "public"
+        ,"synchronize": false
+        ,"entities": [
+            "src/typeorm/entities/*.ts"
+        ]
+    };
+}
+
 
 let httpServer;
 export let SERVER;
@@ -357,7 +387,7 @@ export function start(
     db?: db_impl.DB
     ,conf?: Object
     ,wa?: wa_api.WA
-): void
+): Promise<void>
 {
     if(! conf) conf = default_conf();
     if(! db) db = default_db( conf );
@@ -368,20 +398,36 @@ export function start(
     // https://stackoverflow.com/questions/16965582/node-js-http-get-hangs-after-5-requests-to-remote-site
     http.globalAgent.maxSockets = 1000;
 
-    // Init server
-    SERVER = init_server( conf, db, logger, wa );
-    httpServer = require( 'http' ).createServer( SERVER );
+    return new Promise( (resolve, reject) => {
+        createConnection( typeorm_args( conf ) )
+            .then( (typeorm_connection) => {
+                // Init server
+                SERVER = init_server( conf, db, typeorm_connection, logger, wa );
+                httpServer = require( 'http' ).createServer( SERVER );
 
-    let port = conf["port"];
-    // Start server running
-    httpServer.listen( port );
-    logger.info( "Server running on port", port );
+                let port = conf["port"];
+                // Start server running
+                httpServer.listen( port );
+                logger.info( "Server running on port", port );
+
+                resolve();
+            });
+    });
 }
 
-export function stop (): void
+export function stop (): Promise<void>
 {
     logger.info( "Stopped running server" );
-    httpServer.close();
+
+    return new Promise( (resolve, reject) => {
+        httpServer.close(() => {
+            typeorm
+                .close()
+                .then( () => {
+                    resolve();
+                });
+        });
+    });
 }
 
 

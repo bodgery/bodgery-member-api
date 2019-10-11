@@ -23,7 +23,7 @@ describe( 'GET /v1/member', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Fetches a member', function (done) {
@@ -45,7 +45,7 @@ describe( 'GET /v1/member', function () {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

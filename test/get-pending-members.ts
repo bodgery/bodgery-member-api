@@ -57,7 +57,7 @@ describe( 'GET /v1/members/pending', function() {
             ]
         });
         let db = new mock_db.MockDB( null, null );
-        server.start( db, null, wa_mock );
+        return server.start( db, null, wa_mock );
     });
 
     it( 'Gets all pending members', function(done) {
@@ -82,7 +82,7 @@ describe( 'GET /v1/members/pending', function() {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

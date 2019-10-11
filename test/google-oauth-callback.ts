@@ -9,7 +9,7 @@ describe( 'GET /v1/google_oauth', function () {
     before( () => {
         let conf = server.default_conf();
         conf['google_oauth_token_path'] = token_file;
-        server.start( null, conf );
+        return server.start( null, conf );
     });
 
     // Disabiling this test, as the key is being fetched by another method
@@ -40,12 +40,18 @@ describe( 'GET /v1/google_oauth', function () {
     });
     */
 
-    after( (done) => {
-        server.stop();
-
-        fs.unlink( token_file, (err) => {
-            // Ignore any error, we're just finished
-            done();
+    after( () => {
+        let stop_promise = server.stop();
+        let unlink_promise = new Promise( (resolve, reject) => {
+            fs.unlink( token_file, (err) => {
+                // Ignore any error, we're just finished
+                resolve();
+            });
         });
+
+        return Promise.all([
+            stop_promise
+            ,unlink_promise
+        ]);
     });
 });

@@ -34,7 +34,7 @@ describe( 'GET /v1/rfids', function () {
         };
 
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Fetches the RFID dump', function (done) {
@@ -54,7 +54,7 @@ describe( 'GET /v1/rfids', function () {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

@@ -18,7 +18,7 @@ describe( 'PUT /v1/member/:member_id/wildapricot', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Sets a member wild apricot ID', function (done) {
@@ -40,7 +40,7 @@ describe( 'PUT /v1/member/:member_id/wildapricot', function () {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

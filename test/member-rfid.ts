@@ -25,7 +25,7 @@ describe( 'RFID management', function () {
             ,rfid: inactive_rfid
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Sets an RFID on a valid member', function (done) {
@@ -75,6 +75,6 @@ describe( 'RFID management', function () {
     });
 
     after( () => {
-        server.stop();
+        return server.stop();
     });
 });

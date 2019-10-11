@@ -10,7 +10,7 @@ describe( 'GET /v1/members/pending', function() {
     before( () => {
         process.env['TEST_RUN'] = "1"
         let db = new mock_db.MockDB( null, null );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Gets all pending members on actual Wild Apricot', function(done) {
@@ -31,7 +31,7 @@ describe( 'GET /v1/members/pending', function() {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

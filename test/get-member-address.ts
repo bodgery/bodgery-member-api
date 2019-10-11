@@ -30,7 +30,7 @@ describe( 'GET /v1/member/:member_id/address', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        server.start( db );
+        return server.start( db );
     });
 
     it( 'Gets a member address', function (done) {
@@ -50,7 +50,7 @@ describe( 'GET /v1/member/:member_id/address', function () {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });

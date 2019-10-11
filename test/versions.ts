@@ -5,7 +5,7 @@ import * as server from "../app";
 describe( 'Returns version list', function () {
     before( () => {
         process.env['TEST_RUN'] = "1";
-        server.start();
+        return server.start();
     });
 
     it( 'Gets versions', function (done) {
@@ -26,7 +26,7 @@ describe( 'Returns version list', function () {
     });
 
     after( () => {
-        server.stop();
         delete process.env['TEST_RUN'];
+        return server.stop();
     });
 });
