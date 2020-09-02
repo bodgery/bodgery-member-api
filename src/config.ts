@@ -34,6 +34,7 @@ interface DatabaseConfig {
     db_name: string,
     db_host: string,
     db_port: number,
+    db_ssl: boolean,
 };
 
 type Config = AppConfig & PasswordConfig & DatabaseConfig & WildApricotConfig;
@@ -66,6 +67,7 @@ const databaseConfigDefaults = {
     db_name: "bodgery_members",
     db_host: "localhost",
     db_port: 5432,
+    db_ssl: false
 }
 
 

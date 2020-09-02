@@ -356,6 +356,14 @@ function typeorm_args( conf )
         ,"entities": [
             path.join(__dirname, "src/typeorm/entities/*.{js,ts}")
         ]
+        ,...conf.db_ssl && {
+            extra: {
+                ssl: true
+            }
+            ,ssl: {
+                rejectUnauthorized: false
+            }
+        }
     };
 }
 

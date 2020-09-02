@@ -30,6 +30,7 @@ export class PG
         ,name: string
         ,user: string
         ,pass: string
+        ,use_ssl: boolean = false
     )
     {
         this.pool = new pg.Pool({
@@ -38,6 +39,11 @@ export class PG
             ,database: name
             ,user: user
             ,password: pass
+            ,...use_ssl && {
+                ssl: {
+                    rejectUnauthorized: false
+                }
+            }
         });
     }
 
