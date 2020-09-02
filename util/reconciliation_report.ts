@@ -1,6 +1,7 @@
 import * as App from '../src/request_funcs';
 import * as Email from '../src/email_sender';
 import * as fs from 'fs';
+import config from "../src/config";
 import * as PG from '../src/db-pg';
 import * as WA from '../src/wild_apricot';
 import * as Yaml from 'js-yaml';
@@ -9,12 +10,7 @@ import * as Yaml from 'js-yaml';
 const TO_EMAIL = 'tmurray@wumpus-cave.net';
 
 
-const conf = Yaml.safeLoad(
-    fs.readFileSync( 'config.yaml', 'utf8' ),
-    {
-        filename: "config.yaml"
-    }
-);
+const conf = config();
 const db = new PG.PG(
     conf.db_host
     ,conf.db_port

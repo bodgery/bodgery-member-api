@@ -20,7 +20,8 @@ export class PGFixture
         ,success_callback: () => void
     ): void
     {
-        let db = db_frontend.client;
+        // @ts-ignore
+        let db = db_frontend.client;  
 
         let tool2_callback = (tool_id, tool_name, area_id, member_id) => {
             this.tool2ID = tool_id;
