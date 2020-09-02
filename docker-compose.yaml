@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: bodgery_members
+      DB_USER: bodgery
+      DB_PASSWORD: changeme
+      PORT: 80
+      NODE_ENV: dev
+      DEPLOYMENT_TYPE: dev
+      LOG_FILE: /dev/stdout
+      LOG_LEVEL: info
+  db:
+    build:
+      context: .
+      dockerfile: database.Dockerfile
+    volumes:
+      - database:/database
+    environment:
+      POSTGRES_DB: bodgery_members
+      POSTGRES_USER: bodgery
+      POSTGRES_PASSWORD: changeme
+      PGDATA: /database
+
+      # For psql
+      PGHOST: db
+      PGDATABASE: bodgery_members
+      PGUSER: bodgery
+      PGPASSWORD: changeme
+    restart: on-failure:10
+volumes:
+  database:
+    driver: local

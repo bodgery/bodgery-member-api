@@ -26,3 +26,52 @@ Then you can run:
 To start the server. You can run the tests with:
 
     $ npm test
+
+
+## Docker Instructions
+
+To support development and streamlined deployment, this service can be run in docker containers.
+
+Note: The current setup requires you to first run: `npm install` to pull down some javascript packages used by the docker build.
+
+Building and running both the node-js app-server and the PostgreSQL database server can be accomplished using the following command:
+
+```
+docker-compose up
+
+# or to run in the background
+docker-compose up -d
+```
+
+To re-build containers (for development), use:
+
+```
+docker-compose build
+docker-compose up
+```
+
+### Management Commands
+
+Various management commands and helpers can be run in the dockerized containers.
+
+1. SQL Scripts
+
+```
+# Delete (truncate) all the data in the database
+docker-compose run db psql < sql/truncate_pg_tables.sql
+```
+
+2. Typescript helpers
+
+```
+# Add a user to the database
+docker-compose run web npx ts-node util/add_user.ts
+```
+
+3. TypeORM Generated Code
+
+Re-generate the TypeORM models reflected from the Postgres database.
+
+```
+docker-compose run -v $PWD:/code web typeorm-model-generator.sh /code
+```
