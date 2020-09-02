@@ -1,3 +1,4 @@
+import * as path from "path";
 import * as bodyParser from "body-parser";
 import * as c from "./src/context";
 import {createConnection} from "typeorm";
@@ -6,10 +7,10 @@ import * as express from "express";
 import * as handlebars from "express-handlebars";
 import * as session from "express-session";
 import * as fs from "fs";
-import * as yaml from "js-yaml";
 import * as shortid from "shortid";
 import * as request_funcs from "./src/request_funcs";
 import * as db_impl from "./src/db";
+import config from "./src/config";
 import * as password_checker from "./src/password";
 import * as pg from "./src/db-pg";
 import * as wa_api from "./src/wild_apricot";
@@ -327,27 +328,7 @@ function default_db(conf): db_impl.DB
 
 export function default_conf(): Object
 {
-    let conf = yaml.safeLoad(
-        fs.readFileSync( 'config.yaml', 'utf8' ),
-        {
-            filename: "config.yaml"
-        }
-    );
-
-    let argv = yargs.command(
-        "port"
-        ,"Port to listen on"
-        ,{
-            description: "Port to listen on"
-            ,alias: "p"
-            ,type: "number"
-        }
-    ).argv;
-    if( argv.port ) {
-        conf.port = argv.port;
-    }
-
-    return conf;
+    return config();
 }
 
 function default_wa(conf): wa_api.WA
@@ -373,7 +354,7 @@ function typeorm_args( conf )
         ,"schema": "public"
         ,"synchronize": false
         ,"entities": [
-            "src/typeorm/entities/*.ts"
+            path.join(__dirname, "src/typeorm/entities/*.{js,ts}")
         ]
     };
 }

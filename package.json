@@ -6,7 +6,7 @@
   "license": "BSD-2-Clause",
   "scripts": {
     "start": "ts-node app.ts start",
-    "build": "tsc app.ts",
+    "build": "tsc",
     "test": "mocha --require ts-node/register --watch-extensions ts,tsx --timeout 5000 \"test/**/*.{ts,tsx}\""
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "@types/express": "^4.16.1",
     "@types/express-session": "^1.15.12",
     "@types/js-yaml": "^3.12.0",
+    "@types/nconf": "^0.10.0",
     "@types/pg": "^7.4.14",
     "@types/request": "^2.48.1",
     "@types/scrypt": "^6.0.0",
@@ -34,6 +35,8 @@
     "googleapis": "^40.0.0",
     "js-yaml": "^3.13.1",
     "logger": "^0.0.1",
+    "nconf": "^0.10.0",
+    "nconf-yaml": "^1.0.2",
     "password-prompt": "^1.1.2",
     "pg": "^7.8.2",
     "pg-escape": "^0.2.0",

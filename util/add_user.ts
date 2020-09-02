@@ -1,6 +1,7 @@
 import * as app from "../app";
 import * as db_impl from "../src/db";
 import * as fs from "fs";
+import config from "../src/config";
 import * as password from "../src/password";
 import * as pg from "../src/db-pg";
 import * as prompt from "password-prompt";
@@ -8,12 +9,7 @@ import * as readline from "readline";
 import * as yaml from "js-yaml";
 
 
-const conf = yaml.safeLoad(
-    fs.readFileSync( 'config.yaml', 'utf8' ),
-    {
-        filename: "config.yaml"
-    }
-);
+const conf = config();
 const ui = readline.createInterface({
     input: process.stdin
     ,output: process.stdout

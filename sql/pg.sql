@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE "us_address" (
     "id" serial primary key,
     "address1" text NOT NULL,

@@ -1,0 +1,5 @@
+.git
+Dockerfile
+*.Dockerfile
+node_modules
+!node_modules/connect-pg-simple/table.sql

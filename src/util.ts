@@ -1,11 +1,12 @@
 import * as db from "./db";
 import * as fs from "fs";
+import config from "./config";
 import * as pg from "./db-pg";
 import * as rnd_str from "crypto-random-string";
 import * as shortid from "shortid";
 import * as yaml from "js-yaml";
 
-const CONF_FILE = "./config.yaml";
+// const CONF_FILE = "./config.yaml";
 // Base64 gives you 6 bits per character. A length of 40 gives us 240-bits.
 const TOKEN_LEN_BASE64 = 40;
 
@@ -15,11 +16,9 @@ export function error_handler (err)
     throw err;
 }
 
-export function get_pg_connection(
-    conf_path: string = CONF_FILE
-): pg.PG
+export function get_pg_connection(): pg.PG
 {
-    let conf = get_conf( conf_path );
+    let conf = config();
     let db = new pg.PG(
         conf["db_host"]
         ,conf["db_port"]
@@ -28,19 +27,6 @@ export function get_pg_connection(
         ,conf["db_password"]
     );
     return db;
-}
-
-export function get_conf(
-    conf_path: string = CONF_FILE
-): Object
-{
-    let conf = yaml.safeLoad(
-        fs.readFileSync( conf_path, 'utf8' ),
-        {
-            filename: conf_path
-        }
-    );
-    return conf;
 }
 
 export function test_member_data (

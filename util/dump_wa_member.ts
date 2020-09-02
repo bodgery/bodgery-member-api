@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import config from "../src/config";
 import * as WA from '../src/wild_apricot';
 import * as yaml from "js-yaml";
 
@@ -9,12 +10,7 @@ if(! WA_ID ) {
 }
 
 
-let conf = yaml.safeLoad(
-    fs.readFileSync( 'config.yaml', 'utf8' ),
-    {
-        filename: "config.yaml"
-    }
-);
+let conf = config();
 
 let wa = new WA.WildApricot(
     conf['wa_api_client']
