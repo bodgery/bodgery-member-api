@@ -242,14 +242,12 @@ function setup_server_routes(
         context_wrap( request_funcs.put_member ) );
     api_v1.get( '/member/:member_id',
         context_wrap( request_funcs.get_member ) );
-    api_v1.put( '/member/:member_id/address',
-        context_wrap( request_funcs.put_member_address ) );
-    api_v1.get( '/member/:member_id/address',
-        context_wrap( request_funcs.get_member_address ) );
-    api_v1.put( '/member/:member_id/is_active',
-        context_wrap( request_funcs.put_member_is_active ) );
-    api_v1.get( '/member/:member_id/is_active',
-        context_wrap( request_funcs.get_member_is_active ) );
+    api_v1.route( '/member/:member_id/address')
+        .put(context_wrap( request_funcs.put_member_address ) )
+        .get(context_wrap( request_funcs.get_member_address ) );
+    api_v1.route( '/member/:member_id/is_active')
+        .put(context_wrap( request_funcs.put_member_is_active ) )
+        .get(context_wrap( request_funcs.get_member_is_active ) );
     api_v1.put( '/member/:member_id/rfid',
         context_wrap( request_funcs.put_member_rfid ) );
     api_v1.post( '/member/:member_id/send_signup_email',
@@ -262,10 +260,9 @@ function setup_server_routes(
         context_wrap( request_funcs.put_member_wildapricot ) );
     api_v1.put( '/member/:member_id/google_group_signup',
         context_wrap( request_funcs.put_member_google_group ) );
-    api_v1.put( '/member/:member_id/photo',
-        context_wrap( request_funcs.put_member_photo ) );
-    api_v1.get( '/member/:member_id/photo',
-        context_wrap( request_funcs.get_member_photo ) );
+    api_v1.route( '/member/:member_id/photo')
+        .put(context_wrap( request_funcs.put_member_photo ) )
+        .get(context_wrap( request_funcs.get_member_photo ) );
     api_v1.get( '/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
     api_v1.get( '/rfids',
