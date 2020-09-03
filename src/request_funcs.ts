@@ -95,16 +95,16 @@ function fetch_google_group_scopes(): Array<string>
 }
 
 
-export function get_versions ( req, res, ctx: c.Context )
+export function get_versions ( req, res )
 {
     res
         .status(200)
         .json([ '/v1' ]);
 }
 
-export function put_member( req, res, ctx: c.Context )
+export function put_member( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let body = req.body;
     try {
         valid.validate( body, [
@@ -132,9 +132,9 @@ export function put_member( req, res, ctx: c.Context )
     );
 }
 
-export function get_member( req, res, ctx: c.Context )
+export function get_member( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -160,9 +160,9 @@ export function get_member( req, res, ctx: c.Context )
     );
 }
 
-export function put_member_address( req, res, ctx: c.Context )
+export function put_member_address( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let body = req.body;
 
     try {
@@ -190,9 +190,9 @@ export function put_member_address( req, res, ctx: c.Context )
     );
 }
 
-export function get_member_address( req, res, ctx: c.Context )
+export function get_member_address( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -218,9 +218,9 @@ export function get_member_address( req, res, ctx: c.Context )
     );
 }
 
-export function put_member_is_active( req, res, ctx: c.Context )
+export function put_member_is_active( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -241,8 +241,8 @@ export function put_member_is_active( req, res, ctx: c.Context )
     logger.info( "Setting member status to "
         + status + " in Wild Apricot: " + member_id );
     let wa_active_call = status
-        ? ctx.wa.set_member_active
-        : ctx.wa.set_member_inactive;
+        ? req.ctx.wa.set_member_active
+        : req.ctx.wa.set_member_inactive;
     db.get_member_wild_apricot( member_id
         ,( wa_id ) => {
             let success_callback = () => {
@@ -265,14 +265,14 @@ export function put_member_is_active( req, res, ctx: c.Context )
             };
 
             if( status ) {
-                ctx.wa.set_member_active(
+                req.ctx.wa.set_member_active(
                     wa_id
                     ,success_callback
                     ,error_callback
                 );
             }
             else {
-                ctx.wa.set_member_inactive(
+                req.ctx.wa.set_member_inactive(
                     wa_id
                     ,success_callback
                     ,error_callback
@@ -284,9 +284,9 @@ export function put_member_is_active( req, res, ctx: c.Context )
     );
 }
 
-export function get_member_is_active( req, res, ctx: c.Context )
+export function get_member_is_active( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -311,9 +311,9 @@ export function get_member_is_active( req, res, ctx: c.Context )
     );
 }
 
-export function put_member_rfid( req, res, ctx: c.Context )
+export function put_member_rfid( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -341,9 +341,9 @@ export function put_member_rfid( req, res, ctx: c.Context )
     );
 }
 
-export function get_member_rfid( req, res, ctx: c.Context )
+export function get_member_rfid( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isInteger( 'rfid' )
@@ -373,9 +373,9 @@ export function get_member_rfid( req, res, ctx: c.Context )
     );
 }
 
-export function get_rfid_dump( req, res, ctx: c.Context )
+export function get_rfid_dump( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     db.rfid_dump(
         (dump) => {
             res
@@ -387,9 +387,9 @@ export function get_rfid_dump( req, res, ctx: c.Context )
     );
 }
 
-export function post_log_rfid( req, res, ctx: c.Context )
+export function post_log_rfid( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isInteger( 'rfid' )
@@ -413,9 +413,9 @@ export function post_log_rfid( req, res, ctx: c.Context )
     );
 }
 
-export function put_member_wildapricot( req, res, ctx: c.Context )
+export function put_member_wildapricot( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let body = req.body;
 
     try {
@@ -444,9 +444,9 @@ export function put_member_wildapricot( req, res, ctx: c.Context )
     );
 }
 
-export function put_member_google_group( req, res, ctx: c.Context )
+export function put_member_google_group( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let body = req.body;
 
     try {
@@ -466,14 +466,14 @@ export function put_member_google_group( req, res, ctx: c.Context )
             const email = member_data.email;
 
             fetch_google_auth(
-                ctx.conf
+                req.ctx.conf
                 ,fetch_google_group_scopes()
                 ,( auth ) => {
                     const groups = new google.admin_directory_v1.Admin({
                         auth: auth
                     });
 
-                    let promises = ctx.conf['google_groups_signup_list'].map(
+                    let promises = req.ctx.conf['google_groups_signup_list'].map(
                         (_) => {
                             return groups.members.insert({
                                 groupKey: _
@@ -503,9 +503,9 @@ export function put_member_google_group( req, res, ctx: c.Context )
     );
 }
 
-export function login_user( req, res, ctx: c.Context )
+export function login_user( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.body, [
             valid.isPublicEmail( 'username' )
@@ -528,7 +528,7 @@ export function login_user( req, res, ctx: c.Context )
         let render = tmpl_view( "login", {
             user: username
         }, [], 200 );
-        render( req, res, ctx );
+        render( req, res );
     };
 
     let is_not_match_callback = () => {
@@ -537,10 +537,10 @@ export function login_user( req, res, ctx: c.Context )
         let render = tmpl_view( "home", {}, [
             "Invalid username or password"
         ], 403);
-        render( req, res, ctx );
+        render( req, res );
     };
 
-    let checker = ctx.password_checker;
+    let checker = req.ctx.password_checker;
     checker.isMatch({
         username: username
         ,passwd: password
@@ -549,9 +549,9 @@ export function login_user( req, res, ctx: c.Context )
     });
 }
 
-export function logout_user( req, res, ctx: c.Context )
+export function logout_user( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let username = req.session.username;
     let is_logged_in = req.session.is_logged_in;
 
@@ -575,9 +575,9 @@ export function logout_user( req, res, ctx: c.Context )
     }
 }
 
-export function rfid_log( req, res, ctx: c.Context )
+export function rfid_log( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let query = req.query;
     if(! query['offset'] ) query['offset'] = 0;
     if(! query['per_page'] ) query['per_page'] = 20;
@@ -630,17 +630,17 @@ export function rfid_log( req, res, ctx: c.Context )
                 ,[]
                 ,200
             );
-            render( req, res, ctx );
+            render( req, res );
         }
         ,get_generic_db_error( logger, res )
     );
 }
 
-function render_tokens( req, res, ctx: c.Context )
+function render_tokens( req, res )
 {
     let username = req.session.username;
     let db_manager = typeorm_connection.manager;
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
 
     db_manager
         .getRepository( db_user.users )
@@ -659,22 +659,22 @@ function render_tokens( req, res, ctx: c.Context )
                 tokens: tokens
                 ,suggested_token_value: util.make_secure_token()
             }, [], 200 );
-            render( req, res, ctx );
+            render( req, res );
         })
         .catch( get_generic_db_error( logger, res ) );
 }
 
-export function tokens( req, res, ctx: c.Context )
+export function tokens( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
 
     logger.info( "Showing tokens view" );
-    render_tokens( req, res, ctx );
+    render_tokens( req, res );
 }
 
-export function add_token( req, res, ctx: c.Context )
+export function add_token( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.body, [
             valid.isWords( 'name' )
@@ -708,14 +708,14 @@ export function add_token( req, res, ctx: c.Context )
         })
         .then( () => {
             logger.info( "New API token added for user: " + user );
-            render_tokens( req, res, ctx );
+            render_tokens( req, res );
         })
         .catch( get_generic_db_error( logger, res ) );
 }
 
-export function delete_token( req, res, ctx: c.Context )
+export function delete_token( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let token = req.body.token;
     let username = req.session.username;
     let db_manager = typeorm_connection.manager;
@@ -737,14 +737,14 @@ export function delete_token( req, res, ctx: c.Context )
         })
         .then( () => {
             logger.info( "API token deleted for user: " + username );
-            render_tokens( req, res, ctx );
+            render_tokens( req, res );
         })
         .catch( get_generic_db_error( logger, res ) );
 }
 
-export function is_user_logged_in( req, res, ctx: c.Context )
+export function is_user_logged_in( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let username = req.session.username;
     let is_logged_in = req.session.is_logged_in;
 
@@ -760,10 +760,10 @@ export function is_user_logged_in( req, res, ctx: c.Context )
         .end();
 }
 
-export function get_members_pending( req, res, ctx: c.Context )
+export function get_members_pending( req, res )
 {
-    let logger = ctx.logger;
-    let wa = ctx.wa;
+    let logger = req.ctx.logger;
+    let wa = req.ctx.wa;
 
     let success_callback = ( members: Array<wa_api.WAMember> ) => {
         logger.info( "Fetched pending members from Wild Apricot" );
@@ -788,9 +788,9 @@ export function get_members_pending( req, res, ctx: c.Context )
     );
 }
 
-export function member_signup( req, res, ctx: c.Context )
+export function member_signup( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.query, [
             valid.isInteger( 'wa_id' )
@@ -802,11 +802,11 @@ export function member_signup( req, res, ctx: c.Context )
     }
 
     let wa_id = req.query['wa_id'];
-    let wa = ctx.wa;
+    let wa = req.ctx.wa;
     wa.fetch_member_data(
         wa_id
         ,(member) => {
-            let size_limit = ctx.conf['photo_size_limit'];
+            let size_limit = req.ctx.conf['photo_size_limit'];
             size_limit = sprintf.sprintf( "%0.1f MB",
                 size_limit / 1024 / 1024);
 
@@ -818,7 +818,7 @@ export function member_signup( req, res, ctx: c.Context )
                 ,wa_id: wa_id
                 ,photo_size_limit: size_limit
             }, [], 200 );
-            render( req, res, ctx );
+            render( req, res );
         }
         ,(err) => {
             logger.info( "Error fetching WA info for member <" + wa_id + ">: "
@@ -828,9 +828,9 @@ export function member_signup( req, res, ctx: c.Context )
     );
 }
 
-export function members_active( req, res, ctx: c.Context )
+export function members_active( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let query = req.query;
     if(! query['offset'] ) query['offset'] = 0;
     if(! query['per_page'] ) query['per_page'] = 20;
@@ -877,15 +877,15 @@ export function members_active( req, res, ctx: c.Context )
                 ,[]
                 ,200
             );
-            render( req, res, ctx );
+            render( req, res );
         }
         ,get_generic_db_error( logger, res )
     );
 }
 
-export function member_info( req, res, ctx: c.Context )
+export function member_info( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     let params = req.params;
 
     try {
@@ -914,16 +914,16 @@ export function member_info( req, res, ctx: c.Context )
                 ,[]
                 ,200
             );
-            render( req, res, ctx );
+            render( req, res );
         }
         ,get_member_id_not_found_error( logger, res, params['member_id'] )
         ,get_generic_db_error( logger, res )
     );
 }
 
-export function post_member_signup_email( req, res, ctx: c.Context )
+export function post_member_signup_email( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -942,7 +942,7 @@ export function post_member_signup_email( req, res, ctx: c.Context )
             let to_email = member.email;
 
             let auth = fetch_google_auth(
-                ctx.conf
+                req.ctx.conf
                 ,fetch_google_email_scopes()
                 ,( google_client ) => {
                     let sender = new email_sender.Email({
@@ -952,8 +952,8 @@ export function post_member_signup_email( req, res, ctx: c.Context )
                         sender.send_new_member_signup({
                             to_name: to_name
                             ,to_email: to_email
-                            ,from_name: ctx.conf['email_new_member_signup_from_name']
-                            ,from_email: ctx.conf['email_new_member_signup_from_email']
+                            ,from_name: req.ctx.conf['email_new_member_signup_from_name']
+                            ,from_email: req.ctx.conf['email_new_member_signup_from_email']
                             ,success_callback: () => {
                                 logger.info( "New member signup email sent" );
                                 res.sendStatus( 200 ).end();
@@ -973,9 +973,9 @@ export function post_member_signup_email( req, res, ctx: c.Context )
     );
 }
 
-export function post_group_member_signup_email( req, res, ctx: c.Context )
+export function post_group_member_signup_email( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -994,7 +994,7 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
         answers: Array<wa_api.WAMemberAnswers>
     ) => {
         let auth = fetch_google_auth(
-            ctx.conf
+            req.ctx.conf
             ,fetch_google_email_scopes()
             ,( google_client ) => {
                 let sender = new email_sender.Email({
@@ -1002,10 +1002,10 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
                 });
                 sender.init( () => {
                     sender.send_new_group_member_signup({
-                        to_name: ctx.conf['email_group_new_member_signup_to_name']
-                        ,to_email: ctx.conf['email_group_new_member_signup_to_email']
-                        ,from_name: ctx.conf['email_new_member_signup_from_name']
-                        ,from_email: ctx.conf['email_new_member_signup_from_email']
+                        to_name: req.ctx.conf['email_group_new_member_signup_to_name']
+                        ,to_email: req.ctx.conf['email_group_new_member_signup_to_email']
+                        ,from_name: req.ctx.conf['email_new_member_signup_from_name']
+                        ,from_email: req.ctx.conf['email_new_member_signup_from_email']
                         ,member_first_name: first_name
                         ,photo_path: photo_path
                         ,answers: answers
@@ -1025,7 +1025,7 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
     // TODO This got out of hand with callbacks. Cleanup.
     db.get_member_wild_apricot( member_id
         ,( wild_apricot_id ) => {
-            ctx.wa.fetch_member_answers( wild_apricot_id
+            req.ctx.wa.fetch_member_answers( wild_apricot_id
                 ,( member_answers: Array<wa_api.WAMemberAnswers> ) => {
                     db.get_member( member_id
                         ,(member) => {
@@ -1059,15 +1059,15 @@ export function post_group_member_signup_email( req, res, ctx: c.Context )
     );
 }
 
-export function put_member_photo( req, res, ctx: c.Context )
+export function put_member_photo( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
         ]);
         valid.validate( req.body, [
-            valid.byteLengthLimit( ctx.conf['photo_size_limit'] )
+            valid.byteLengthLimit( req.ctx.conf['photo_size_limit'] )
         ]);
     }
     catch (err) {
@@ -1077,7 +1077,7 @@ export function put_member_photo( req, res, ctx: c.Context )
 
     let decoded_photo = Buffer.from( req.body.toString(), 'base64' );
     let member_id = req.params['member_id'];
-    let path = ctx.conf['photo_dir'] + "/" + shortid.generate();
+    let path = req.ctx.conf['photo_dir'] + "/" + shortid.generate();
     logger.info( "Saving photo (" + decoded_photo.length + " bytes)"
         + " to " + path + " for member ID " + member_id );
 
@@ -1107,9 +1107,9 @@ export function put_member_photo( req, res, ctx: c.Context )
     });
 }
 
-export function get_member_photo( req, res, ctx: c.Context )
+export function get_member_photo( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -1140,13 +1140,13 @@ export function get_member_photo( req, res, ctx: c.Context )
 // No longer use this alternative method to fetch the OAuth2 ID from Google, 
 // but keep it around just in case.
 /*
-export function google_oauth( req, res, ctx: c.Context )
+export function google_oauth( req, res )
 {
-    let logger = ctx.logger;
+    let logger = req.ctx.logger;
 
     // TODO authenticate that this is actually coming from Google
     let token = req.query['code'];
-    let token_file = ctx.conf['google_oauth_token_path'];
+    let token_file = req.ctx.conf['google_oauth_token_path'];
 
     let data = new Uint8Array( Buffer.from( token ) );
     fs.writeFile( token_file, data, (err) => {
@@ -1174,8 +1174,8 @@ export function tmpl_view(
     ,status_code = 200
 )
 {
-    return ( req, res, ctx: c.Context ) => {
-        ctx.logger.info( "Rendering view: " + view );
+    return ( req, res ) => {
+        req.ctx.logger.info( "Rendering view: " + view );
 
         let tokens = new Tokens();
         let csrf_token = tokens.create( req.session.csrf_secret );
