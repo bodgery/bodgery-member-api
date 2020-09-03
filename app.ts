@@ -18,16 +18,6 @@ import * as yargs from "yargs";
 import * as http from "http";
 
 
-// The routes listed here can be accessed by a user who isn't logged in
-const ALLOW_UNKNOWN_USER_ROUTES = [
-    '/'
-    ,'/user/login'
-    ,'/user/is-logged-in'
-    ,'/js/.*'
-    ,'/css/.*'
-].map( (_) => new RegExp( "^" + _ + "$" ) );
-
-
 let make_logger = (logger) => {
     let request_id = shortid.generate();
     let log_func = function (level, args) {
@@ -124,13 +114,12 @@ function get_token( req )
     return token;
 }
 
-function authorization( logger, db )
+function session_authorization( logger )
 {
     return (req, res, next ) => {
-        let route = req.path;
-        let token = get_token( req );
+        const route = req.path;
 
-        let not_allowed = () => {
+        const not_allowed = () => {
             logger.error( "User not allowed to access " + route );
             res.sendStatus(401);
         };
@@ -143,8 +132,33 @@ function authorization( logger, db )
             logger.info( "User is logged in, allowing" );
             next();
         }
+        // Tests can set an env var to bypass this check
+        // TODO remove
+        else if( process.env['TEST_RUN'] ) {
+            logger.info( "Server in test run mode, allowing" );
+            next();
+        }
+        // Everything else is not allowed
+        else {
+            not_allowed();
+        }
+    };
+}
+
+function bearer_authorization( logger, db )
+{
+    return (req, res, next ) => {
+        const route = req.path;
+        const token = get_token( req );
+
+        const not_allowed = () => {
+            logger.error( "User not allowed to access " + route );
+            res.sendStatus(401);
+        };
+
+        logger.info( "Checking user authorization" );
         // Bearer tokens
-        else if( token != undefined ) {
+        if( token != undefined ) {
             db.is_token_allowed( token
                 ,() => {
                     logger.info( "Bearer token is allowed" );
@@ -158,13 +172,6 @@ function authorization( logger, db )
                     throw err;
                 }
             );
-        }
-        // Allow through the whitelisted routes
-        else if( 0 < ALLOW_UNKNOWN_USER_ROUTES.filter(
-            (_) => route.match( _ )
-        ).length ) {
-            logger.info( "Route is globally allowed" );
-            next();
         }
         // Tests can set an env var to bypass this check
         // TODO remove
@@ -198,7 +205,6 @@ function setup_server_params( conf, db, typeorm_connection, logger )
 
     let server = express();
     server.use( session( session_options ) );
-    server.use( authorization( logger, db ) );
     server.use( bodyParser.json() );
     server.use( bodyParser.raw({
         type: "image/*"
@@ -232,9 +238,13 @@ function setup_server_routes(
     ,wa: wa_api.WA
 )
 {
-    let context_wrap = make_context_wrap( logger, conf, db, wa );
+    const context_wrap = make_context_wrap( logger, conf, db, wa );
 
     const api = express.Router();
+
+    // API requires bearer token authorization
+    api.use(bearer_authorization( logger, db ));
+
     api.get('/', context_wrap( request_funcs.get_versions ) );
 
     const api_v1 = express.Router();
@@ -283,33 +293,37 @@ function setup_server_routes(
 
     const views = express.Router();
 
-    // View routes
+    const session_required = session_authorization(logger);
+
+    // Unauthenticated routes
     views.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );
-    views.get( '/members/pending',
-        context_wrap( request_funcs.tmpl_view( 'members-pending' ) ) );
-    views.get( '/member/signup',
-        context_wrap( request_funcs.member_signup ) );
-    views.get( '/members/active',
-        context_wrap( request_funcs.members_active ) );
-    views.get( '/member/show/:member_id',
-        context_wrap( request_funcs.member_info ) );
     views.get( '/user/is-logged-in',
         context_wrap( request_funcs.is_user_logged_in ) );
     views.post( '/user/login',
         context_wrap( request_funcs.login_user ) );
-    views.post( '/user/logout',
+
+    // Authenticated routes
+    views.get( '/members/pending', session_required,
+        context_wrap( request_funcs.tmpl_view( 'members-pending' ) ) );
+    views.get( '/member/signup', session_required,
+        context_wrap( request_funcs.member_signup ) );
+    views.get( '/members/active', session_required,
+        context_wrap( request_funcs.members_active ) );
+    views.get( '/member/show/:member_id', session_required,
+        context_wrap( request_funcs.member_info ) );
+    views.post( '/user/logout', session_required,
         context_wrap( request_funcs.logout_user ) );
-    views.get( '/rfid/log',
+    views.get( '/rfid/log', session_required,
         context_wrap( request_funcs.rfid_log ) );
-    views.get( '/tokens',
+    views.get( '/tokens', session_required,
         context_wrap( request_funcs.tokens ) );
-    views.post( '/tokens/add',
+    views.post( '/tokens/add', session_required,
         context_wrap( request_funcs.add_token ) );
-    views.post( '/tokens/delete',
+    views.post( '/tokens/delete', session_required,
         context_wrap( request_funcs.delete_token ) );
 
-    // Install the View Router
-    server.use('/', views);
+    // Install the View routers
+    server.use(views);
 
     // 404 handler, must be last in the list
     server.use( (req, res, next) => {
