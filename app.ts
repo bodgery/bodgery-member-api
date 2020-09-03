@@ -38,6 +38,40 @@ let make_logger = (logger) => {
     return request_logger;
 };
 
+function context_middleware( logger, conf, db, wa )
+{
+    return function(req, res, next) {
+        const request_logger = make_logger( logger );
+        request_logger.info( "Begin request to", req.method, req.path );
+
+        const checker = new password_checker.Checker(
+            conf['preferred_password_crypt_method']
+            ,db
+        );
+
+        req.ctx = new c.Context( conf, request_logger, checker, wa );
+
+        if(! req.session.csrf_secret ) {
+            const tokens = new Tokens();
+            request_logger.info( "Making CSRF secret for new client" );
+            req.session.csrf_secret = tokens.secretSync();
+        }
+
+        try {
+            next()
+        }
+        catch(err) {
+            request_logger.error( "Error running request: ",
+                err.toString() );
+            request_logger.error( "Stack trace: ", err.stack );
+
+            res.sendStatus( 500 );
+        }
+
+        request_logger.info( "Finished setting up", req.method, req.path );
+    }
+}
+
 let make_context_wrap = (
     logger
     ,conf
@@ -238,47 +272,47 @@ function setup_server_routes(
     ,wa: wa_api.WA
 )
 {
-    const context_wrap = make_context_wrap( logger, conf, db, wa );
+    server.use(context_middleware( logger, conf, db, wa ));
 
     const api = express.Router();
 
     // API requires bearer token authorization
     api.use(bearer_authorization( logger, db ));
 
-    api.get('/', context_wrap( request_funcs.get_versions ) );
+    api.get('/', request_funcs.get_versions );
 
     const api_v1 = express.Router();
     api_v1.put( '/member',
-        context_wrap( request_funcs.put_member ) );
+        request_funcs.put_member );
     api_v1.get( '/member/:member_id',
-        context_wrap( request_funcs.get_member ) );
+        request_funcs.get_member );
     api_v1.route( '/member/:member_id/address')
-        .put(context_wrap( request_funcs.put_member_address ) )
-        .get(context_wrap( request_funcs.get_member_address ) );
+        .put(request_funcs.put_member_address )
+        .get(request_funcs.get_member_address );
     api_v1.route( '/member/:member_id/is_active')
-        .put(context_wrap( request_funcs.put_member_is_active ) )
-        .get(context_wrap( request_funcs.get_member_is_active ) );
+        .put(request_funcs.put_member_is_active )
+        .get(request_funcs.get_member_is_active );
     api_v1.put( '/member/:member_id/rfid',
-        context_wrap( request_funcs.put_member_rfid ) );
+        request_funcs.put_member_rfid );
     api_v1.post( '/member/:member_id/send_signup_email',
-        context_wrap( request_funcs.post_member_signup_email ) );
+        request_funcs.post_member_signup_email );
     api_v1.post( '/member/:member_id/send_group_signup_email',
-        context_wrap( request_funcs.post_group_member_signup_email ) );
+        request_funcs.post_group_member_signup_email );
     api_v1.get( '/members/pending',
-        context_wrap( request_funcs.get_members_pending ) );
+        request_funcs.get_members_pending );
     api_v1.put( '/member/:member_id/wildapricot',
-        context_wrap( request_funcs.put_member_wildapricot ) );
+        request_funcs.put_member_wildapricot );
     api_v1.put( '/member/:member_id/google_group_signup',
-        context_wrap( request_funcs.put_member_google_group ) );
+        request_funcs.put_member_google_group );
     api_v1.route( '/member/:member_id/photo')
-        .put(context_wrap( request_funcs.put_member_photo ) )
-        .get(context_wrap( request_funcs.get_member_photo ) );
+        .put(request_funcs.put_member_photo )
+        .get(request_funcs.get_member_photo );
     api_v1.get( '/rfid/:rfid',
-        context_wrap( request_funcs.get_member_rfid ) );
+        request_funcs.get_member_rfid );
     api_v1.get( '/rfids',
-        context_wrap( request_funcs.get_rfid_dump ) );
+        request_funcs.get_rfid_dump );
     api_v1.post( '/rfid/log_entry/:rfid/:is_allowed',
-        context_wrap( request_funcs.post_log_rfid ) );
+        request_funcs.post_log_rfid );
 
     api.use('/v1', api_v1);
 
@@ -289,38 +323,38 @@ function setup_server_routes(
     // Undocumented route for the callback on Google's OAuth token
     // No longer used
     //server.get( '/api/v1/google_oauth',
-    //    context_wrap( request_funcs.google_oauth ) );
+    //    request_funcs.google_oauth );
 
     const views = express.Router();
 
     const session_required = session_authorization(logger);
 
     // Unauthenticated routes
-    views.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );
+    views.get( '/', request_funcs.tmpl_view( 'home' ) );
     views.get( '/user/is-logged-in',
-        context_wrap( request_funcs.is_user_logged_in ) );
+        request_funcs.is_user_logged_in );
     views.post( '/user/login',
-        context_wrap( request_funcs.login_user ) );
+        request_funcs.login_user );
 
     // Authenticated routes
     views.get( '/members/pending', session_required,
-        context_wrap( request_funcs.tmpl_view( 'members-pending' ) ) );
+        request_funcs.tmpl_view( 'members-pending' ) );
     views.get( '/member/signup', session_required,
-        context_wrap( request_funcs.member_signup ) );
+        request_funcs.member_signup );
     views.get( '/members/active', session_required,
-        context_wrap( request_funcs.members_active ) );
+        request_funcs.members_active );
     views.get( '/member/show/:member_id', session_required,
-        context_wrap( request_funcs.member_info ) );
+        request_funcs.member_info );
     views.post( '/user/logout', session_required,
-        context_wrap( request_funcs.logout_user ) );
+        request_funcs.logout_user );
     views.get( '/rfid/log', session_required,
-        context_wrap( request_funcs.rfid_log ) );
+        request_funcs.rfid_log );
     views.get( '/tokens', session_required,
-        context_wrap( request_funcs.tokens ) );
+        request_funcs.tokens );
     views.post( '/tokens/add', session_required,
-        context_wrap( request_funcs.add_token ) );
+        request_funcs.add_token );
     views.post( '/tokens/delete', session_required,
-        context_wrap( request_funcs.delete_token ) );
+        request_funcs.delete_token );
 
     // Install the View routers
     server.use(views);
