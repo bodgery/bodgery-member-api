@@ -1,56 +1,50 @@
-var validation = require( '../src/validation.ts' );
+var validation = require('../src/validation.ts');
 
-
-describe( 'Validate booleans', function () {
-    it( 'is booleans', function (done) {
+describe('Validate booleans', function () {
+    it('is booleans', function (done) {
         var error;
 
         try {
-            validation.validate( { value: true }, [
-                validation.isBoolean( 'value' ),
-            ]);
-        }
-        catch(err) {
+            validation.validate({value: true}, [validation.isBoolean('value')]);
+        } catch (err) {
             error = err;
         }
 
-        if( error ) done( error );
+        if (error) done(error);
         else done();
     });
 
-    it( 'is not booleans', function (done) {
+    it('is not booleans', function (done) {
         var error;
 
         try {
-            validation.validate( { value: "foo 'bar' baz" }, [
-                validation.isBoolean( 'value' ),
+            validation.validate({value: "foo 'bar' baz"}, [
+                validation.isBoolean('value'),
             ]);
-        }
-        catch(err) {
+        } catch (err) {
             error = err;
         }
 
-        if( error ) done();
-        else done( new Error( "Validation was supposed to fail for booleans" ) );
+        if (error) done();
+        else done(new Error('Validation was supposed to fail for booleans'));
     });
 
-    it( 'is text booleans', function (done) {
+    it('is text booleans', function (done) {
         var error;
 
         try {
-            validation.validate( {
-                value: "true"
-                ,value2: "false"
-            }, [
-                validation.isBoolean( 'value' )
-                ,validation.isBoolean( 'value2' )
-            ]);
-        }
-        catch(err) {
+            validation.validate(
+                {
+                    value: 'true',
+                    value2: 'false',
+                },
+                [validation.isBoolean('value'), validation.isBoolean('value2')],
+            );
+        } catch (err) {
             error = err;
         }
 
-        if( error ) done( error );
+        if (error) done(error);
         else done();
     });
 });

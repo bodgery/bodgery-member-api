@@ -1,15 +1,14 @@
-import * as assert from "assert";
-import * as fs from "fs";
-import * as request from "supertest";
-import * as server from "../app";
+import * as assert from 'assert';
+import * as fs from 'fs';
+import * as request from 'supertest';
+import * as server from '../app';
 
-
-describe( 'GET /v1/google_oauth', function () {
+describe('GET /v1/google_oauth', function () {
     let token_file = 'tmp-google-token';
-    before( () => {
+    before(() => {
         let conf = server.default_conf();
         conf['google_oauth_token_path'] = token_file;
-        return server.start( null, conf );
+        return server.start(null, conf);
     });
 
     // Disabiling this test, as the key is being fetched by another method
@@ -40,18 +39,15 @@ describe( 'GET /v1/google_oauth', function () {
     });
     */
 
-    after( () => {
+    after(() => {
         let stop_promise = server.stop();
-        let unlink_promise = new Promise( (resolve, reject) => {
-            fs.unlink( token_file, (err) => {
+        let unlink_promise = new Promise((resolve, reject) => {
+            fs.unlink(token_file, err => {
                 // Ignore any error, we're just finished
                 resolve();
             });
         });
 
-        return Promise.all([
-            stop_promise
-            ,unlink_promise
-        ]);
+        return Promise.all([stop_promise, unlink_promise]);
     });
 });

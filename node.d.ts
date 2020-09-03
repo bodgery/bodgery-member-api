@@ -1,1 +1,1 @@
-declare module "short-uuid";
+declare module 'short-uuid';
