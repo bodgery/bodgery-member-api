@@ -234,72 +234,85 @@ function setup_server_routes(
 {
     let context_wrap = make_context_wrap( logger, conf, db, wa );
 
-    // API routes
-    server.get('/api/', context_wrap( request_funcs.get_versions ) );
-    server.put( '/api/v1/member',
-            context_wrap( request_funcs.put_member ) );
-    server.get( '/api/v1/member/:member_id',
+    const api = express.Router();
+    api.get('/', context_wrap( request_funcs.get_versions ) );
+
+    const api_v1 = express.Router();
+    api_v1.put( '/member',
+        context_wrap( request_funcs.put_member ) );
+    api_v1.get( '/member/:member_id',
         context_wrap( request_funcs.get_member ) );
-    server.put( '/api/v1/member/:member_id/address',
+    api_v1.put( '/member/:member_id/address',
         context_wrap( request_funcs.put_member_address ) );
-    server.get( '/api/v1/member/:member_id/address',
+    api_v1.get( '/member/:member_id/address',
         context_wrap( request_funcs.get_member_address ) );
-    server.put( '/api/v1/member/:member_id/is_active',
+    api_v1.put( '/member/:member_id/is_active',
         context_wrap( request_funcs.put_member_is_active ) );
-    server.get( '/api/v1/member/:member_id/is_active',
+    api_v1.get( '/member/:member_id/is_active',
         context_wrap( request_funcs.get_member_is_active ) );
-    server.put( '/api/v1/member/:member_id/rfid',
+    api_v1.put( '/member/:member_id/rfid',
         context_wrap( request_funcs.put_member_rfid ) );
-    server.post( '/api/v1/member/:member_id/send_signup_email',
+    api_v1.post( '/member/:member_id/send_signup_email',
         context_wrap( request_funcs.post_member_signup_email ) );
-    server.post( '/api/v1/member/:member_id/send_group_signup_email',
+    api_v1.post( '/member/:member_id/send_group_signup_email',
         context_wrap( request_funcs.post_group_member_signup_email ) );
-    server.get( '/api/v1/members/pending',
+    api_v1.get( '/members/pending',
         context_wrap( request_funcs.get_members_pending ) );
-    server.put( '/api/v1/member/:member_id/wildapricot',
+    api_v1.put( '/member/:member_id/wildapricot',
         context_wrap( request_funcs.put_member_wildapricot ) );
-    server.put( '/api/v1/member/:member_id/google_group_signup',
+    api_v1.put( '/member/:member_id/google_group_signup',
         context_wrap( request_funcs.put_member_google_group ) );
-    server.put( '/api/v1/member/:member_id/photo',
+    api_v1.put( '/member/:member_id/photo',
         context_wrap( request_funcs.put_member_photo ) );
-    server.get( '/api/v1/member/:member_id/photo',
+    api_v1.get( '/member/:member_id/photo',
         context_wrap( request_funcs.get_member_photo ) );
-    server.get( '/api/v1/rfid/:rfid',
+    api_v1.get( '/rfid/:rfid',
         context_wrap( request_funcs.get_member_rfid ) );
-    server.get( '/api/v1/rfids',
+    api_v1.get( '/rfids',
         context_wrap( request_funcs.get_rfid_dump ) );
-    server.post( '/api/v1/rfid/log_entry/:rfid/:is_allowed',
+    api_v1.post( '/rfid/log_entry/:rfid/:is_allowed',
         context_wrap( request_funcs.post_log_rfid ) );
+
+    api.use('/v1', api_v1);
+
+    // Install the API router
+    server.use('/api', api);
+
 
     // Undocumented route for the callback on Google's OAuth token
     // No longer used
     //server.get( '/api/v1/google_oauth',
     //    context_wrap( request_funcs.google_oauth ) );
 
+    const views = express.Router();
+
     // View routes
-    server.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );
-    server.get( '/members/pending',
+    views.get( '/', context_wrap( request_funcs.tmpl_view( 'home' ) ) );
+    views.get( '/members/pending',
         context_wrap( request_funcs.tmpl_view( 'members-pending' ) ) );
-    server.get( '/member/signup',
+    views.get( '/member/signup',
         context_wrap( request_funcs.member_signup ) );
-    server.get( '/members/active',
+    views.get( '/members/active',
         context_wrap( request_funcs.members_active ) );
-    server.get( '/member/show/:member_id',
+    views.get( '/member/show/:member_id',
         context_wrap( request_funcs.member_info ) );
-    server.get( '/user/is-logged-in',
+    views.get( '/user/is-logged-in',
         context_wrap( request_funcs.is_user_logged_in ) );
-    server.post( '/user/login',
+    views.post( '/user/login',
         context_wrap( request_funcs.login_user ) );
-    server.post( '/user/logout',
+    views.post( '/user/logout',
         context_wrap( request_funcs.logout_user ) );
-    server.get( '/rfid/log',
+    views.get( '/rfid/log',
         context_wrap( request_funcs.rfid_log ) );
-    server.get( '/tokens',
+    views.get( '/tokens',
         context_wrap( request_funcs.tokens ) );
-    server.post( '/tokens/add',
+    views.post( '/tokens/add',
         context_wrap( request_funcs.add_token ) );
-    server.post( '/tokens/delete',
+    views.post( '/tokens/delete',
         context_wrap( request_funcs.delete_token ) );
+
+    // Install the View Router
+    server.use('/', views);
 
     // 404 handler, must be last in the list
     server.use( (req, res, next) => {
