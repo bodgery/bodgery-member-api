@@ -3,14 +3,13 @@ const readline = require('readline');
 const {google} = require('googleapis');
 
 const SCOPES = [
-    'https://www.googleapis.com/auth/admin.directory.group.member'
-    ,'https://www.googleapis.com/auth/admin.directory.group'
-    ,'https://mail.google.com/'
-    ,'https://www.googleapis.com/auth/gmail.modify'
-    ,'https://www.googleapis.com/auth/gmail.compose'
-    ,'https://www.googleapis.com/auth/gmail.send'
+  'https://www.googleapis.com/auth/admin.directory.group.member',
+  'https://www.googleapis.com/auth/admin.directory.group',
+  'https://mail.google.com/',
+  'https://www.googleapis.com/auth/gmail.modify',
+  'https://www.googleapis.com/auth/gmail.compose',
+  'https://www.googleapis.com/auth/gmail.send',
 ];
-
 
 // Load client secrets from a local file.
 fs.readFile('google-credentials.json', (err, content) => {
@@ -28,7 +27,10 @@ fs.readFile('google-credentials.json', (err, content) => {
 function authorize(credentials) {
   const {client_secret, client_id, redirect_uris} = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
-      client_id, client_secret, redirect_uris[0] );
+    client_id,
+    client_secret,
+    redirect_uris[0],
+  );
 
   getNewToken(oAuth2Client);
 }

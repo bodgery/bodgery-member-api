@@ -1,96 +1,92 @@
-import * as assert from "assert";
-import * as request from "supertest";
-import * as server from "../app";
-import * as mock_db from "../src/db-mock";
-import * as passwd from "../src/password";
+import * as assert from 'assert';
+import * as request from 'supertest';
+import * as server from '../app';
+import * as mock_db from '../src/db-mock';
+import * as passwd from '../src/password';
 
-
-describe( "User authorization", function () {
+describe('User authorization', function () {
     let db: mock_db.MockDB;
-    let username = "test@example.com";
-    let password = "foobar123";
-    let checker_str = "terribadplaintext";
+    let username = 'test@example.com';
+    let password = 'foobar123';
+    let checker_str = 'terribadplaintext';
 
     // Since session cookie is HTTPS-only, need to put this header in to make
     // server think we're coming from the frontend proxy
     let trust_header_name = 'X-Forwarded-Proto';
     let trust_header_value = 'https';
 
-
-    before( () => {
+    before(() => {
         let conf = server.default_conf();
         conf['preferred_password_crypt_method'] = checker_str;
 
         let user_data: any = {};
         user_data[username] = {
-            password: password
-            ,crypt_type: checker_str
+            password: password,
+            crypt_type: checker_str,
         };
 
-        db = new mock_db.MockDB( null, user_data );
+        db = new mock_db.MockDB(null, user_data);
 
-        return server.start( db, conf );
+        return server.start(db, conf);
     });
 
-
-    it( 'Tries to access a secure page without logging in', (done) => {
-        request( server.SERVER )
-            .get( '/members/pending' )
-            .set( trust_header_name, trust_header_value )
-            .expect( 401 )
-            .end( (err, res) => {
-                if(err) done(err);
+    it('Tries to access a secure page without logging in', done => {
+        request(server.SERVER)
+            .get('/members/pending')
+            .set(trust_header_name, trust_header_value)
+            .expect(401)
+            .end((err, res) => {
+                if (err) done(err);
                 else done();
             });
     });
 
-    it( 'Gets to login page, logs in, then tries to access a secure page', (done) => {
+    it('Gets to login page, logs in, then tries to access a secure page', done => {
         let login;
         let access_pending;
         let cookie;
 
         let start = () => {
-            request( server.SERVER )
-                .get( '/' )
-                .set( trust_header_name, trust_header_value )
+            request(server.SERVER)
+                .get('/')
+                .set(trust_header_name, trust_header_value)
                 .send({
-                    username: username
-                    ,password: password
+                    username: username,
+                    password: password,
                 })
-                .expect( 200 )
-                .expect( 'set-cookie', /=/ )
-                .end( (err, res) => {
-                    if(err) throw err;
-                    login()
+                .expect(200)
+                .expect('set-cookie', /=/)
+                .end((err, res) => {
+                    if (err) throw err;
+                    login();
                 });
-
         };
 
         login = () => {
-            request( server.SERVER )
-                .post( '/user/login' )
-                .set( trust_header_name, trust_header_value )
+            request(server.SERVER)
+                .post('/user/login')
+                .set(trust_header_name, trust_header_value)
                 .send({
-                    username: username
-                    ,password: password
+                    username: username,
+                    password: password,
                 })
-                .expect( 200 )
-                .expect( 'set-cookie', /=/ )
-                .end( (err, res) => {
-                    if(err) throw err;
+                .expect(200)
+                .expect('set-cookie', /=/)
+                .end((err, res) => {
+                    if (err) throw err;
                     cookie = res.header['set-cookie'];
-                    access_pending()
+                    access_pending();
                 });
         };
 
         access_pending = () => {
-            request( server.SERVER )
-                .get( '/members/pending' )
-                .set( trust_header_name, trust_header_value )
-                .set( 'Cookie', cookie )
-                .expect( 200 )
-                .end( (err, res) => {
-                    if(err) done(err);
+            request(server.SERVER)
+                .get('/members/pending')
+                .set(trust_header_name, trust_header_value)
+                .set('Cookie', cookie)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) done(err);
                     else done();
                 });
         };
@@ -98,29 +94,29 @@ describe( "User authorization", function () {
         start();
     });
 
-    it( 'Checks that we can access static css files without logging in', (done) => {
-        request( server.SERVER )
-            .get( '/css/basic.css' )
-            .set( trust_header_name, trust_header_value )
-            .expect( 200 )
-            .end( (err, res) => {
-                if(err) throw err;
+    it('Checks that we can access static css files without logging in', done => {
+        request(server.SERVER)
+            .get('/css/basic.css')
+            .set(trust_header_name, trust_header_value)
+            .expect(200)
+            .end((err, res) => {
+                if (err) throw err;
                 else done();
             });
     });
 
-    it( 'Checks that we can access static js files without logging in', (done) => {
-        request( server.SERVER )
-            .get( '/js/jquery-3.4.1.min.js' )
-            .set( trust_header_name, trust_header_value )
-            .expect( 200 )
-            .end( (err, res) => {
-                if(err) throw err;
+    it('Checks that we can access static js files without logging in', done => {
+        request(server.SERVER)
+            .get('/js/jquery-3.4.1.min.js')
+            .set(trust_header_name, trust_header_value)
+            .expect(200)
+            .end((err, res) => {
+                if (err) throw err;
                 else done();
             });
     });
 
-    after( () => {
+    after(() => {
         return server.stop();
     });
 });

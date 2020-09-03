@@ -1,8 +1,7 @@
-import * as request from "supertest";
-import * as server from "../app";
-import * as funcs from "../src/request_funcs";
-import * as mock_db from "../src/db-mock";
-
+import * as request from 'supertest';
+import * as server from '../app';
+import * as funcs from '../src/request_funcs';
+import * as mock_db from '../src/db-mock';
 
 // TODO
 /*

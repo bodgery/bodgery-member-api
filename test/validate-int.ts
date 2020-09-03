@@ -1,37 +1,31 @@
-var validation = require( '../src/validation.ts' );
+var validation = require('../src/validation.ts');
 
-
-describe( 'Validate numbers', function () {
-    it( 'is integer', function (done) {
+describe('Validate numbers', function () {
+    it('is integer', function (done) {
         var error;
 
         try {
-            validation.validate( { value: 1234 }, [
-                validation.isInteger( 'value' ),
-            ]);
-        }
-        catch(err) {
+            validation.validate({value: 1234}, [validation.isInteger('value')]);
+        } catch (err) {
             error = err;
         }
 
-
-        if( error ) done( error );
+        if (error) done(error);
         else done();
     });
 
-    it( 'is not integer', function (done) {
+    it('is not integer', function (done) {
         var error;
 
         try {
-            validation.validate( { value: "foobar" }, [
-                validation.isInteger( 'value' ),
+            validation.validate({value: 'foobar'}, [
+                validation.isInteger('value'),
             ]);
-        }
-        catch (err) {
+        } catch (err) {
             error = err;
         }
 
-        if( error ) done();
-        else done( new Error( "Validation was supposed to fail for integer" ) );
+        if (error) done();
+        else done(new Error('Validation was supposed to fail for integer'));
     });
 });

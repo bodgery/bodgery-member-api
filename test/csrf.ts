@@ -1,18 +1,15 @@
-import * as request from "supertest";
-import * as server from "../app";
-import * as funcs from "../src/request_funcs";
-import * as mock_db from "../src/db-mock";
+import * as request from 'supertest';
+import * as server from '../app';
+import * as funcs from '../src/request_funcs';
+import * as mock_db from '../src/db-mock';
 
-
-describe(
-    'Checks that CSRF tokens are required on methods that change state',
-    function () {
-    before( () => {
+describe('Checks that CSRF tokens are required on methods that change state', function () {
+    before(() => {
         let db = new mock_db.MockDB([], {});
-        return server.start( db );
+        return server.start(db);
     });
 
-/*
+    /*
     it( 'Adds a member', function (done) {
         request( server.SERVER )
             .put( '/api/v1/member' )
@@ -32,7 +29,7 @@ describe(
     });
  */
 
-    after( () => {
+    after(() => {
         return server.stop();
     });
 });
