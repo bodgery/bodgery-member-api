@@ -72,46 +72,6 @@ function context_middleware( logger, conf, db, wa )
     }
 }
 
-let make_context_wrap = (
-    logger
-    ,conf
-    ,db
-    ,wa
-) => (callback) => {
-    return function (req, res) {
-        let request_logger = make_logger( logger );
-        request_logger.info( "Begin request to", req.method, req.path );
-
-        let checker = new password_checker.Checker(
-            conf['preferred_password_crypt_method']
-            ,db
-        );
-
-        let context = new c.Context( conf, request_logger, checker, wa );
-
-        if(! req.session.csrf_secret ) {
-            let tokens = new Tokens();
-            request_logger.info( "Making CSRF secret for new client" );
-            req.session.csrf_secret = tokens.secretSync();
-        }
-
-        let ret;
-        try {
-            ret = callback( req, res, context );
-        }
-        catch(err) {
-            request_logger.error( "Error running request: ",
-                err.toString() );
-            request_logger.error( "Stack trace: ", err.stack );
-
-            res.sendStatus( 500 );
-        }
-
-        request_logger.info( "Finished setting up", req.method, req.path );
-        return ret;
-    }
-};
-
 let typeorm;
 
 
