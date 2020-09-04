@@ -1,7 +1,5 @@
-import * as path from "path";
 import * as bodyParser from "body-parser";
 import * as c from "./src/context";
-import {createConnection} from "typeorm";
 import * as Tokens from "csrf";
 import * as express from "express";
 import * as handlebars from "express-handlebars";
@@ -10,13 +8,14 @@ import * as fs from "fs";
 import * as shortid from "shortid";
 import * as request_funcs from "./src/request_funcs";
 import * as db_impl from "./src/db";
-import config from "./src/config";
+import config, {Config} from "./src/config";
 import * as password_checker from "./src/password";
 import * as pg from "./src/db-pg";
 import * as wa_api from "./src/wild_apricot";
 import * as yargs from "yargs";
 import * as http from "http";
 import {session_authorization, bearer_authorization} from "./src/auth";
+import createConnection from "./src/typeorm_db";
 
 
 let make_logger = (logger) => {
@@ -265,7 +264,7 @@ function default_db(conf): db_impl.DB
     return db;
 }
 
-export function default_conf(): Object
+export function default_conf(): Config
 {
     return config();
 }
@@ -280,32 +279,6 @@ function default_wa(conf): wa_api.WA
     return wa;
 }
 
-function typeorm_args( conf )
-{
-    return {
-        "name": "default"
-        ,"type": "postgres" as 'postgres'
-        ,"host": <string> conf.db_host
-        ,"port": <number> conf.db_port
-        ,"username": <string> conf.db_user
-        ,"password": <string> conf.db_password
-        ,"database": <string> conf.db_name
-        ,"schema": "public"
-        ,"synchronize": false
-        ,"entities": [
-            path.join(__dirname, "src/typeorm/entities/*.{js,ts}")
-        ]
-        ,...conf.db_ssl && {
-            extra: {
-                ssl: true
-            }
-            ,ssl: {
-                rejectUnauthorized: false
-            }
-        }
-    };
-}
-
 
 let httpServer;
 export let SERVER;
@@ -313,7 +286,7 @@ let logger;
 
 export function start(
     db?: db_impl.DB
-    ,conf?: Object
+    ,conf?: Config
     ,wa?: wa_api.WA
 ): Promise<void>
 {
@@ -327,7 +300,7 @@ export function start(
     http.globalAgent.maxSockets = 1000;
 
     return new Promise( (resolve, reject) => {
-        createConnection( typeorm_args( conf ) )
+        createConnection( conf )
             .then( (typeorm_connection) => {
                 // Init server
                 SERVER = init_server( conf, db, typeorm_connection, logger, wa );
