@@ -14,7 +14,14 @@ import * as pg from "./src/db-pg";
 import * as wa_api from "./src/wild_apricot";
 import * as yargs from "yargs";
 import * as http from "http";
-import {session_authorization, bearer_authorization} from "./src/auth";
+import {
+    authentication_middleware,
+    BearerTokenProvider,
+    SessionProvider,
+    TestUserProvider,
+    user_required,
+    user_required_or_redirect,
+} from './src/auth';
 import createConnection from "./src/typeorm_db";
 
 
@@ -157,7 +164,8 @@ function setup_server_routes(
     const api = express.Router();
 
     // API requires bearer token authorization
-    api.use(bearer_authorization( logger, db ));
+    api.use(authentication_middleware([BearerTokenProvider, TestUserProvider]));
+    api.use(user_required(logger));
 
     api.get('/', request_funcs.get_versions );
 
@@ -206,8 +214,7 @@ function setup_server_routes(
     //    request_funcs.google_oauth );
 
     const views = express.Router();
-
-    const session_required = session_authorization(logger);
+    views.use(authentication_middleware([SessionProvider, TestUserProvider]));
 
     // Unauthenticated routes
     views.get( '/', request_funcs.tmpl_view( 'home' ) );
@@ -217,6 +224,8 @@ function setup_server_routes(
         request_funcs.login_user );
 
     // Authenticated routes
+    const session_required = user_required_or_redirect(logger, "/");
+
     views.get( '/members/pending', session_required,
         request_funcs.tmpl_view( 'members-pending' ) );
     views.get( '/member/signup', session_required,
