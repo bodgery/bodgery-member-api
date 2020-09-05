@@ -1,8 +1,10 @@
 import * as assert from "assert";
 import * as request from "supertest";
+import * as sinon from "sinon";
 import * as server from "../app";
 import * as mock_db from "../src/db-mock";
 import * as passwd from "../src/password";
+import UserRepositoryStub from "./__mocks__/user_repository";
 
 
 describe( "User authorization", function () {
@@ -16,7 +18,6 @@ describe( "User authorization", function () {
     let trust_header_name = 'X-Forwarded-Proto';
     let trust_header_value = 'https';
 
-
     before( () => {
         let conf = server.default_conf();
         conf['preferred_password_crypt_method'] = checker_str;
@@ -29,6 +30,11 @@ describe( "User authorization", function () {
 
         db = new mock_db.MockDB( null, user_data );
 
+        UserRepositoryStub().addUser({
+            email: username,
+            password: password,
+        })
+
         return server.start( db, conf );
     });
 
@@ -37,7 +43,8 @@ describe( "User authorization", function () {
         request( server.SERVER )
             .get( '/members/pending' )
             .set( trust_header_name, trust_header_value )
-            .expect( 401 )
+            .expect( 302 )
+            .expect('Location', '/')
             .end( (err, res) => {
                 if(err) done(err);
                 else done();
@@ -120,7 +127,6 @@ describe( "User authorization", function () {
             });
     });
 
-    after( () => {
-        return server.stop();
-    });
+    after(sinon.restore);
+    after(server.stop);
 });

@@ -37,7 +37,7 @@ interface DatabaseConfig {
     db_ssl: boolean,
 };
 
-type Config = AppConfig & PasswordConfig & DatabaseConfig & WildApricotConfig;
+export type Config = AppConfig & PasswordConfig & DatabaseConfig & WildApricotConfig;
 
 const appConfigDefaults = {
     port: 3001,
