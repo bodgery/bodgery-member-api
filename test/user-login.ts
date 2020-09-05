@@ -1,9 +1,11 @@
 import * as assert from "assert";
 import * as request from "supertest";
+import * as sinon from "sinon";
 import * as server from "../app";
 import * as bcrypt from "../src/password/bcrypt";
 import * as mock_db from "../src/db-mock";
 import * as passwd from "../src/password";
+import UserRepositoryStub from "./__mocks__/user_repository";
 
 
 describe( "User login", function () {
@@ -19,7 +21,6 @@ describe( "User login", function () {
     let trust_header_name = 'X-Forwarded-Proto';
     let trust_header_value = 'https';
 
-
     before( () => {
         let conf = server.default_conf();
         conf['preferred_password_crypt_method'] = checker_str;
@@ -31,6 +32,11 @@ describe( "User login", function () {
         };
 
         db = new mock_db.MockDB( null, user_data );
+
+        UserRepositoryStub().addUser({
+            email: good_username,
+            password: good_password,
+        })
 
         return server.start( db, conf );
     });
@@ -112,6 +118,7 @@ describe( "User login", function () {
     });
 
     it( "Logs in with bad user", function (done) {
+
         request( server.SERVER )
             .post( '/user/login' )
             .set( trust_header_name, trust_header_value )
@@ -141,8 +148,6 @@ describe( "User login", function () {
             });
     });
 
-
-    after( () => {
-        return server.stop();
-    });
+    after(sinon.restore);
+    after(server.stop);
 });

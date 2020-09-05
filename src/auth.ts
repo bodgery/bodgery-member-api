@@ -18,7 +18,7 @@ export async function BearerTokenProvider( req: Request ): Promise<User | null>
 {
     const token = get_token( req );
 
-    if (token === null || token === "") {
+    if (!token) {
         return null;
     }
 
@@ -32,7 +32,7 @@ export async function SessionProvider( req: Request ): Promise<User | null>
 
     console.log(`Loading session email: ${email}`);
 
-    if (email === null || email === "") {
+    if (!email) {
         return null;
     }
 
