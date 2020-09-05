@@ -1,7 +1,8 @@
 import {NextFunction, Request, RequestHandler, Response} from "express";
-import {users as User} from "./typeorm/entities/users";
+import {getCustomRepository} from "typeorm";
+import {UserRepository} from "./typeorm/user_repository";
 import {access_token as AccessToken} from "./typeorm/entities/access_token";
-import {getRepository} from "typeorm";
+import {users as User} from "./typeorm/entities/users";
 
 export type AuthProvider = (req: Request) => Promise<User | null>;
 
@@ -13,25 +14,6 @@ function get_token( req: Request ): string
     return token;
 }
 
-async function get_user_for_token(token: string): Promise<User | null> {
-    const repo = getRepository(AccessToken);
-
-    const tokenModel = await repo.findOne({
-        relations: ["user"],
-        where: {token},
-    });
-
-    // TODO: Need to upgrade typescript to get null coalescing
-    // return tokenModel?.user;
-    return tokenModel ? tokenModel.user : null;
-}
-
-async function get_user_for_email(email: string): Promise<User | null> {
-    const repo = getRepository(User);
-
-    return await repo.findOne({ email });
-}
-
 export async function BearerTokenProvider( req: Request ): Promise<User | null>
 {
     const token = get_token( req );
@@ -39,7 +21,9 @@ export async function BearerTokenProvider( req: Request ): Promise<User | null>
     if (token === null || token === "") {
         return null;
     }
-    return await get_user_for_token( token );
+
+    const repo = getCustomRepository(UserRepository);
+    return await repo.findByAccessToken(token);
 }
 
 export async function SessionProvider( req: Request ): Promise<User | null>
@@ -52,7 +36,8 @@ export async function SessionProvider( req: Request ): Promise<User | null>
         return null;
     }
 
-    return await get_user_for_email( email );
+    const repo = getCustomRepository(UserRepository);
+    return await repo.findByEmail(email);
 }
 
 export async function TestUserProvider( req: Request ): Promise<User | null>
