@@ -3,12 +3,15 @@ import * as server from "../app";
 
 
 describe( "Not found error", function () {
-    before( () => {
+    let app;
+
+    before( async () => {
         process.env['TEST_RUN'] = "1";
+        app = await server.createApp(this.connection, );
     });
 
     it( "Checks for not found error", function (done) {
-        request( server.SERVER )
+        request( app )
             .get( '/not/found' )
             .expect( 404 )
             .expect( 'content-type', /html/ )

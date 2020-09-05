@@ -11,7 +11,9 @@ const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 
 
 describe( 'PUT /v1/member/:member_id/photo', function () {
-    before( () => {
+    let app;
+
+    before( async () => {
         process.env['TEST_RUN'] = "1";
         let members = {};
         members[uuid] = {
@@ -22,14 +24,14 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
         conf['photo_dir'] = PHOTO_DIR;
 
         let db = new mock_db.MockDB( [], members );
-        return server.start( db, conf );
+        app = await server.createApp(this.connection, db, conf );
     });
 
     it( 'Sets a member photo', function (done) {
         let expected_length = 0;
 
         let check_photo = () => {
-            request( server.SERVER )
+            request( app )
                 .get( "/api/v1/member/" + uuid + "/photo" )
                 .send()
                 .expect( 200 )
@@ -51,7 +53,7 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
                 expected_length = data.length;
                 let encoded_data = data.toString( 'base64' );
 
-                request( server.SERVER )
+                request( app )
                     .put( '/api/v1/member/' + uuid + '/photo' )
                     .set( 'Content-Type', 'image/jpeg' )
                     .send( encoded_data )
@@ -69,11 +71,10 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
     });
 
     after( () => {
-        let server_promise = server.stop();
         delete process.env['TEST_RUN'];
 
         // Just delete everything in the test photo dir
-        let cleanup_promise = new Promise( (resolve, reject) => {
+        return new Promise( (resolve, reject) => {
             fs.readdir( PHOTO_DIR, (err, files) => {
                 let promises = files.map( (_) => new Promise(
                     (resolve, reject) => {
@@ -92,10 +93,5 @@ describe( 'PUT /v1/member/:member_id/photo', function () {
                 Promise.all( promises ).then( () => resolve() );
             });
         });
-
-        return Promise.all([
-            server_promise
-            ,cleanup_promise
-        ]);
     });
 });

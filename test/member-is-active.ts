@@ -9,9 +9,11 @@ const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 
 
 describe( '/v1/member/:member_id/is_active', function () {
+    let app;
+
     let wa_mock: wa_api.MockWA;
 
-    before( () => {
+    before( async () => {
         process.env['TEST_RUN'] = "1";
         let members = {};
         members[uuid] =  {
@@ -28,14 +30,14 @@ describe( '/v1/member/:member_id/is_active', function () {
             members: wa_members
         });
 
-        return server.start( db, null, wa_mock );
+        app = await server.createApp(this.connection, db, null, wa_mock );
     });
 
     it( 'Sets member status', function (done) {
         let fetch_status = (
             callback: ( res ) => void
         ) => {
-            request( server.SERVER )
+            request( app )
                 .get( '/api/v1/member/' + uuid + '/is_active' )
                 .send()
                 .expect( 200 )
@@ -63,7 +65,7 @@ describe( '/v1/member/:member_id/is_active', function () {
             status: boolean
             ,callback: ( res ) => void
         ) => {
-            request( server.SERVER )
+            request( app )
                 .put( '/api/v1/member/' + uuid + '/is_active' )
                 .send({ is_active: status })
                 .expect( 200 )
@@ -89,6 +91,5 @@ describe( '/v1/member/:member_id/is_active', function () {
 
     after( () => {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

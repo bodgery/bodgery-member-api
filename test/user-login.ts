@@ -9,6 +9,7 @@ import UserRepositoryStub from "./__mocks__/user_repository";
 
 
 describe( "User login", function () {
+    let app;
     let db: mock_db.MockDB;
     let good_username = "test@example.com";
     let good_password = "foobar123";
@@ -21,7 +22,7 @@ describe( "User login", function () {
     let trust_header_name = 'X-Forwarded-Proto';
     let trust_header_value = 'https';
 
-    before( () => {
+    before( async () => {
         let conf = server.default_conf();
         conf['preferred_password_crypt_method'] = checker_str;
 
@@ -38,7 +39,7 @@ describe( "User login", function () {
             password: good_password,
         })
 
-        return server.start( db, conf );
+        app = await server.createApp(this.connection, db, conf );
     });
 
     it( "Logs a user in", function (done) {
@@ -46,7 +47,7 @@ describe( "User login", function () {
         let cookie;
 
         let start = () => {
-            request( server.SERVER )
+            request( app )
                 .get( '/user/is-logged-in' )
                 .set( trust_header_name, trust_header_value )
                 .expect( 403 )
@@ -57,7 +58,7 @@ describe( "User login", function () {
         };
 
         login = () => {
-            request( server.SERVER )
+            request( app )
                 .post( '/user/login' )
                 .set( trust_header_name, trust_header_value )
                 .send({
@@ -74,7 +75,7 @@ describe( "User login", function () {
         };
 
         check_is_logged_in = () => {
-            let req = request( server.SERVER )
+            let req = request( app )
                 .get( '/user/is-logged-in' )
                 .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
@@ -89,7 +90,7 @@ describe( "User login", function () {
         };
 
         logout = () => {
-            let req = request( server.SERVER )
+            let req = request( app )
                 .post( '/user/logout' )
                 .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
@@ -102,7 +103,7 @@ describe( "User login", function () {
         };
 
         check_final_logged_out = () => {
-            let req = request( server.SERVER )
+            let req = request( app )
                 .get( '/user/is-logged-in' )
                 .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
@@ -119,7 +120,7 @@ describe( "User login", function () {
 
     it( "Logs in with bad user", function (done) {
 
-        request( server.SERVER )
+        request( app )
             .post( '/user/login' )
             .set( trust_header_name, trust_header_value )
             .send({
@@ -134,7 +135,7 @@ describe( "User login", function () {
     });
 
     it( "Logs in with bad password", function (done) {
-        request( server.SERVER )
+        request( app )
             .post( '/user/login' )
             .set( trust_header_name, trust_header_value )
             .send({
@@ -148,6 +149,5 @@ describe( "User login", function () {
             });
     });
 
-    after(sinon.restore);
-    after(server.stop);
+    after(() => sinon.restore());
 });

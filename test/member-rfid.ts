@@ -9,12 +9,14 @@ const uuid2 = "c28ec74e-2459-488e-9aec-f6068e8a08a7";
 
 
 describe( 'RFID management', function () {
+    let app;
+
     let good_rfid = "0001234567";
     let invalid_rfid = "0007654321";
     let inactive_rfid = "1234567000";
 
 
-    before( () => {
+    before( async () => {
         let members = {};
         members[uuid1] = {
             is_active: true
@@ -25,12 +27,12 @@ describe( 'RFID management', function () {
             ,rfid: inactive_rfid
         };
         let db = new mock_db.MockDB( members, {} );
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
     it( 'Sets an RFID on a valid member', function (done) {
         let fetch_status = () => {
-            request( server.SERVER )
+            request( app )
                 .get( '/api/v1/rfid/' + good_rfid )
                 .send()
                 .expect( 200 )
@@ -41,7 +43,7 @@ describe( 'RFID management', function () {
         };
 
         process.env['TEST_RUN'] = "1";
-        request( server.SERVER )
+        request( app )
             .put( '/api/v1/member/' + uuid1 + '/rfid' )
             .send({ rfid: good_rfid })
             .expect( 200 )
@@ -53,7 +55,7 @@ describe( 'RFID management', function () {
     });
 
     it( 'Tries to fetch a member that doesn\'t exist', function (done) {
-        request( server.SERVER )
+        request( app )
             .get( '/api/v1/rfid/' + invalid_rfid )
             .send()
             .expect( 404 )
@@ -64,7 +66,7 @@ describe( 'RFID management', function () {
     });
 
     it( 'Tries to fetch an inactive member', function (done) {
-        request( server.SERVER )
+        request( app )
             .get( '/api/v1/rfid/' + inactive_rfid )
             .send()
             .expect( 403 )
@@ -72,9 +74,5 @@ describe( 'RFID management', function () {
                 if( err ) done(err);
                 else done();
             });
-    });
-
-    after( () => {
-        return server.stop();
     });
 });

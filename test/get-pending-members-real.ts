@@ -7,14 +7,16 @@ import * as wa_api from "../src/wild_apricot_mock";
 
 
 describe( 'GET /v1/members/pending', function() {
-    before( () => {
+    let app;
+
+    before( async () => {
         process.env['TEST_RUN'] = "1"
         let db = new mock_db.MockDB( null, null );
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
     it( 'Gets all pending members on actual Wild Apricot', function(done) {
-        request( server.SERVER )
+        request( app )
             .get( '/api/v1/members/pending' )
             .send()
             .expect( 200 )
@@ -32,6 +34,5 @@ describe( 'GET /v1/members/pending', function() {
 
     after( () => {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

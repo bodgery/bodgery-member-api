@@ -5,11 +5,13 @@ import * as server from "../app";
 
 
 describe( 'GET /v1/google_oauth', function () {
+    let app;
+
     let token_file = 'tmp-google-token';
-    before( () => {
+    before( async () => {
         let conf = server.default_conf();
         conf['google_oauth_token_path'] = token_file;
-        return server.start( null, conf );
+        app = await server.createApp(this.connection, null, conf );
     });
 
     // Disabiling this test, as the key is being fetched by another method
@@ -17,7 +19,7 @@ describe( 'GET /v1/google_oauth', function () {
     it( 'Sets a token for the google oauth callback', function (done) {
         let token_code = "xyz123";
 
-        request( server.SERVER )
+        request( app )
             .get( '/api/v1/google_oauth?code=' + token_code )
             .send()
             .expect( 200 )
@@ -41,17 +43,11 @@ describe( 'GET /v1/google_oauth', function () {
     */
 
     after( () => {
-        let stop_promise = server.stop();
-        let unlink_promise = new Promise( (resolve, reject) => {
+        return new Promise( (resolve, reject) => {
             fs.unlink( token_file, (err) => {
                 // Ignore any error, we're just finished
                 resolve();
             });
         });
-
-        return Promise.all([
-            stop_promise
-            ,unlink_promise
-        ]);
     });
 });

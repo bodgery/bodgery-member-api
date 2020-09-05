@@ -6,14 +6,16 @@ import * as mock_db from "../src/db-mock";
 
 
 describe( 'PUT /v1/member', function () {
-    before( () => {
+    let app;
+
+    before( async () => {
         process.env['TEST_RUN'] = "1";
         let db = new mock_db.MockDB([], {});
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
     it( 'Adds a member', function (done) {
-        request( server.SERVER )
+        request( app )
             .put( '/api/v1/member' )
             .send({
                 rfid: "00000000"
@@ -35,6 +37,5 @@ describe( 'PUT /v1/member', function () {
 
     after( () => {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

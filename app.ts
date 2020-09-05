@@ -22,7 +22,7 @@ import {
     user_required,
     user_required_or_redirect,
 } from './src/auth';
-import createConnection from "./src/typeorm_db";
+import createConnection, {Connection} from "./src/typeorm_db";
 
 
 let make_logger = (logger) => {
@@ -144,6 +144,10 @@ function setup_server_params( conf, db, typeorm_connection, logger )
     // Init context
     logger.setLevel( conf.log_level );
     logger.format = ( level, date, message ) => message;
+
+    // Assign the logger to the app locals object
+    server.locals.logger = logger;
+
     server.use( error_handler_builder( logger ) );
 
     request_funcs.set_db( db, typeorm_connection );
@@ -289,56 +293,44 @@ function default_wa(conf): wa_api.WA
 }
 
 
-let httpServer;
-export let SERVER;
-let logger;
-
-export function start(
+export async function createApp(
+    typeorm_connection: Connection,
     db?: db_impl.DB
     ,conf?: Config
     ,wa?: wa_api.WA
-): Promise<void>
+): Promise<express.Application>
 {
     if(! conf) conf = default_conf();
     if(! db) db = default_db( conf );
     if(! wa) wa = default_wa( conf );
-    logger = require( 'logger' ).createLogger( conf["log_file"] );
+    const logger = require( 'logger' ).createLogger( conf["log_file"] );
 
     // Fix hanging connections for certain external requests. See:
     // https://stackoverflow.com/questions/16965582/node-js-http-get-hangs-after-5-requests-to-remote-site
     http.globalAgent.maxSockets = 1000;
-
-    return new Promise( (resolve, reject) => {
-        createConnection( conf )
-            .then( (typeorm_connection) => {
-                // Init server
-                SERVER = init_server( conf, db, typeorm_connection, logger, wa );
-                httpServer = require( 'http' ).createServer( SERVER );
-
-                let port = conf["port"];
-                // Start server running
-                httpServer.listen( port );
-                logger.info( "Server running on port", port );
-
-                resolve();
-            });
-    });
+    // Init server
+    return init_server( conf, db, typeorm_connection, logger, wa );
 }
 
-export function stop (): Promise<void>
+export async function start(
+    db?: db_impl.DB
+    ,conf?: Config
+    ,wa?: wa_api.WA
+): Promise<http.Server>
 {
-    logger.info( "Stopped running server" );
 
-    return new Promise( (resolve, reject) => {
-        httpServer.close(() => {
-            typeorm
-                .close()
-                .then( () => {
-                    resolve();
-                });
-        });
-    });
+    const typeorm_connection = await createConnection( conf );
+
+    const app = await createApp( typeorm_connection, db, conf, wa );
+
+    const httpServer = require( 'http' ).createServer( app );
+
+    let port = conf["port"];
+    // Start server running
+    httpServer.listen( port );
+    app.locals.logger.info( "Server running on port", port );
+
+    return httpServer;
 }
-
 
 if( process.argv[2] == "start" ) start();

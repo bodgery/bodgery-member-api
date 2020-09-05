@@ -6,21 +6,22 @@ import * as passwd from "../src/password";
 
 
 describe( "User authorization with OAuth2", function () {
+    let app;
     let db: mock_db.MockDB;
     let token = "foobarbaz";
 
 
-    before( () => {
+    before( async () => {
         let tokens = {};
         tokens[token] = true;
         db = new mock_db.MockDB( {}, {}, null, tokens );
 
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
 
     it( 'Sends an OAuth2 token to a secure page', (done) => {
-        request( server.SERVER )
+        request( app )
             .get( '/members/pending' )
             .set( 'Authorization', 'Bearer ' + token )
             .expect( 200 )
@@ -28,9 +29,5 @@ describe( "User authorization with OAuth2", function () {
                 if(err) done(err);
                 else done();
             });
-    });
-
-    after( () => {
-        return server.stop();
     });
 });

@@ -8,6 +8,7 @@ import UserRepositoryStub from "./__mocks__/user_repository";
 
 
 describe( "User authorization", function () {
+    let app;
     let db: mock_db.MockDB;
     let username = "test@example.com";
     let password = "foobar123";
@@ -18,7 +19,7 @@ describe( "User authorization", function () {
     let trust_header_name = 'X-Forwarded-Proto';
     let trust_header_value = 'https';
 
-    before( () => {
+    before( async () => {
         let conf = server.default_conf();
         conf['preferred_password_crypt_method'] = checker_str;
 
@@ -35,12 +36,12 @@ describe( "User authorization", function () {
             password: password,
         })
 
-        return server.start( db, conf );
+        app = await server.createApp(this.connection, db, conf );
     });
 
 
     it( 'Tries to access a secure page without logging in', (done) => {
-        request( server.SERVER )
+        request( app )
             .get( '/members/pending' )
             .set( trust_header_name, trust_header_value )
             .expect( 302 )
@@ -57,7 +58,7 @@ describe( "User authorization", function () {
         let cookie;
 
         let start = () => {
-            request( server.SERVER )
+            request( app )
                 .get( '/' )
                 .set( trust_header_name, trust_header_value )
                 .send({
@@ -74,7 +75,7 @@ describe( "User authorization", function () {
         };
 
         login = () => {
-            request( server.SERVER )
+            request( app )
                 .post( '/user/login' )
                 .set( trust_header_name, trust_header_value )
                 .send({
@@ -91,7 +92,7 @@ describe( "User authorization", function () {
         };
 
         access_pending = () => {
-            request( server.SERVER )
+            request( app )
                 .get( '/members/pending' )
                 .set( trust_header_name, trust_header_value )
                 .set( 'Cookie', cookie )
@@ -106,7 +107,7 @@ describe( "User authorization", function () {
     });
 
     it( 'Checks that we can access static css files without logging in', (done) => {
-        request( server.SERVER )
+        request( app )
             .get( '/css/basic.css' )
             .set( trust_header_name, trust_header_value )
             .expect( 200 )
@@ -117,7 +118,7 @@ describe( "User authorization", function () {
     });
 
     it( 'Checks that we can access static js files without logging in', (done) => {
-        request( server.SERVER )
+        request( app )
             .get( '/js/jquery-3.4.1.min.js' )
             .set( trust_header_name, trust_header_value )
             .expect( 200 )
@@ -127,6 +128,5 @@ describe( "User authorization", function () {
             });
     });
 
-    after(sinon.restore);
-    after(server.stop);
+    after(() => sinon.restore());
 });
