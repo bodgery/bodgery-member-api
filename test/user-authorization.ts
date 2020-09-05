@@ -19,7 +19,7 @@ describe( "User authorization", function () {
     let trust_header_name = 'X-Forwarded-Proto';
     let trust_header_value = 'https';
 
-    before( async () => {
+    beforeEach( async function() {
         let conf = server.default_conf();
         conf['preferred_password_crypt_method'] = checker_str;
 
@@ -128,5 +128,5 @@ describe( "User authorization", function () {
             });
     });
 
-    after(() => sinon.restore());
+    afterEach(() => sinon.restore());
 });

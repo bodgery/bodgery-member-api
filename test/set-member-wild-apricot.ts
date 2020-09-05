@@ -11,7 +11,7 @@ describe( 'PUT /v1/member/:member_id/wildapricot', function () {
     let app;
     let members;
 
-    before( async () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
         members = {};
         members[uuid] = {
@@ -41,7 +41,7 @@ describe( 'PUT /v1/member/:member_id/wildapricot', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
     });
 });

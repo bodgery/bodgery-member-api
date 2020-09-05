@@ -5,7 +5,7 @@ import * as server from "../app";
 describe( 'Returns version list', function () {
     let app;
 
-    before( async () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
         app = await server.createApp(this.connection, );
     });
@@ -27,7 +27,7 @@ describe( 'Returns version list', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
     });
 });

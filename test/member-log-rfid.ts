@@ -9,7 +9,7 @@ describe( 'Log RFID', function () {
     let app;
     let db;
 
-    before( async () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
 
         db = new mock_db.MockDB( {}, {} );
@@ -33,7 +33,7 @@ describe( 'Log RFID', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
     });
 });

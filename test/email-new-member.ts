@@ -7,7 +7,7 @@ import * as mock_db from "../src/db-mock";
 describe( 'POST /v1/member/:member_id/send_signup_email', function () {
     let app;
     let test_email;
-    before( async () => {
+    beforeEach( async function() {
         test_email = process.env['TEST_EMAIL'];
         let members = {
             "01": {

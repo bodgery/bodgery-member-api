@@ -14,6 +14,7 @@ import * as pg from "./src/db-pg";
 import * as wa_api from "./src/wild_apricot";
 import * as yargs from "yargs";
 import * as http from "http";
+import * as logger from "logger";
 import {
     authentication_middleware,
     BearerTokenProvider,
@@ -24,6 +25,16 @@ import {
 } from './src/auth';
 import createConnection, {Connection} from "./src/typeorm_db";
 
+// Need to declare our injected properties on the Request object
+declare global {
+    namespace Express {
+        interface Application {
+            logger: logger.Logger;
+            db: db_impl.DB;
+            orm: Connection;
+        }
+    }
+}
 
 let make_logger = (logger) => {
     let request_id = shortid.generate();
@@ -64,23 +75,9 @@ function context_middleware( logger, conf, db, wa )
             req.session.csrf_secret = tokens.secretSync();
         }
 
-        try {
-            next()
-        }
-        catch(err) {
-            request_logger.error( "Error running request: ",
-                err.toString() );
-            request_logger.error( "Stack trace: ", err.stack );
-
-            res.sendStatus( 500 );
-        }
-
-        request_logger.info( "Finished setting up", req.method, req.path );
+        next()
     }
 }
-
-let typeorm;
-
 
 function error_handler_builder( logger ) {
     return ( err, req, res, next ) => {
@@ -92,7 +89,7 @@ function error_handler_builder( logger ) {
     };
 };
 
-function init_server(
+function init_app(
     conf
     ,db
     ,typeorm_connection
@@ -100,14 +97,12 @@ function init_server(
     ,wa: wa_api.WA
 )
 {
-    typeorm = typeorm_connection;
-
-    let server = setup_server_params( conf, db, typeorm_connection, logger );
-    setup_server_routes( conf, db, logger, server, wa );
-    return server;
+    let app = setup_app_params( conf, db, typeorm_connection, logger );
+    setup_app_routes( conf, db, logger, app, wa );
+    return app;
 }
 
-function setup_server_params( conf, db, typeorm_connection, logger )
+function setup_app_params( conf, db, typeorm_connection, logger )
 {
     let use_secure_cookie = (conf['deployment_type'] == "prod");
     let session_options = {
@@ -124,46 +119,46 @@ function setup_server_params( conf, db, typeorm_connection, logger )
     let session_store = db.session_store( session );
     if(session_store) session_options['store'] = session_store;
 
-    let server = express();
-    server.use( session( session_options ) );
-    server.use( bodyParser.json() );
-    server.use( bodyParser.raw({
+    let app = express();
+    app.use( session( session_options ) );
+    app.use( bodyParser.json() );
+    app.use( bodyParser.raw({
         type: "image/*"
         ,limit: conf['photo_size_limit']
     }) );
-    server.use( bodyParser.urlencoded({ extended: true }) );
-    server.use( express.static( 'public' ) );
+    app.use( bodyParser.urlencoded({ extended: true }) );
+    app.use( express.static( 'public' ) );
 
-    server.engine( 'handlebars', handlebars({
+    app.engine( 'handlebars', handlebars({
         defaultLayout: 'main'
     }) );
-    server.set( 'view engine', 'handlebars' );
+    app.set( 'view engine', 'handlebars' );
 
-    server.set( "trust proxy", conf.is_behind_reverse_proxy );
+    app.set( "trust proxy", conf.is_behind_reverse_proxy );
 
     // Init context
     logger.setLevel( conf.log_level );
     logger.format = ( level, date, message ) => message;
 
-    // Assign the logger to the app locals object
-    server.locals.logger = logger;
+    app.use( error_handler_builder( logger ) );
 
-    server.use( error_handler_builder( logger ) );
+    // // Install the request helpers
+    app.logger = logger;
+    app.db = db;
+    app.orm = typeorm_connection;
 
-    request_funcs.set_db( db, typeorm_connection );
-
-    return server;
+    return app;
 }
 
-function setup_server_routes(
+function setup_app_routes(
     conf
     ,db
     ,logger
-    ,server
+    ,app
     ,wa: wa_api.WA
 )
 {
-    server.use(context_middleware( logger, conf, db, wa ));
+    app.use(context_middleware( logger, conf, db, wa ));
 
     const api = express.Router();
 
@@ -209,12 +204,12 @@ function setup_server_routes(
     api.use('/v1', api_v1);
 
     // Install the API router
-    server.use('/api', api);
+    app.use('/api', api);
 
 
     // Undocumented route for the callback on Google's OAuth token
     // No longer used
-    //server.get( '/api/v1/google_oauth',
+    //app.get( '/api/v1/google_oauth',
     //    request_funcs.google_oauth );
 
     const views = express.Router();
@@ -250,10 +245,10 @@ function setup_server_routes(
         request_funcs.delete_token );
 
     // Install the View routers
-    server.use(views);
+    app.use(views);
 
     // 404 handler, must be last in the list
-    server.use( (req, res, next) => {
+    app.use( (req, res, next) => {
         logger.error( "Route {" + req.method + " " + req.path
             + "} not found"  );
         res
@@ -303,13 +298,13 @@ export async function createApp(
     if(! conf) conf = default_conf();
     if(! db) db = default_db( conf );
     if(! wa) wa = default_wa( conf );
-    const logger = require( 'logger' ).createLogger( conf["log_file"] );
+    const log = logger.createLogger( conf["log_file"] );
 
     // Fix hanging connections for certain external requests. See:
     // https://stackoverflow.com/questions/16965582/node-js-http-get-hangs-after-5-requests-to-remote-site
     http.globalAgent.maxSockets = 1000;
-    // Init server
-    return init_server( conf, db, typeorm_connection, logger, wa );
+    // Init app
+    return init_app( conf, db, typeorm_connection, log, wa );
 }
 
 export async function start(
@@ -318,6 +313,7 @@ export async function start(
     ,wa?: wa_api.WA
 ): Promise<http.Server>
 {
+    if(! conf) conf = default_conf();
 
     const typeorm_connection = await createConnection( conf );
 
@@ -328,7 +324,7 @@ export async function start(
     let port = conf["port"];
     // Start server running
     httpServer.listen( port );
-    app.locals.logger.info( "Server running on port", port );
+    app.logger.info( "Server running on port", port );
 
     return httpServer;
 }

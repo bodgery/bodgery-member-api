@@ -8,7 +8,7 @@ import * as mock_db from "../src/db-mock";
 describe( 'PUT /v1/member', function () {
     let app;
 
-    before( async () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
         let db = new mock_db.MockDB([], {});
         app = await server.createApp(this.connection, db );
@@ -35,7 +35,7 @@ describe( 'PUT /v1/member', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
     });
 });

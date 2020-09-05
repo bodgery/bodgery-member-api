@@ -16,7 +16,7 @@ describe( 'RFID management', function () {
     let inactive_rfid = "1234567000";
 
 
-    before( async () => {
+    beforeEach( async function() {
         let members = {};
         members[uuid1] = {
             is_active: true

@@ -9,7 +9,7 @@ describe(
     function () {
     let app;
 
-    before( async () => {
+    beforeEach( async function() {
         let db = new mock_db.MockDB([], {});
         app = await server.createApp(this.connection, db );
     });

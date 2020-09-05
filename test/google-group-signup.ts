@@ -8,7 +8,7 @@ describe( 'PUT /v1/member/:member_id/google_group_signup', function () {
     let app;
 
     let test_email;
-    before( async () => {
+    beforeEach( async function() {
         test_email = process.env['TEST_EMAIL'];
         let members = {
             "01": {

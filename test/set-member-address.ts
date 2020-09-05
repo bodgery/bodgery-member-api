@@ -9,7 +9,7 @@ const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 describe( 'PUT /v1/member/:member_id/address', function () {
     let app;
 
-    before( async () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
         let members = {};
         members[uuid] = {
@@ -43,7 +43,7 @@ describe( 'PUT /v1/member/:member_id/address', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
     });
 });

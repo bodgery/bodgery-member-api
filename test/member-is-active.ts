@@ -13,7 +13,7 @@ describe( '/v1/member/:member_id/is_active', function () {
 
     let wa_mock: wa_api.MockWA;
 
-    before( async () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
         let members = {};
         members[uuid] =  {
@@ -89,7 +89,7 @@ describe( '/v1/member/:member_id/is_active', function () {
         });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
     });
 });

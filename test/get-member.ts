@@ -10,7 +10,7 @@ const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 describe( 'GET /v1/member', function () {
     let app;
 
-    before( async () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
 
         let members = {}
@@ -46,7 +46,7 @@ describe( 'GET /v1/member', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
     });
 });

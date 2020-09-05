@@ -11,7 +11,7 @@ describe( "User authorization with OAuth2", function () {
     let token = "foobarbaz";
 
 
-    before( async () => {
+    beforeEach( async function() {
         let tokens = {};
         tokens[token] = true;
         db = new mock_db.MockDB( {}, {}, null, tokens );

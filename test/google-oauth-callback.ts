@@ -8,7 +8,7 @@ describe( 'GET /v1/google_oauth', function () {
     let app;
 
     let token_file = 'tmp-google-token';
-    before( async () => {
+    beforeEach( async function() {
         let conf = server.default_conf();
         conf['google_oauth_token_path'] = token_file;
         app = await server.createApp(this.connection, null, conf );
@@ -42,7 +42,7 @@ describe( 'GET /v1/google_oauth', function () {
     });
     */
 
-    after( () => {
+    afterEach( async function() {
         return new Promise( (resolve, reject) => {
             fs.unlink( token_file, (err) => {
                 // Ignore any error, we're just finished
