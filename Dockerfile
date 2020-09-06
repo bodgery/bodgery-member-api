@@ -10,6 +10,7 @@ RUN echo '#!/bin/bash\nnpx typeorm-model-generator --noConfig -h $DB_HOST -d $DB
 RUN chmod +x /sbin/typeorm-model-generator.sh
 
 COPY . /app
+ENV TS_NODE_TRANSPILE_ONLY=1
 
 RUN npm run-script build
 
