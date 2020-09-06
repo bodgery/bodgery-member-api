@@ -1,5 +1,6 @@
 require:
   - ts-node/register
+  - ./test/connection-hooks.ts
 
 extension:
   - ts

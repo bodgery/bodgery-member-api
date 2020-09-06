@@ -6,17 +6,18 @@ import * as mock_db from "../src/db-mock";
 
 
 describe( 'Log RFID', function () {
+    let app;
     let db;
 
-    before( () => {
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
 
         db = new mock_db.MockDB( {}, {} );
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
     it( 'Logs a successful RFID entry', function (done) {
-        request( server.SERVER )
+        request( app )
             .post( '/api/v1/rfid/log_entry/000123/true' )
             .send()
             .expect( 200 )
@@ -32,8 +33,7 @@ describe( 'Log RFID', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

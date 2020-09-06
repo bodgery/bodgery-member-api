@@ -14,17 +14,6 @@ import * as valid from "./validation";
 import * as wa_api from "./wild_apricot";
 
 
-let db : db_impl.DB;
-let typeorm_connection;
-export function set_db (
-    new_db: db_impl.DB
-    ,new_typeorm_connection
-)
-{
-    db = new_db;
-    typeorm_connection = new_typeorm_connection;
-}
-
 function get_generic_db_error( logger, res )
 {
     return ( err: Error ) => {
@@ -120,7 +109,7 @@ export function put_member( req, res )
         return;
     }
 
-    db.add_member( body
+    req.app.db.add_member( body
         ,( member_id ) => {
             logger.info( "Member added successfully" );
             res
@@ -134,7 +123,7 @@ export function put_member( req, res )
 
 export function get_member( req, res )
 {
-    let logger = req.req.ctx.logger;
+    let logger = req.ctx.logger;
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -147,7 +136,7 @@ export function get_member( req, res )
 
     let member_id = req.params.member_id;
 
-    db.get_member( member_id
+    req.app.db.get_member( member_id
         ,( member: db_impl.SimpleMember ) => {
             logger.info( "Fetched member" );
             res
@@ -180,7 +169,7 @@ export function put_member_address( req, res )
 
     let member_id = req.params.member_id;
 
-    db.put_member_address( member_id, body
+    req.app.db.put_member_address( member_id, body
         ,() => {
             logger.info( "Address set on member successfully" );
             res.sendStatus( 204 ).end();
@@ -205,7 +194,7 @@ export function get_member_address( req, res )
 
     let member_id = req.params.member_id;
 
-    db.get_member_address( member_id
+    req.app.db.get_member_address( member_id
         ,( address: db_impl.USAddress ) => {
             logger.info( "Fetched member address" );
             res
@@ -221,6 +210,7 @@ export function get_member_address( req, res )
 export function put_member_is_active( req, res )
 {
     let logger = req.ctx.logger;
+
     try {
         valid.validate( req.params, [
             valid.isUUID( 'member_id' )
@@ -243,12 +233,12 @@ export function put_member_is_active( req, res )
     let wa_active_call = status
         ? req.ctx.wa.set_member_active
         : req.ctx.wa.set_member_inactive;
-    db.get_member_wild_apricot( member_id
+    req.app.db.get_member_wild_apricot( member_id
         ,( wa_id ) => {
             let success_callback = () => {
                 logger.info( "Setting member status to "
                     + status + " in database: " + member_id );
-                db.set_member_is_active( member_id, status
+                req.app.db.set_member_is_active( member_id, status
                     ,() => {
                         logger.info( "Member status now "
                             + status + ": " + member_id );
@@ -298,7 +288,7 @@ export function get_member_is_active( req, res )
     }
 
     let member_id = req.params.member_id;
-    db.get_member_is_active( member_id
+    req.app.db.get_member_is_active( member_id
         ,(is_active: boolean) => {
             logger.info( "Set is active: " + is_active );
             res
@@ -330,7 +320,7 @@ export function put_member_rfid( req, res )
 
     let member_id = req.params.member_id;
     let rfid = req.body.rfid;
-    db.set_member_rfid( member_id, rfid
+    req.app.db.set_member_rfid( member_id, rfid
         ,() => {
             // Don't put RFID in log
             logger.info( "Set RFID on member " + member_id );
@@ -355,7 +345,7 @@ export function get_member_rfid( req, res )
     }
 
     let rfid = req.params.rfid;
-    db.get_member_rfid( rfid
+    req.app.db.get_member_rfid( rfid
         ,() => {
             // Don't put RFID tag in log
             logger.info( "RFID check OK" );
@@ -376,7 +366,7 @@ export function get_member_rfid( req, res )
 export function get_rfid_dump( req, res )
 {
     let logger = req.ctx.logger;
-    db.rfid_dump(
+    req.app.db.rfid_dump(
         (dump) => {
             res
                 .status(200)
@@ -404,7 +394,7 @@ export function post_log_rfid( req, res )
     let rfid = req.params.rfid;
     let is_allowed = (req.params.is_allowed === 'true');
 
-    db.log_rfid_entry( rfid, is_allowed
+    req.app.db.log_rfid_entry( rfid, is_allowed
         ,() => {
             logger.info( "RFID logged" );
             res.sendStatus( 200 ).end();
@@ -434,7 +424,7 @@ export function put_member_wildapricot( req, res )
     let member_id = req.params.member_id;
     let wild_apricot_id = body.wild_apricot_id;
 
-    db.put_member_wild_apricot( member_id, wild_apricot_id
+    req.app.db.put_member_wild_apricot( member_id, wild_apricot_id
         ,() => {
             logger.info( "Wild Apricot ID set on member successfully" );
             res.sendStatus( 204 ).end();
@@ -461,7 +451,7 @@ export function put_member_google_group( req, res )
 
     let member_id = req.params.member_id;
 
-    db.get_member( member_id
+    req.app.db.get_member( member_id
         ,( member_data ) => {
             const email = member_data.email;
 
@@ -596,7 +586,7 @@ export function rfid_log( req, res )
     let offset: number = parseInt( query['offset'] );
     let per_page: number = parseInt( query['per_page'] );
 
-    db.get_rfid_log( offset, per_page
+    req.app.db.get_rfid_log( offset, per_page
         ,( logs ) => {
             logger.info( "Fetched " + logs.length
                 + " logs starting at " + offset );
@@ -639,7 +629,7 @@ export function rfid_log( req, res )
 function render_tokens( req, res )
 {
     let username = req.session.username;
-    let db_manager = typeorm_connection.manager;
+    let db_manager = req.app.orm.manager;
     let logger = req.ctx.logger;
 
     db_manager
@@ -691,7 +681,7 @@ export function add_token( req, res )
 
     logger.info( "Adding token" );
 
-    let db_manager = typeorm_connection.manager;
+    let db_manager = req.app.orm.manager;
     db_manager
         .getRepository( db_user.users )
         .findOne({
@@ -718,7 +708,7 @@ export function delete_token( req, res )
     let logger = req.ctx.logger;
     let token = req.body.token;
     let username = req.session.username;
-    let db_manager = typeorm_connection.manager;
+    let db_manager = req.app.orm.manager;
 
     logger.info( "Deleting token" );
     db_manager
@@ -849,7 +839,7 @@ export function members_active( req, res )
     let offset: number = parseInt( query['offset'] );
     let per_page: number = parseInt( query['per_page'] );
 
-    db.get_members( offset, per_page
+    req.app.db.get_members( offset, per_page
         ,( members ) => {
             logger.info( "Fetched " + members.length
                 + " members starting at " + offset );
@@ -898,7 +888,7 @@ export function member_info( req, res )
         return;
     }
 
-    db.get_member( params['member_id']
+    req.app.db.get_member( params['member_id']
         ,( member ) => {
             logger.info( "Fetched member" );
 
@@ -936,7 +926,7 @@ export function post_member_signup_email( req, res )
 
     let member_id = req.params['member_id'];
 
-    db.get_member( member_id
+    req.app.db.get_member( member_id
         ,(member) => {
             let to_name = member.firstName + " " + member.lastName;
             let to_email = member.email;
@@ -1023,13 +1013,13 @@ export function post_group_member_signup_email( req, res )
     };
 
     // TODO This got out of hand with callbacks. Cleanup.
-    db.get_member_wild_apricot( member_id
+    req.app.db.get_member_wild_apricot( member_id
         ,( wild_apricot_id ) => {
             req.ctx.wa.fetch_member_answers( wild_apricot_id
                 ,( member_answers: Array<wa_api.WAMemberAnswers> ) => {
-                    db.get_member( member_id
+                    req.app.db.get_member( member_id
                         ,(member) => {
-                            db.get_member_photo(
+                            req.app.db.get_member_photo(
                                 member_id
                                 ,(photo_path) => {
                                     send_email(
@@ -1090,7 +1080,7 @@ export function put_member_photo( req, res )
                 else resolve();
             })
         )
-        ,new Promise( (resolve, reject) => db.set_member_photo(
+        ,new Promise( (resolve, reject) => req.app.db.set_member_photo(
             member_id
             ,path
             ,resolve
@@ -1121,7 +1111,7 @@ export function get_member_photo( req, res )
     }
 
     let member_id = req.params.member_id;
-    db.get_member_photo( member_id
+    req.app.db.get_member_photo( member_id
         ,(path: string) => {
             fs.realpath( path, ( err, real_path ) => {
                 logger.info( "Member photo: " + real_path );

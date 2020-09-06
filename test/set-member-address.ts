@@ -7,7 +7,9 @@ const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 
 
 describe( 'PUT /v1/member/:member_id/address', function () {
-    before( () => {
+    let app;
+
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
         let members = {};
         members[uuid] = {
@@ -21,11 +23,11 @@ describe( 'PUT /v1/member/:member_id/address', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
     it( 'Sets a member address', function (done) {
-        request( server.SERVER )
+        request( app )
             .put( '/api/v1/member/' + uuid + '/address' )
             .send({
                 name: "Foo Bar"
@@ -41,8 +43,7 @@ describe( 'PUT /v1/member/:member_id/address', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

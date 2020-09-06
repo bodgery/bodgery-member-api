@@ -3,13 +3,15 @@ import * as server from "../app";
 
 
 describe( 'Returns version list', function () {
-    before( () => {
+    let app;
+
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
-        return server.start();
+        app = await server.createApp(this.connection, );
     });
 
     it( 'Gets versions', function (done) {
-        request( server.SERVER )
+        request( app )
             .get( '/api/' )
             .expect( 200 )
             .expect( 'Content-Type', /json/ )
@@ -25,8 +27,7 @@ describe( 'Returns version list', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

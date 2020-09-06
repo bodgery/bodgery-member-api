@@ -5,8 +5,10 @@ import * as mock_db from "../src/db-mock";
 
 
 describe( 'PUT /v1/member/:member_id/google_group_signup', function () {
+    let app;
+
     let test_email;
-    before( () => {
+    beforeEach( async function() {
         test_email = process.env['TEST_EMAIL'];
         let members = {
             "01": {
@@ -21,12 +23,12 @@ describe( 'PUT /v1/member/:member_id/google_group_signup', function () {
             }
         };
         let db = new mock_db.MockDB( members, {} );
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
     it( 'Adds member to the Google Group list', function (done) {
         if( test_email ) {
-            request( server.SERVER )
+            request( app )
                 .put( '/api/v1/member/01/google_group_signup' )
                 .expect( 200 )
                 .end( function( err, res ) {
@@ -39,9 +41,5 @@ describe( 'PUT /v1/member/:member_id/google_group_signup', function () {
                 + " to run this test" );
             done();
         }
-    });
-
-    after( () => {
-        return server.stop();
     });
 });

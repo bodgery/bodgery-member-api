@@ -1,5 +1,4 @@
 import {NextFunction, Request, RequestHandler, Response} from "express";
-import {getCustomRepository} from "typeorm";
 import {UserRepository} from "./typeorm/user_repository";
 import {access_token as AccessToken} from "./typeorm/entities/access_token";
 import {users as User} from "./typeorm/entities/users";
@@ -22,7 +21,7 @@ export async function BearerTokenProvider( req: Request ): Promise<User | null>
         return null;
     }
 
-    const repo = getCustomRepository(UserRepository);
+    const repo = req.app.orm.getCustomRepository(UserRepository);
     return await repo.findByAccessToken(token);
 }
 
@@ -30,13 +29,11 @@ export async function SessionProvider( req: Request ): Promise<User | null>
 {
     const email = req.session.username;
 
-    console.log(`Loading session email: ${email}`);
-
     if (!email) {
         return null;
     }
 
-    const repo = getCustomRepository(UserRepository);
+    const repo = req.app.orm.getCustomRepository(UserRepository);
     return await repo.findByEmail(email);
 }
 

@@ -8,7 +8,9 @@ const uuid = "0662df8c-e43a-4e90-8b03-3849afbb533e";
 
 
 describe( 'GET /v1/rfids', function () {
-    before( () => {
+    let app;
+
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
 
         let members = {}
@@ -34,11 +36,11 @@ describe( 'GET /v1/rfids', function () {
         };
 
         let db = new mock_db.MockDB( members, {} );
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
     it( 'Fetches the RFID dump', function (done) {
-        request( server.SERVER )
+        request( app )
             .get( '/api/v1/rfids' )
             .send()
             .expect( 200 )
@@ -53,8 +55,7 @@ describe( 'GET /v1/rfids', function () {
             });
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

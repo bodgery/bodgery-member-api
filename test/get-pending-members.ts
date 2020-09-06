@@ -7,7 +7,9 @@ import * as wa_api from "../src/wild_apricot_mock";
 
 
 describe( 'GET /v1/members/pending', function() {
-    before( () => {
+    let app;
+
+    beforeEach( async function() {
         process.env['TEST_RUN'] = "1";
         let wa_mock = new wa_api.MockWA({
             // TODO fill in pending and existing members
@@ -57,11 +59,11 @@ describe( 'GET /v1/members/pending', function() {
             ]
         });
         let db = new mock_db.MockDB( null, null );
-        return server.start( db, null, wa_mock );
+        app = await server.createApp(this.connection, db, null, wa_mock );
     });
 
     it( 'Gets all pending members', function(done) {
-        request( server.SERVER )
+        request( app )
             .get( '/api/v1/members/pending' )
             .send()
             .expect( 200 )
@@ -81,8 +83,7 @@ describe( 'GET /v1/members/pending', function() {
             })
     });
 
-    after( () => {
+    afterEach( async function() {
         delete process.env['TEST_RUN'];
-        return server.stop();
     });
 });

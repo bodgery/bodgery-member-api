@@ -1,7 +1,7 @@
 import * as path from "path";
 import { Config } from "./config";
 
-import {createConnection as typeormCreateConnection, Connection } from "typeorm";
+import {createConnection as typeormCreateConnection, Connection as _Connection } from "typeorm";
 
 function typeorm_args( conf: Config )
 {
@@ -29,6 +29,8 @@ function typeorm_args( conf: Config )
         }
     };
 }
+
+export type Connection = _Connection;
 
 export default async function createConnection( conf: Config ): Promise<Connection> {
     return await typeormCreateConnection( typeorm_args( conf ) );

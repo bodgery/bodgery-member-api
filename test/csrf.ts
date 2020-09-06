@@ -7,14 +7,16 @@ import * as mock_db from "../src/db-mock";
 describe(
     'Checks that CSRF tokens are required on methods that change state',
     function () {
-    before( () => {
+    let app;
+
+    beforeEach( async function() {
         let db = new mock_db.MockDB([], {});
-        return server.start( db );
+        app = await server.createApp(this.connection, db );
     });
 
 /*
     it( 'Adds a member', function (done) {
-        request( server.SERVER )
+        request( app )
             .put( '/api/v1/member' )
             .send({
                 rfid: "00000000"
@@ -31,8 +33,4 @@ describe(
             });
     });
  */
-
-    after( () => {
-        return server.stop();
-    });
 });
