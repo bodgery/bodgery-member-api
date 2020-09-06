@@ -5,7 +5,7 @@
   "repository": "https://github.com/bodgery/bodgery-member-api",
   "license": "BSD-2-Clause",
   "scripts": {
-    "start": "ts-node app.ts start",
+    "start": "ts-node --transpile-only app.ts start",
     "build": "tsc",
     "test": "mocha --require ts-node/register --watch-extensions ts,tsx --timeout 5000 \"test/**/*.{ts,tsx}\""
   },
