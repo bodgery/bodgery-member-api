@@ -3,7 +3,7 @@ import * as c from "./src/context";
 import * as Tokens from "csrf";
 import * as express from "express";
 import * as handlebars from "express-handlebars";
-import * as session from "express-session";
+import session = require("cookie-session"); // CommonJS Typescript workaround: https://www.typescriptlang.org/docs/handbook/modules.html#export--and-import--require
 import * as fs from "fs";
 import * as shortid from "shortid";
 import * as request_funcs from "./src/request_funcs";
@@ -107,17 +107,11 @@ function setup_app_params( conf, db, typeorm_connection, logger )
     let use_secure_cookie = (conf['deployment_type'] == "prod");
     let session_options = {
         secret: conf.session_secret
-        ,resave: false
-        ,saveUninitialized: true
-        ,cookie: {
-            maxAge: conf.session_length_sec
-            ,sameSite: true
-            ,secure: use_secure_cookie
-            ,httpOnly: true
-        }
+        ,maxAge: conf.session_length_sec
+        ,sameSite: true
+        ,secure: use_secure_cookie
+        ,httpOnly: true
     };
-    let session_store = db.session_store( session );
-    if(session_store) session_options['store'] = session_store;
 
     let app = express();
     app.use( session( session_options ) );

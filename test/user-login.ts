@@ -85,6 +85,7 @@ describe( "User login", function () {
                     if(err) throw err;
                     assert.strictEqual( res.body.username, good_username
                         ,"Returned username" );
+                    cookie = res.header['set-cookie'];
                     logout();
                 });
         };
@@ -97,6 +98,7 @@ describe( "User login", function () {
                 .send()
                 .expect( 200 )
                 .end( (err, res) => {
+                    cookie = res.header['set-cookie'];
                     if(err) throw err;
                     check_final_logged_out();
                 });
