@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import * as request from "supertest";
+import * as request from "supertest-session";
 import * as sinon from "sinon";
 import * as server from "../app";
 import * as bcrypt from "../src/password/bcrypt";
@@ -44,10 +44,11 @@ describe( "User login", function () {
 
     it( "Logs a user in", function (done) {
         let check_final_logged_out, logout, check_is_logged_in, login;
-        let cookie;
+
+        const client = request(app);
 
         let start = () => {
-            request( app )
+            client
                 .get( '/user/is-logged-in' )
                 .set( trust_header_name, trust_header_value )
                 .expect( 403 )
@@ -58,7 +59,7 @@ describe( "User login", function () {
         };
 
         login = () => {
-            request( app )
+            client
                 .post( '/user/login' )
                 .set( trust_header_name, trust_header_value )
                 .send({
@@ -69,46 +70,40 @@ describe( "User login", function () {
                 .expect( 'set-cookie', /=/ )
                 .end( (err, res) => {
                     if(err) throw err;
-                    cookie = res.header['set-cookie'];
                     check_is_logged_in();
                 });
         };
 
         check_is_logged_in = () => {
-            let req = request( app )
+            let req = client
                 .get( '/user/is-logged-in' )
                 .set( trust_header_name, trust_header_value )
-                .set( 'Cookie', cookie )
                 .send()
                 .expect( 200 )
                 .end( (err, res) => {
                     if(err) throw err;
                     assert.strictEqual( res.body.username, good_username
                         ,"Returned username" );
-                    cookie = res.header['set-cookie'];
                     logout();
                 });
         };
 
         logout = () => {
-            let req = request( app )
+            let req = client
                 .post( '/user/logout' )
                 .set( trust_header_name, trust_header_value )
-                .set( 'Cookie', cookie )
                 .send()
                 .expect( 200 )
                 .end( (err, res) => {
-                    cookie = res.header['set-cookie'];
                     if(err) throw err;
                     check_final_logged_out();
                 });
         };
 
         check_final_logged_out = () => {
-            let req = request( app )
+            let req = client
                 .get( '/user/is-logged-in' )
                 .set( trust_header_name, trust_header_value )
-                .set( 'Cookie', cookie )
                 .send()
                 .expect( 403 )
                 .end( (err, res) => {
