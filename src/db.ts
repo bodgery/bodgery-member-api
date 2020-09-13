@@ -202,8 +202,6 @@ export interface DB
         ,error_callback: ( err: Error ) => void
     ): void;
 
-    session_store( express_session );
-
     is_token_allowed(
         token: string
         ,success_callback: () => void

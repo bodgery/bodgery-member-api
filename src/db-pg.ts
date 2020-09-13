@@ -1,7 +1,6 @@
 import * as db_impl from "./db";
 import * as pg from "pg";
 import * as pg_escape from "pg-escape";
-import * as session from "connect-pg-simple";
 
 
 let no_rows_callback_builder = (member_id, callback) => {
@@ -677,15 +676,6 @@ export class PG
             ,no_user_found_callback
             ,error_callback
         );
-    }
-
-    session_store( express_session )
-    {
-        let pg_session = session( express_session );
-        let full_session = new pg_session({
-            pool: this.pool
-        });
-        return full_session;
     }
 
     is_token_allowed(

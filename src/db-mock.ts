@@ -380,11 +380,6 @@ export class MockDB
         success_callback();
     }
 
-    session_store( express_session )
-    {
-        return null;
-    }
-
     add_token(
         username: string
         ,token: string

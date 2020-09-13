@@ -547,11 +547,10 @@ export function logout_user( req, res )
 
     if( is_logged_in ) {
         logger.info( "Username " + username + " is logging out" );
-        req.session.destroy( () => {
-            res
-                .status( 200 )
-                .render( "home" );
-        });
+        req.session = {};
+        res
+            .status( 200 )
+            .render( "home" );
     }
     else {
         logger.info( "Asked for logout, but is not logged in" );
